@@ -2,66 +2,336 @@
 <html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kids Learning Site</title>
-    <link rel="icon" href="favicon/favicon.webp">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Развивайка</title>
+    <link rel="icon" href="favicon/favicon.webp" type="image/webp">
     <link rel="stylesheet" href="style.css">
+    <!-- Apply saved theme instantly to prevent flash -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-    <div id="app">
-        <div id="video-container">
-            <video id="global-video" loop muted playsinline></video>
-            <div id="loader" class="hidden"><div class="spinner"></div></div>
+
+<div id="loader"><div class="spinner"></div></div>
+<div id="toast"></div>
+<div class="stars-host" id="stars-host"></div>
+
+<div id="app">
+
+    <!-- TOP BAR -->
+    <div id="top-bar">
+        <button id="back-btn" class="hidden" onclick="App.back()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Назад
+        </button>
+        <span id="page-title-bar" class="hidden"></span>
+        <span style="flex:1"></span>
+        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки">⚙️</button>
+    </div>
+
+    <!-- ========== MAIN ========== -->
+    <section id="main">
+        <div class="home-logo">Развивайка 🌟</div>
+        <div class="home-sub">Выбери раздел и начинай!</div>
+        <div class="menu-grid">
+            <button class="menu-card mc-alphabet" onclick="Media.initSection('alphabet')">
+                <div class="icon-wrap">🔤</div>Алфавит
+            </button>
+            <button class="menu-card mc-numbers" onclick="Media.initSection('numbers')">
+                <div class="icon-wrap">🔢</div>Цифры
+            </button>
+            <button class="menu-card mc-colors" onclick="Media.initSection('colors')">
+                <div class="icon-wrap">🎨</div>Цвета
+            </button>
+            <button class="menu-card mc-songs" onclick="Songs.init()">
+                <div class="icon-wrap">🎵</div>Песенки
+            </button>
+            <button class="menu-card mc-puzzles" onclick="Puzzles.init()">
+                <div class="icon-wrap">🧩</div>Ребусы
+            </button>
+            <button class="menu-card mc-riddles" onclick="Riddles.init()">
+                <div class="icon-wrap">🤔</div>Загадки
+            </button>
+            <button class="menu-card mc-finger" onclick="App.navigate('finger')">
+                <div class="icon-wrap">🖐️</div>Пальчиковые игры
+            </button>
+            <button class="menu-card mc-articul" onclick="App.navigate('articul')">
+                <div class="icon-wrap">👄</div>Артикул. гимн.
+            </button>
+            <button class="menu-card mc-breath" onclick="App.navigate('breath')">
+                <div class="icon-wrap">💨</div>Дыхат. гимн.
+            </button>
+            <button class="menu-card mc-info" onclick="App.navigate('info')">
+                <div class="icon-wrap">ℹ️</div>Информация
+            </button>
+            <button class="menu-card mc-stats" onclick="Stats.show()">
+                <div class="icon-wrap">📊</div>Статистика
+            </button>
+            <button class="menu-card mc-settings" onclick="App.navigate('settings')">
+                <div class="icon-wrap">⚙️</div>Настройки
+            </button>
         </div>
+    </section>
 
-        <button id="back-btn" class="hidden" onclick="navigateTo('main')">← Назад</button>
-
-        <section id="main" class="active">
-            <h1 class="gradient-text">Развивайка</h1>
-            <div class="menu-grid">
-                <button class="menu-card" onclick="navigateTo('alphabet')">🅰️ Алфавит</button>
-                <button class="menu-card" onclick="navigateTo('numbers')">🔢 Цифры</button>
-                <button class="menu-card" onclick="navigateTo('colors')">🎨 Цвета</button>
-                <button class="menu-card" onclick="navigateTo('songs')">🎵 Песенки</button>
-                <button class="menu-card" onclick="navigateTo('riddles')">🧩 Загадки</button>
-                <button class="menu-card" onclick="navigateTo('settings')">⚙️ Настройки</button>
+    <!-- ========== MEDIA PAGE (Alphabet / Numbers / Colors) ========== -->
+    <section id="media-page" class="hidden">
+        <div id="video-wrap">
+            <video id="global-video" loop muted playsinline></video>
+            <div class="video-placeholder-inner" id="video-placeholder">
+                <div class="pi">🎬</div>
+                <span id="video-label">—</span>
             </div>
-        </section>
+        </div>
+        <div class="sp12"></div>
 
-        <section id="media-section" class="hidden">
-            <div class="player-card">
-                <div class="controls">
-                    <button onclick="Media.prev()">⏮</button>
-                    <button id="play-pause" onclick="Media.toggle()">▶️</button>
-                    <button onclick="Media.next()">⏭</button>
-                    <button onclick="Media.toggleRepeat()" id="repeat-btn">🔁</button>
+        <div class="audio-player">
+            <div class="track-info">
+                <div class="track-icon" id="track-icon">🎵</div>
+                <div>
+                    <div class="track-name" id="track-name">—</div>
+                    <div class="track-sub"  id="track-sub">—</div>
                 </div>
             </div>
-            <div id="items-grid" class="menu-grid"></div>
-        </section>
-
-        <section id="riddles" class="hidden">
-            <div class="menu-card">
-                <p id="riddle-text">Загрузка...</p>
-                <input type="text" id="riddle-answer" placeholder="Твой ответ">
-                <button class="gradient-btn" onclick="checkRiddle()">Отправить</button>
-                <p id="feedback"></p>
+            <div class="progress-bar-wrap" id="prog-wrap">
+                <div id="progress-bar"></div>
             </div>
-        </section>
+            <div class="progress-times">
+                <span id="time-cur">0:00</span>
+                <span id="time-dur">0:00</span>
+            </div>
+            <div class="player-btns">
+                <button class="ctrl-btn" id="shuffle-btn" onclick="Media.toggleShuffle()" title="Перемешать">🔀</button>
+                <button class="ctrl-btn" onclick="Media.prev()">⏮</button>
+                <button id="play-btn" onclick="Media.toggle()">▶</button>
+                <button class="ctrl-btn" onclick="Media.next()">⏭</button>
+                <button class="ctrl-btn" id="repeat-btn" onclick="Media.toggleRepeat()" title="Повтор">🔁</button>
+            </div>
+        </div>
+        <div class="sp8"></div>
+        <div id="media-grid"></div>
+    </section>
 
-        <section id="settings" class="hidden">
-            <h2 class="gradient-text">Настройки</h2>
-            <button class="gradient-btn" onclick="toggleTheme()">Переключить тему</button>
-        </section>
+    <!-- ========== SONGS ========== -->
+    <section id="songs" class="hidden">
+        <div class="audio-player">
+            <div class="track-info">
+                <div class="track-icon">🎵</div>
+                <div>
+                    <div class="track-name" id="song-name">Выберите песенку</div>
+                    <div class="track-sub"  id="song-sub">—</div>
+                </div>
+            </div>
+            <div class="progress-bar-wrap" id="song-prog-wrap">
+                <div id="song-progress-bar"></div>
+            </div>
+            <div class="progress-times">
+                <span id="song-time-cur">0:00</span>
+                <span id="song-time-dur">0:00</span>
+            </div>
+            <div class="player-btns">
+                <button class="ctrl-btn" id="song-shuffle-btn" onclick="Songs.toggleShuffle()">🔀</button>
+                <button class="ctrl-btn" onclick="Songs.prev()">⏮</button>
+                <button id="song-play-btn" onclick="Songs.toggle()">▶</button>
+                <button class="ctrl-btn" onclick="Songs.nextSong()">⏭</button>
+                <button class="ctrl-btn" id="song-repeat-btn" onclick="Songs.toggleRepeat()">🔁</button>
+            </div>
+        </div>
+        <div class="sp8"></div>
+        <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="song-search" placeholder="Найти песенку..." oninput="Songs.filter(this.value)">
+        </div>
+        <div class="songs-list" id="songs-list"></div>
+    </section>
 
-        <section id="admin-panel" class="hidden">
-            <h2 class="gradient-text">Админка</h2>
-            <input type="text" id="admin-song-name" placeholder="Название">
-            <input type="text" id="admin-song-file" placeholder="Файл (mp3)">
-            <button class="gradient-btn" onclick="adminAddSong()">Сохранить на GitHub</button>
-        </section>
+    <!-- ========== PUZZLES ========== -->
+    <section id="puzzles" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="level-tabs" style="flex:1;margin:0;">
+                <button class="level-tab easy"   onclick="Puzzles.setLevel('easy')">🟢 Простой</button>
+                <button class="level-tab"         onclick="Puzzles.setLevel('medium')">🟡 Средний</button>
+                <button class="level-tab"         onclick="Puzzles.setLevel('hard')">🔴 Сложный</button>
+            </div>
+        </div>
+        <div class="puzzle-img-wrap" id="puzzle-img">🧩</div>
+        <div class="hint-box" id="puzzle-hint">💡 Подсказка</div>
+        <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
+        <div id="puzzle-msg"></div>
+        <button class="submit-btn" onclick="Puzzles.check()">✅ Проверить</button>
+        <button class="next-btn" onclick="Puzzles.next()">Следующий ребус →</button>
+    </section>
+
+    <!-- ========== RIDDLES ========== -->
+    <section id="riddles" class="hidden">
+        <div class="riddle-box" id="riddle-text">Загрузка...</div>
+        <div class="answer-img" id="riddle-img"></div>
+        <input type="text" id="riddle-input" placeholder="Введи ответ...">
+        <div id="riddle-msg"></div>
+        <button class="submit-btn" onclick="Riddles.check()">✅ Проверить ответ</button>
+        <button class="next-btn" onclick="Riddles.next()">Следующая загадка →</button>
+    </section>
+
+    <!-- ========== FINGER GAMES ========== -->
+    <section id="finger" class="hidden">
+        <div style="text-align:center;padding:40px 0;font-size:64px;">🖐️</div>
+        <div class="riddle-box">Пальчиковые игры</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== ARTICULATION ========== -->
+    <section id="articul" class="hidden">
+        <div style="text-align:center;padding:40px 0;font-size:64px;">👄</div>
+        <div class="riddle-box">Артикуляционная гимнастика</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== BREATHING ========== -->
+    <section id="breath" class="hidden">
+        <div style="text-align:center;padding:40px 0;font-size:64px;">💨</div>
+        <div class="riddle-box">Дыхательная гимнастика</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== INFO ========== -->
+    <section id="info" class="hidden">
+        <div class="info-block">
+            <h3>🌟 О сайте</h3>
+            <p>Детский образовательный сайт для изучения букв, цифр, цветов и развития речи через игру и песенки.</p>
+        </div>
+        <div class="info-block">
+            <h3>📚 Разделы</h3>
+            <p>• Алфавит — учим буквы с видео и аудио<br>• Цифры — считаем от 0 до 9<br>• Цвета — изучаем цвета<br>• Песенки — любимые детские треки<br>• Ребусы и Загадки — развиваем мышление<br>• Гимнастика — пальчиковые и артик. упражнения</p>
+        </div>
+        <div class="info-block">
+            <h3>💡 Советы</h3>
+            <p>Занимайтесь каждый день по 15–20 минут. Хвалите ребёнка за каждый правильный ответ!</p>
+        </div>
+    </section>
+
+    <!-- ========== STATS ========== -->
+    <section id="stats" class="hidden">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--grad-purple)">🧩</div>
+            <div style="flex:1">
+                <div class="stat-val" id="st-puzzles">0</div>
+                <div class="stat-lbl">Ребусов решено</div>
+                <div class="stat-track"><div class="stat-fill" id="sf-puzzles" style="background:var(--grad-purple)"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--grad-green)">🤔</div>
+            <div style="flex:1">
+                <div class="stat-val" id="st-riddles">0</div>
+                <div class="stat-lbl">Загадок угадано</div>
+                <div class="stat-track"><div class="stat-fill" id="sf-riddles" style="background:var(--grad-green)"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--grad-yellow)">🎵</div>
+            <div style="flex:1">
+                <div class="stat-val" id="st-songs">0</div>
+                <div class="stat-lbl">Песенок прослушано</div>
+                <div class="stat-track"><div class="stat-fill" id="sf-songs" style="background:var(--grad-yellow)"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--grad-blue)">🔤</div>
+            <div style="flex:1">
+                <div class="stat-val" id="st-letters">0</div>
+                <div class="stat-lbl">Букв изучено</div>
+                <div class="stat-track"><div class="stat-fill" id="sf-letters" style="background:var(--grad-blue)"></div></div>
+            </div>
+        </div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:12px;font-weight:700;">Продолжай учиться — ты молодец! 🌟</div>
+    </section>
+
+    <!-- ========== SETTINGS ========== -->
+    <section id="settings" class="hidden">
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon">🌙</span>
+                <div><div class="s-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
+                <div class="toggle" id="tog-theme" onclick="App.toggleTheme(this)"></div>
+            </div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon">🔊</span>
+                <div><div class="s-label">Звук</div><div class="s-sub">Звуковые уведомления</div></div>
+                <div class="toggle on" id="tog-sound" onclick="this.classList.toggle('on');saveSetting('sound',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon">🎵</span>
+                <div><div class="s-label">Автовоспроизведение</div><div class="s-sub">Запускать музыку автоматически</div></div>
+                <div class="toggle on" id="tog-auto" onclick="this.classList.toggle('on');saveSetting('auto',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon">⭐</span>
+                <div><div class="s-label">Анимации</div><div class="s-sub">Звёздочки и эффекты</div></div>
+                <div class="toggle on" id="tog-anim" onclick="this.classList.toggle('on');saveSetting('anim',this.classList.contains('on'))"></div>
+            </div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="App.resetStats()">
+                <span class="s-icon">🗑️</span>
+                <div><div class="s-label" style="color:#ef4444">Сбросить прогресс</div><div class="s-sub">Очистить все данные</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Развивайка v1.0 · Сделано с ❤️</div>
+    </section>
+
+    <!-- ========== ADMIN ========== -->
+    <section id="admin" class="hidden">
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="Admin.setTab('songs',this)">🎵 Песенки</button>
+            <button class="admin-tab" onclick="Admin.setTab('podcasts',this)">🎙️ Подкасты</button>
+            <button class="admin-tab" onclick="Admin.setTab('puzzles',this)">🧩 Ребусы</button>
+            <button class="admin-tab" onclick="Admin.setTab('riddles',this)">🤔 Загадки</button>
+        </div>
+        <div class="admin-list" id="admin-list"></div>
+        <button class="admin-add-btn" onclick="Admin.openModal(null)">➕ Добавить</button>
+        <button class="publish-btn" onclick="Admin.publish()">📤 Опубликовать на GitHub</button>
+    </section>
+
+</div><!-- #app -->
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal" onclick="Admin.closeModal(event)">
+    <div class="modal-box">
+        <div class="modal-title" id="modal-title">Добавить</div>
+        <input type="text"     id="m-name"    placeholder="Название / Текст загадки">
+        <input type="text"     id="m-answer"  placeholder="Ответ (для ребусов/загадок)">
+        <input type="text"     id="m-hint"    placeholder="Подсказка / Картинка-ребус (эмодзи)">
+        <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
+            <option value="">Уровень (только для ребусов)</option>
+            <option value="easy">🟢 Простой</option>
+            <option value="medium">🟡 Средний</option>
+            <option value="hard">🔴 Сложный</option>
+        </select>
+        <label class="file-label">
+            📎 Прикрепить файл (аудио / картинку)
+            <input type="file" id="m-file" accept="audio/*,image/*" onchange="document.getElementById('m-file-name').textContent=this.files[0]?.name||'Файл не выбран'">
+        </label>
+        <div class="file-chosen" id="m-file-name">Файл не выбран</div>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="Admin.closeModal()">Отмена</button>
+            <button class="modal-save"   onclick="Admin.save()">Сохранить</button>
+        </div>
     </div>
-    <script src="app.js"></script>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
