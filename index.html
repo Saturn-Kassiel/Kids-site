@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Site</title>
+    <link rel="icon" href="favicon/favicon.webp">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="video-container">
+            <video id="global-video" loop muted playsinline></video>
+            <div id="loader" class="hidden"><div class="spinner"></div></div>
+        </div>
+
+        <button id="back-btn" class="hidden" onclick="navigateTo('main')">← Назад</button>
+
+        <section id="main" class="active">
+            <h1 class="gradient-text">Развивайка</h1>
+            <div class="menu-grid">
+                <button class="menu-card" onclick="navigateTo('alphabet')">🅰️ Алфавит</button>
+                <button class="menu-card" onclick="navigateTo('numbers')">🔢 Цифры</button>
+                <button class="menu-card" onclick="navigateTo('colors')">🎨 Цвета</button>
+                <button class="menu-card" onclick="navigateTo('songs')">🎵 Песенки</button>
+                <button class="menu-card" onclick="navigateTo('riddles')">🧩 Загадки</button>
+                <button class="menu-card" onclick="navigateTo('settings')">⚙️ Настройки</button>
+            </div>
+        </section>
+
+        <section id="media-section" class="hidden">
+            <div class="player-card">
+                <div class="controls">
+                    <button onclick="Media.prev()">⏮</button>
+                    <button id="play-pause" onclick="Media.toggle()">▶️</button>
+                    <button onclick="Media.next()">⏭</button>
+                    <button onclick="Media.toggleRepeat()" id="repeat-btn">🔁</button>
+                </div>
+            </div>
+            <div id="items-grid" class="menu-grid"></div>
+        </section>
+
+        <section id="riddles" class="hidden">
+            <div class="menu-card">
+                <p id="riddle-text">Загрузка...</p>
+                <input type="text" id="riddle-answer" placeholder="Твой ответ">
+                <button class="gradient-btn" onclick="checkRiddle()">Отправить</button>
+                <p id="feedback"></p>
+            </div>
+        </section>
+
+        <section id="settings" class="hidden">
+            <h2 class="gradient-text">Настройки</h2>
+            <button class="gradient-btn" onclick="toggleTheme()">Переключить тему</button>
+        </section>
+
+        <section id="admin-panel" class="hidden">
+            <h2 class="gradient-text">Админка</h2>
+            <input type="text" id="admin-song-name" placeholder="Название">
+            <input type="text" id="admin-song-file" placeholder="Файл (mp3)">
+            <button class="gradient-btn" onclick="adminAddSong()">Сохранить на GitHub</button>
+        </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
