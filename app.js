@@ -320,15 +320,24 @@ const Media = {
         const placeholder = document.getElementById('video-placeholder');
         document.getElementById('video-label').textContent = item.label;
 
+        // Всегда полностью сбрасываем видео перед загрузкой нового
+        vid.pause();
+        vid.removeAttribute('src');
+        vid.load();
+        placeholder.style.display = 'flex';
+
         if (item.video) {
             vid.src = item.video;
             vid.load();
-            vid.play().catch(() => {});
-            vid.onloadeddata = () => { placeholder.style.display = 'none'; };
-            vid.onerror = () => { placeholder.style.display = 'flex'; };
-        } else {
-            vid.src = '';
-            placeholder.style.display = 'flex';
+            vid.onloadeddata = () => {
+                placeholder.style.display = 'none';
+                vid.play().catch(() => {});
+            };
+            vid.onerror = () => {
+                vid.removeAttribute('src');
+                vid.load();
+                placeholder.style.display = 'flex';
+            };
         }
 
         // Audio
@@ -1070,6 +1079,8 @@ const Admin = {
             }
         });
         this.render();
+        // Восстанавливаем токен из localStorage
+        setTimeout(() => this._loadToken(), 30);
     },
 
     _getData(k) { try { return JSON.parse(localStorage.getItem('admin_' + k)) || []; } catch { return []; } },
@@ -1289,12 +1300,107 @@ const Admin = {
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
     },
 
-    publish() {
-        showToast('📤 Для публикации настройте GitHub Token в коде');
-        // Real implementation: use GitHub API
-        // fetch('https://api.github.com/repos/Saturn-Kassiel/Kids-site/contents/data.json', {
-        //     method: 'PUT', headers: { Authorization: 'token YOUR_TOKEN', ... }, body: JSON.stringify({...})
-        // });
+    // ── GitHub Token helpers ──
+    saveToken(val) {
+        if (val) localStorage.setItem('gh_token', val.trim());
+        else localStorage.removeItem('gh_token');
+    },
+
+    toggleTokenEye(btn) {
+        const inp = document.getElementById('github-token-input');
+        if (!inp) return;
+        const isHidden = inp.type === 'password';
+        inp.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁';
+    },
+
+    // Вызывается при открытии Админки — восстанавливает токен из localStorage
+    _loadToken() {
+        const saved = localStorage.getItem('gh_token');
+        const inp = document.getElementById('github-token-input');
+        if (inp && saved) inp.value = saved;
+    },
+
+    // ── Публикация в GitHub ──
+    async publish() {
+        const REPO  = 'Saturn-Kassiel/Kids-site';   // ← ваш репозиторий
+        const FILE  = 'data.json';                   // ← файл в корне репо
+        const BRANCH = 'main';                       // ← ветка
+
+        const token = (document.getElementById('github-token-input')?.value || '').trim()
+                   || localStorage.getItem('gh_token') || '';
+
+        if (!token) {
+            showToast('⚠️ Введите GitHub Token');
+            document.getElementById('github-token-input')?.focus();
+            return;
+        }
+
+        // Собираем все данные Админки
+        const data = {
+            songs:    this._getData('songs'),
+            podcasts: this._getData('podcasts'),
+            puzzles:  this._getData('puzzles'),
+            riddles:  this._getData('riddles'),
+            exportedAt: new Date().toISOString()
+        };
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+        const btn = document.getElementById('publish-btn');
+        const origText = btn ? btn.textContent : '';
+        if (btn) { btn.textContent = '⏳ Публикация...'; btn.disabled = true; }
+
+        try {
+            const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+            const headers = {
+                'Authorization': `token ${token}`,
+                'Content-Type':  'application/json',
+                'Accept':        'application/vnd.github.v3+json'
+            };
+
+            // Получаем текущий SHA файла (нужен для обновления)
+            let sha = null;
+            try {
+                const getResp = await fetch(apiUrl + `?ref=${BRANCH}`, { headers });
+                if (getResp.ok) {
+                    const existing = await getResp.json();
+                    sha = existing.sha;
+                }
+            } catch (_) { /* файл ещё не существует */ }
+
+            // Загружаем файл
+            const body = {
+                message: `📱 Обновление данных приложения ${new Date().toLocaleString('ru')}`,
+                content,
+                branch: BRANCH,
+                ...(sha ? { sha } : {})
+            };
+
+            const putResp = await fetch(apiUrl, {
+                method:  'PUT',
+                headers,
+                body: JSON.stringify(body)
+            });
+
+            if (putResp.ok) {
+                const result = await putResp.json();
+                localStorage.setItem('gh_token', token); // сохраняем токен
+                showToast('✅ Данные опубликованы на GitHub!');
+                console.log('Published:', result.content?.html_url);
+            } else {
+                const err = await putResp.json();
+                const msg = err.message || 'Ошибка';
+                if (putResp.status === 401) showToast('❌ Токен недействителен');
+                else if (putResp.status === 404) showToast('❌ Репозиторий не найден');
+                else if (putResp.status === 403) showToast('❌ Нет прав на запись');
+                else showToast('❌ Ошибка: ' + msg);
+            }
+        } catch (e) {
+            showToast('❌ Нет соединения с GitHub');
+            console.error('Publish error:', e);
+        } finally {
+            if (btn) { btn.textContent = origText; btn.disabled = false; }
+        }
     }
 };
 

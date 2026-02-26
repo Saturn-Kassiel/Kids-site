@@ -673,6 +673,56 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
     transition: all var(--tr);
 }
 .publish-btn:hover { transform: translateY(-2px); }
+.publish-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── GitHub Token поле ── */
+.github-token-row {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 8px;
+}
+.github-token-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+}
+.github-token-input-wrap {
+    display: flex; align-items: center; gap: 6px;
+}
+.github-token-input-wrap input {
+    flex: 1;
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: 0.03em;
+    outline: none;
+    transition: border-color var(--tr);
+}
+.github-token-input-wrap input:focus {
+    border-color: var(--luna-mid, #54ACBF);
+}
+.github-token-eye {
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px;
+    transition: all var(--tr); flex-shrink: 0;
+}
+.github-token-eye:hover { background: var(--card); }
+.github-token-hint {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 6px;
+}
 
 
 /* ===== ADMIN LAYOUT ===== */

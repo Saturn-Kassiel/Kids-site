@@ -312,7 +312,18 @@
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
             <button class="admin-add-btn" onclick="Admin.openModal(null)">➕ Добавить</button>
-            <button class="publish-btn" onclick="Admin.publish()">📤 Опубликовать на GitHub</button>
+            <div class="github-token-row">
+                <div class="github-token-label">GitHub Token</div>
+                <div class="github-token-input-wrap">
+                    <input type="password" id="github-token-input"
+                        placeholder="ghp_xxxxxxxxxxxx"
+                        autocomplete="off" spellcheck="false"
+                        oninput="Admin.saveToken(this.value)">
+                    <button class="github-token-eye" onclick="Admin.toggleTokenEye(this)" title="Показать/скрыть">👁</button>
+                </div>
+                <div class="github-token-hint">Хранится только в браузере · <a href="https://github.com/settings/tokens/new?scopes=repo&description=RazvivaykaApp" target="_blank" style="color:var(--text2)">Создать новый →</a></div>
+            </div>
+            <button class="publish-btn" onclick="Admin.publish()" id="publish-btn">📤 Опубликовать на GitHub</button>
         </div>
     </section>
 
