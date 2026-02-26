@@ -1,0 +1,423 @@
+{
+  "songs": [
+    {
+      "id": 1,
+      "name": "Колыбельная",
+      "duration": "",
+      "src": "assets/audio/songs/kolybelnaya.mp3"
+    },
+    {
+      "id": 2,
+      "name": "Песенка для мамы",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_dlya_mamy.mp3"
+    },
+    {
+      "id": 3,
+      "name": "Песенка про слона",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_clona.mp3"
+    },
+    {
+      "id": 4,
+      "name": "Песенка про Деда Мороза",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_deda_moroza.mp3"
+    },
+    {
+      "id": 5,
+      "name": "Песенка про февраль",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_fevral.mp3"
+    },
+    {
+      "id": 6,
+      "name": "Песенка про льва",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_lva.mp3"
+    },
+    {
+      "id": 7,
+      "name": "Песенка про неделю",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_nedelyu.mp3"
+    },
+    {
+      "id": 8,
+      "name": "Песенка про носорога",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3"
+    },
+    {
+      "id": 9,
+      "name": "Песенка про папу",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_papu.mp3"
+    },
+    {
+      "id": 10,
+      "name": "Песенка про умывание",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3"
+    },
+    {
+      "id": 11,
+      "name": "Песенка про январь",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_yanvar.mp3"
+    },
+    {
+      "id": 12,
+      "name": "Песенка про зебру",
+      "duration": "",
+      "src": "assets/audio/songs/pesenka_pro_zebru.mp3"
+    },
+    {
+      "id": 13,
+      "name": "В лесу родилась ёлочка",
+      "duration": "",
+      "src": "assets/audio/songs/v_lesu_rodilas_yolochka.mp3"
+    }
+  ],
+  "podcasts": [
+    {
+      "id": 1,
+      "name": "Благодарность",
+      "desc": "Ваш ребёнок принимает подарки как должное и забывает про «спасибо» не из-за плохого характера, а в силу естественного эгоцентризма.\n\nБлагодарность — это не врождённый инстинкт, а сложный навык, который созревает постепенно по мере развития мозга.\n\nМы расскажем о методике NOTICE-THINK-FEEL-DO, позволяющей превратить дежурную вежливость в глубокое внутреннее чувство.\n\nПрисоединяйтесь, чтобы ваш ребенок видел добро в мелочах и ценил нематериальные блага!",
+      "duration": "",
+      "src": "assets/audio/podcasts/blagodarnost.mp3"
+    },
+    {
+      "id": 2,
+      "name": "Доверие ребёнка",
+      "desc": "Почему ребенок «отключается» именно тогда, когда вы пытаетесь объяснить ему что-то важное?\n\nВ этом материале разбираем феномен «эпистемической заморозки» — защитной реакции мозга, которая блокирует восприятие информации, если дошкольник не чувствует себя в безопасности.\n\nВы узнаете, в чем разница между верой в факты и глубоким межличностным доверием, а также как модель PACE (игривость, принятие, любопытство и эмпатия) помогает растопить лед и вернуть контакт с ребенком.\n\nНаучитесь восстанавливать безопасность раньше, чем начнете давать советы, чтобы ваши слова снова стали для него значимыми.",
+      "duration": "",
+      "src": "assets/audio/podcasts/doverie_rebyonka.mp3"
+    },
+    {
+      "id": 3,
+      "name": "Мозг дошкольника",
+      "desc": "Мозг дошкольника — это строительная площадка, где эмоции уже работают, а «центр управления» и логика еще не сформированы. В разгар истерики его мозг биологически не способен на рациональность.\n\nЧтобы вырастить устойчивую личность, родителю важно стать «контейнером»: сохранять спокойствие самому, позволять ребенку выплакать «слезы тщетности» для принятия реальности и признавать его чувства.\n\nВаша готовность принимать ребенка «неудобным» и уязвимым — это не слабость, а фундамент его будущей психологической силы.\n\nПослушайте разговор об этом!",
+      "duration": "",
+      "src": "assets/audio/podcasts/mozg_doshkolnika.mp3"
+    },
+    {
+      "id": 4,
+      "name": "Поколение Альфа",
+      "desc": "Познакомьтесь с Поколением Альфа — первой когортой в истории, полностью рожденной в XXI веке и не знающей мира без смартфонов и облачных технологий.",
+      "duration": "",
+      "src": "assets/audio/podcasts/pokolenie_alfa.mp3"
+    },
+    {
+      "id": 5,
+      "name": "Эмпатия",
+      "desc": "Родители часто переживают, когда ребенок не хочет делиться игрушками или не замечает расстройства окружающих.\n\nПедагоги утверждают, что эмпатия не является врожденным даром. Это навык, который можно и нужно тренировать.\n\nУмение понять чувства другого человека, будь то радость, обида или грусть, и способность «заглянуть в сердце» ближнему.\n\nПослушайте, разговор об эмпатии.",
+      "duration": "",
+      "src": "assets/audio/podcasts/slushat_serdtsem.mp3"
+    },
+    {
+      "id": 6,
+      "name": "Сравнение",
+      "desc": "«А вот Петя уже сам...»: почему сравнение — это яд для развития ребенка.\n\nВ этом выпуске мы разбираем одну из самых разрушительных привычек в воспитании — социальное сравнение.\n\nРодители часто используют его как инструмент мотивации, но для ребенка 3–6 лет это превращается в «угрозу выживанию» и сообщение о том, что его ценят только за достижения.",
+      "duration": "",
+      "src": "assets/audio/podcasts/sravnenie.mp3"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": 2,
+      "name": "Ложка",
+      "pic": "assets/images/rebuses_pictures_opt/lozhka.webp",
+      "hint": "Для еды",
+      "answer": "Ложка",
+      "level": "easy"
+    },
+    {
+      "id": 3,
+      "name": "Вилка",
+      "pic": "assets/images/rebuses_pictures_opt/vilka.webp",
+      "hint": "Для еды",
+      "answer": "Вилка",
+      "level": "easy"
+    },
+    {
+      "id": 4,
+      "name": "Море",
+      "pic": "assets/images/rebuses_pictures_opt/more.webp",
+      "hint": "Вода",
+      "answer": "Море",
+      "level": "easy"
+    },
+    {
+      "id": 5,
+      "name": "Радуга",
+      "pic": "assets/images/rebuses_pictures_opt/raduga.webp",
+      "hint": "В небе",
+      "answer": "Радуга",
+      "level": "easy"
+    },
+    {
+      "id": 6,
+      "name": "Слон",
+      "pic": "assets/images/rebuses_pictures_opt/slon.webp",
+      "hint": "Присмотрись к картинке",
+      "answer": "слон",
+      "level": "easy"
+    },
+    {
+      "id": 7,
+      "name": "Бабочка",
+      "pic": "assets/images/rebuses_pictures_opt/babochka.webp",
+      "hint": "Крылья",
+      "answer": "Бабочка",
+      "level": "easy"
+    },
+    {
+      "id": 8,
+      "name": "Коньки",
+      "pic": "assets/images/rebuses_pictures_opt/konki.webp",
+      "hint": "Для ног",
+      "answer": "Коньки",
+      "level": "medium"
+    },
+    {
+      "id": 9,
+      "name": "Трактор",
+      "pic": "assets/images/rebuses_pictures_opt/traktor.webp",
+      "hint": "Техника",
+      "answer": "Трактор",
+      "level": "medium"
+    },
+    {
+      "id": 10,
+      "name": "Туча",
+      "pic": "assets/images/rebuses_pictures_opt/tucha.webp",
+      "hint": "Небо",
+      "answer": "Туча",
+      "level": "medium"
+    },
+    {
+      "id": 11,
+      "name": "Туман",
+      "pic": "assets/images/rebuses_pictures_opt/tuman.webp",
+      "hint": "Погода",
+      "answer": "Туман",
+      "level": "medium"
+    },
+    {
+      "id": 12,
+      "name": "Зелень",
+      "pic": "assets/images/rebuses_pictures_opt/zelen.webp",
+      "hint": "Польза",
+      "answer": "Зелень",
+      "level": "medium"
+    },
+    {
+      "id": 13,
+      "name": "Креветка",
+      "pic": "assets/images/rebuses_pictures_opt/krevetka.webp",
+      "hint": "Море",
+      "answer": "Креветка",
+      "level": "hard"
+    },
+    {
+      "id": 14,
+      "name": "Забор",
+      "pic": "assets/images/rebuses_pictures_opt/zabor.webp",
+      "hint": "Возле дома",
+      "answer": "Забор",
+      "level": "hard"
+    },
+    {
+      "id": 15,
+      "name": "Токарь",
+      "pic": "assets/images/rebuses_pictures_opt/tokar.webp",
+      "hint": "Профессия",
+      "answer": "Токарь",
+      "level": "hard"
+    }
+  ],
+  "riddles": [
+    {
+      "id": 1,
+      "text": "Белым снегом всё одето, значит наступает ...",
+      "answer": "Зима",
+      "pic": "assets/images/riddles_pictures_opt/zima.webp"
+    },
+    {
+      "id": 2,
+      "text": "Охраняет часто дом, повиляет всем хвостом, зарычит, коль ты чужой, и оближет, если свой.",
+      "answer": "Собака",
+      "pic": "assets/images/riddles_pictures_opt/sobaka.webp"
+    },
+    {
+      "id": 3,
+      "text": "По реке плывёт бревно, ох и злющее оно,  тем, кто в речку угодил, нос откусит ...",
+      "answer": "Крокодил",
+      "pic": "assets/images/riddles_pictures_opt/krokodil.webp"
+    },
+    {
+      "id": 7,
+      "text": "Мимо улья проходил косолапый ...",
+      "answer": "Медведь",
+      "pic": "assets/images/riddles_pictures_opt/medved.webp"
+    },
+    {
+      "id": 8,
+      "text": "Ночью каждое оконце слабо освещает ...",
+      "answer": "Луна",
+      "pic": "assets/images/riddles_pictures_opt/luna.webp"
+    },
+    {
+      "id": 9,
+      "text": "Овощ это непростой,\nВызовет слезу порой,\nНо уж больно он полезный\nЗащищает от болезней!",
+      "answer": "Лук",
+      "pic": "assets/images/riddles_pictures_opt/luk.webp"
+    },
+    {
+      "id": 10,
+      "text": "Кто мычит там на лугу,\nСочную жует траву,\nУгощает молоком\nИ полезным творожком.",
+      "answer": "Корова",
+      "pic": "assets/images/riddles_pictures_opt/korova.webp"
+    },
+    {
+      "id": 11,
+      "text": "С ветки прыгает на ветку\nРыжая красавица.\nШишки, желуди, орехи\nЗапасает на зиму.",
+      "answer": "белка",
+      "pic": "assets/images/riddles_pictures_opt/belka.webp"
+    },
+    {
+      "id": 12,
+      "text": "Он хвостастый и зубастый,\nНа луну он воет часто,\nВсе в лесу его боятся,\nА в особенности, зайцы.",
+      "answer": "волк",
+      "pic": "assets/images/riddles_pictures_opt/volk.webp"
+    },
+    {
+      "id": 13,
+      "text": "В лесу живёт плутовка,\nХитры её глаза,\nА цветом, как морковка,\nПушистая...",
+      "answer": "Лиса",
+      "pic": "assets/images/riddles_pictures_opt/lisa.webp"
+    },
+    {
+      "id": 14,
+      "text": "Живет в берлоге он в лесу,\nПугает волка и лису,\nЛюбит ягоды и мед,\nКосолапо он идет.",
+      "answer": "Медведь",
+      "pic": "assets/images/riddles_pictures_opt/medved.webp"
+    },
+    {
+      "id": 16,
+      "text": "Он пятнистый, с длинной шеей,\nГде-то в Африке живет.\nИ с огромных он деревьев\nЛегко листья достает.",
+      "answer": "Жираф",
+      "pic": "assets/images/riddles_pictures_opt/zhiraf.webp"
+    },
+    {
+      "id": 17,
+      "text": "Траву жуёт. Носит матроску\nВ чёрно - белую полоску.",
+      "answer": "Зебра",
+      "pic": "assets/images/riddles_pictures_opt/zebra.webp"
+    },
+    {
+      "id": 18,
+      "text": "В цирке трюки выполняет,\nБрёвна хоботом таскает.\nСерый и громадный он,\nКто же это? Это ...",
+      "answer": "Слон",
+      "pic": "assets/images/riddles_pictures_opt/slon.webp"
+    },
+    {
+      "id": 19,
+      "text": "В зоопарке, в синей клетке\nЛовко прыгает по сетке,\nКорчит рожи, ест бананы.\nКто? Конечно",
+      "answer": "Обезьяна",
+      "pic": "assets/images/riddles_pictures_opt/obezyana.webp"
+    },
+    {
+      "id": 20,
+      "text": "Нет того, кто не боится\nЭтой грозной хищной птицы.\nКто куда бы не забрёл,\nСверху видит всё…",
+      "answer": "Орёл",
+      "pic": "assets/images/riddles_pictures_opt/orel.webp"
+    },
+    {
+      "id": 21,
+      "text": "Хвост веером, на голове корона, нет птицы краше чем ...",
+      "answer": "Павлин",
+      "pic": "assets/images/riddles_pictures_opt/pavlin.webp"
+    },
+    {
+      "id": 22,
+      "text": "Рано он всегда встаёт,\nПо утрам всегда поёт,\nНосит гребень и серёжки,\nВ перьях все его одёжки.",
+      "answer": "Петух",
+      "pic": "assets/images/riddles_pictures_opt/petukh.webp"
+    },
+    {
+      "id": 23,
+      "text": "Маленькая птичка\nЧирикает отлично,\nПрыгает по веткам,\nЖить не станет в клетке.\nНе таится от людей\nРазвесёлый...",
+      "answer": "воробей",
+      "pic": "assets/images/riddles_pictures_opt/vorobey.webp"
+    },
+    {
+      "id": 24,
+      "text": "Перья черные летят,\nВсюду каркают, кричат,\nЧто за важная персона?\nЭто черная...",
+      "answer": "Ворона",
+      "pic": "assets/images/riddles_pictures_opt/vorona.webp"
+    },
+    {
+      "id": 25,
+      "text": "Я по травке не спешу.\nЕсли станет страшно вдруг,\nСпрячусь в домик, милый друг.",
+      "answer": "Улитка",
+      "pic": "assets/images/riddles_pictures_opt/ulitka.webp"
+    },
+    {
+      "id": 26,
+      "text": "На пруду на живёт,\nГромко песенки поёт,\nПучеглазая зверюшка\nНазывается...",
+      "answer": "Лягушка",
+      "pic": "assets/images/riddles_pictures_opt/lyagushka.webp"
+    },
+    {
+      "id": 27,
+      "text": "В пустыне живёт,\nПодолгу не пьёт,\nС жарой легко справляется,\nКолючками питается.",
+      "answer": "Верблюд",
+      "pic": "assets/images/riddles_pictures_opt/verblyud.webp"
+    },
+    {
+      "id": 29,
+      "text": "Через море-океан\nПлывёт чудо-великан,\nПрячет ус во рту,\nРастянулся на версту.",
+      "answer": "Кит",
+      "pic": "assets/images/riddles_pictures_opt/kit.webp"
+    },
+    {
+      "id": 30,
+      "text": "Ем я уголь, пью я воду,\nКак напьюсь — прибавлю ходу.\nВезу обоз на сто колес\nИ называюсь...",
+      "answer": "Паровоз",
+      "pic": "assets/images/riddles_pictures_opt/parovoz.webp"
+    },
+    {
+      "id": 31,
+      "text": "Она идет и зиму прогоняет.\nКогда придет, вокруг всё расцветает.\nОт солнышка прекрасного ясна.\nЗовут ее, конечно же ...",
+      "answer": "Весна",
+      "pic": "assets/images/riddles_pictures_opt/vesna.webp"
+    },
+    {
+      "id": 32,
+      "text": "Если крылья распахнет —\nКрасотой с ума сведет.\nНа лугу она летает,\nВсех собою удивляет.",
+      "answer": "Бабочка",
+      "pic": "assets/images/riddles_pictures_opt/babochka.webp"
+    },
+    {
+      "id": 34,
+      "text": "Живёт в норке, грызёт корки, боится кошки.",
+      "answer": "Мышь",
+      "pic": "assets/images/riddles_pictures_opt/mysh.webp"
+    },
+    {
+      "id": 36,
+      "text": "Лечит маленьких детей,\nЛечит птичек и зверей,\nСквозь очки свои глядит\nДобрый доктор...",
+      "answer": "Айболит",
+      "pic": "assets/images/riddles_pictures_opt/aybolit.webp"
+    },
+    {
+      "id": 37,
+      "text": "Сначала пашут,\nПотом засевают,\nВремя придёт,\nУрожай собирают!",
+      "answer": "Поле",
+      "pic": "assets/images/riddles_pictures_opt/pshenitsa.webp"
+    }
+  ],
+  "exportedAt": "2026-02-26T09:03:26.432Z"
+}
