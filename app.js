@@ -26,6 +26,16 @@ const App = {
 
         if (!isMain) this._history.push(id);
         window.scrollTo(0, 0);
+        // Убираем кружки уровней при уходе с ребусов
+        if (id !== 'puzzles') {
+            const dots = document.getElementById('puzzle-level-dots');
+            if (dots) dots.remove();
+        }
+        // Убираем кнопку поделиться при уходе с загадок
+        if (id !== 'riddles') {
+            const sb = document.getElementById('riddle-share-topbar');
+            if (sb) sb.remove();
+        }
         // Рендерим динамические разделы
         if (id === 'info') Info.render();
     },
@@ -816,7 +826,28 @@ const Puzzles = {
         App.navigate('puzzles', 'Ребусы');
         this._loadFromAdmin();
         this._pos = { easy: 0, medium: 0, hard: 0 };
+        this._level = 'easy';
+        // Вставляем кружки уровней в топ-бар
+        this._renderLevelDots();
         this.show();
+    },
+
+    _renderLevelDots() {
+        // Убираем старые кружки если есть
+        const old = document.getElementById('puzzle-level-dots');
+        if (old) old.remove();
+        const topBar = document.getElementById('top-bar');
+        if (!topBar) return;
+        const wrap = document.createElement('div');
+        wrap.id = 'puzzle-level-dots';
+        wrap.innerHTML = `
+            <button class="lvl-dot easy   ${this._level==='easy'   ? 'active':''}" onclick="Puzzles.setLevel('easy')"   title="Простой"></button>
+            <button class="lvl-dot medium ${this._level==='medium' ? 'active':''}" onclick="Puzzles.setLevel('medium')" title="Средний"></button>
+            <button class="lvl-dot hard   ${this._level==='hard'   ? 'active':''}" onclick="Puzzles.setLevel('hard')"   title="Сложный"></button>
+        `;
+        // Вставляем перед кнопкой настроек
+        const settingsBtn = document.getElementById('settings-icon-btn');
+        topBar.insertBefore(wrap, settingsBtn);
     },
 
     // Загружаем актуальные данные из Admin localStorage
@@ -876,11 +907,10 @@ const Puzzles = {
     setLevel(lv) {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить»'); return; }
         this._level = lv;
-        document.querySelectorAll('.level-tab').forEach(t => t.className = 'level-tab');
-        const tabs = document.querySelectorAll('.level-tab');
-        if (lv === 'easy')   tabs[0].className = 'level-tab easy';
-        if (lv === 'medium') tabs[1].className = 'level-tab medium';
-        if (lv === 'hard')   tabs[2].className = 'level-tab hard';
+        // Обновляем активный кружок
+        document.querySelectorAll('.lvl-dot').forEach(d => d.classList.remove('active'));
+        const active = document.querySelector(`.lvl-dot.${lv}`);
+        if (active) active.classList.add('active');
         this.show();
     },
 
@@ -969,6 +999,19 @@ const Riddles = {
             }));
         }
         this._pos = 0;
+        // Кнопка «Поделиться» в топ-баре
+        const oldBtn = document.getElementById('riddle-share-topbar');
+        if (oldBtn) oldBtn.remove();
+        const topBar = document.getElementById('top-bar');
+        const settingsBtn = document.getElementById('settings-icon-btn');
+        if (topBar && settingsBtn) {
+            const btn = document.createElement('button');
+            btn.id = 'riddle-share-topbar';
+            btn.title = 'Поделиться загадкой';
+            btn.innerHTML = '📤';
+            btn.addEventListener('click', () => Riddles.share());
+            topBar.insertBefore(btn, settingsBtn);
+        }
         this.show();
     },
 
@@ -1040,6 +1083,26 @@ const Riddles = {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить ответ»'); return; }
         this._pos++;
         this.show();
+    },
+
+    share() {
+        const idx = this._pos % this.data.length;
+        const text = this.data[idx].q;
+        if (!text || text === '—') { showToast('⚠️ Нет текста загадки'); return; }
+        const msg = `🤔 Отгадай загадку!\n\n${text}`;
+        if (navigator.share) {
+            navigator.share({ text: msg }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(msg).then(() => {
+                showToast('📤 Загадка скопирована!');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = msg; ta.style.cssText = 'position:fixed;opacity:0';
+                document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                showToast('📤 Загадка скопирована!');
+            });
+        }
     }
 };
 

@@ -160,13 +160,6 @@
 
     <!-- ========== PUZZLES ========== -->
     <section id="puzzles" class="hidden">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div class="level-tabs" style="flex:1;margin:0;">
-                <button class="level-tab easy"   onclick="Puzzles.setLevel('easy')">🟢 Простой</button>
-                <button class="level-tab"         onclick="Puzzles.setLevel('medium')">🟡 Средний</button>
-                <button class="level-tab"         onclick="Puzzles.setLevel('hard')">🔴 Сложный</button>
-            </div>
-        </div>
         <div class="puzzle-img-wrap" id="puzzle-img">🧩</div>
         <div class="hint-box" id="puzzle-hint">💡 Подсказка</div>
         <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
@@ -178,11 +171,13 @@
     <!-- ========== RIDDLES ========== -->
     <section id="riddles" class="hidden">
         <div class="riddle-box" id="riddle-text">Загрузка...</div>
-        <div class="answer-img" id="riddle-img"></div>
         <input type="text" id="riddle-input" placeholder="Введи ответ...">
         <div id="riddle-msg"></div>
-        <button class="submit-btn" onclick="Riddles.check()">✅ Проверить ответ</button>
-        <button class="next-btn" onclick="Riddles.next()">Следующая загадка →</button>
+        <div class="riddle-btns-row">
+            <button class="submit-btn" onclick="Riddles.check()">✅ Проверить</button>
+            <button class="next-btn" onclick="Riddles.next()">Следующая →</button>
+        </div>
+        <div class="answer-img" id="riddle-img"></div>
     </section>
 
     <!-- ========== FINGER GAMES ========== -->
