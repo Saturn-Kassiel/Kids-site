@@ -26,15 +26,13 @@ const App = {
 
         if (!isMain) this._history.push(id);
         window.scrollTo(0, 0);
-        // Убираем кружки уровней при уходе с ребусов
+        // Убираем кнопки ребусов при уходе
         if (id !== 'puzzles') {
-            const dots = document.getElementById('puzzle-level-dots');
-            if (dots) dots.remove();
+            ['puzzle-level-dots','puzzle-share-topbar'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
         }
-        // Убираем кнопку поделиться при уходе с загадок
+        // Убираем кнопки загадок при уходе
         if (id !== 'riddles') {
-            const sb = document.getElementById('riddle-share-topbar');
-            if (sb) sb.remove();
+            ['riddle-share-topbar','riddle-level-dots'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
         }
         // Рендерим динамические разделы
         if (id === 'info') Info.render();
@@ -833,11 +831,18 @@ const Puzzles = {
     },
 
     _renderLevelDots() {
-        // Убираем старые кружки если есть
-        const old = document.getElementById('puzzle-level-dots');
-        if (old) old.remove();
+        ['puzzle-level-dots','puzzle-share-topbar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
         const topBar = document.getElementById('top-bar');
-        if (!topBar) return;
+        const settingsBtn = document.getElementById('settings-icon-btn');
+        if (!topBar || !settingsBtn) return;
+        // Кнопка шаринга картинки
+        const shareBtn = document.createElement('button');
+        shareBtn.id = 'puzzle-share-topbar';
+        shareBtn.title = 'Поделиться ребусом';
+        shareBtn.innerHTML = '📤';
+        shareBtn.addEventListener('click', () => Puzzles.share());
+        topBar.insertBefore(shareBtn, settingsBtn);
+        // Кружки уровней
         const wrap = document.createElement('div');
         wrap.id = 'puzzle-level-dots';
         wrap.innerHTML = `
@@ -845,9 +850,29 @@ const Puzzles = {
             <button class="lvl-dot medium ${this._level==='medium' ? 'active':''}" onclick="Puzzles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ? 'active':''}" onclick="Puzzles.setLevel('hard')"   title="Сложный"></button>
         `;
-        // Вставляем перед кнопкой настроек
-        const settingsBtn = document.getElementById('settings-icon-btn');
-        topBar.insertBefore(wrap, settingsBtn);
+        topBar.insertBefore(wrap, shareBtn);
+    },
+
+    async share() {
+        // Берём картинку из puzzle-img
+        const imgEl = document.getElementById('puzzle-img');
+        const img = imgEl ? imgEl.querySelector('img') : null;
+        if (!img || !img.src) { showToast('⚠️ Нет картинки для шаринга'); return; }
+        try {
+            const resp = await fetch(img.src);
+            const blob = await resp.blob();
+            const file = new File([blob], 'rebus.jpg', { type: blob.type });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], text: '🧩 Отгадай ребус!' });
+            } else if (navigator.share) {
+                await navigator.share({ text: '🧩 Отгадай ребус! ' + img.src });
+            } else {
+                navigator.clipboard.writeText(img.src);
+                showToast('🔗 Ссылка на картинку скопирована');
+            }
+        } catch(e) {
+            if (e.name !== 'AbortError') showToast('⚠️ Не удалось поделиться');
+        }
     },
 
     // Загружаем актуальные данные из Admin localStorage
@@ -953,6 +978,8 @@ const Riddles = {
     _pos: 0,
     _hasUnsaved: false,
     _solved: false,
+    _level: 'easy',
+    _data: { easy: [], medium: [], hard: [] },
 
     data: [
         { q:'Белым снегом всё одето, значит наступает ...', a:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' },
@@ -989,30 +1016,65 @@ const Riddles = {
 
     init() {
         App.navigate('riddles', 'Загадки');
-        // Полностью заменяем data на данные из Админки (с pic)
-        const adm = this._loadAdmin();
-        if (adm.length) {
-            this.data = adm.map(r => ({
-                q:   r.text   || '—',
-                a:   r.answer || '',
-                pic: r.pic    || ''
-            }));
-        }
+        this._level = 'easy';
+        this._loadFromAdmin();
         this._pos = 0;
-        // Кнопка «Поделиться» в топ-баре
-        const oldBtn = document.getElementById('riddle-share-topbar');
-        if (oldBtn) oldBtn.remove();
+        this._renderTopBar();
+        this.show();
+    },
+
+    _loadFromAdmin() {
+        const adm = this._loadAdmin();
+        const src = adm.length ? adm : this.data.map((r, i) => ({
+            id: i + 1, text: r.q, answer: r.a, pic: r.pic,
+            level: i < 10 ? 'easy' : i < 20 ? 'medium' : 'hard'
+        }));
+        this._data = { easy: [], medium: [], hard: [] };
+        src.forEach(r => {
+            const lv = r.level || 'easy';
+            if (this._data[lv]) this._data[lv].push({ q: r.text || r.q || '—', a: r.answer || r.a || '', pic: r.pic || '' });
+        });
+        // Если уровень пуст — берём easy
+        if (!this._data.medium.length) this._data.medium = [...this._data.easy];
+        if (!this._data.hard.length)   this._data.hard   = [...this._data.easy];
+    },
+
+    _current() {
+        const list = this._data[this._level];
+        return list[this._pos % list.length];
+    },
+
+    setLevel(lv) {
+        if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить ответ»'); return; }
+        this._level = lv;
+        this._pos = 0;
+        document.querySelectorAll('#riddle-level-dots .lvl-dot').forEach(d => d.classList.remove('active'));
+        const active = document.querySelector(`#riddle-level-dots .lvl-dot.${lv}`);
+        if (active) active.classList.add('active');
+        this.show();
+    },
+
+    _renderTopBar() {
+        ['riddle-level-dots','riddle-share-topbar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
         const topBar = document.getElementById('top-bar');
         const settingsBtn = document.getElementById('settings-icon-btn');
-        if (topBar && settingsBtn) {
-            const btn = document.createElement('button');
-            btn.id = 'riddle-share-topbar';
-            btn.title = 'Поделиться загадкой';
-            btn.innerHTML = '📤';
-            btn.addEventListener('click', () => Riddles.share());
-            topBar.insertBefore(btn, settingsBtn);
-        }
-        this.show();
+        if (!topBar || !settingsBtn) return;
+        // Кнопка шаринга
+        const shareBtn = document.createElement('button');
+        shareBtn.id = 'riddle-share-topbar';
+        shareBtn.title = 'Поделиться загадкой';
+        shareBtn.innerHTML = '📤';
+        shareBtn.addEventListener('click', () => Riddles.share());
+        topBar.insertBefore(shareBtn, settingsBtn);
+        // Кружки уровней
+        const dots = document.createElement('div');
+        dots.id = 'riddle-level-dots';
+        dots.innerHTML = `
+            <button class="lvl-dot easy   ${this._level==='easy'   ?'active':''}" onclick="Riddles.setLevel('easy')"   title="Простой"></button>
+            <button class="lvl-dot medium ${this._level==='medium' ?'active':''}" onclick="Riddles.setLevel('medium')" title="Средний"></button>
+            <button class="lvl-dot hard   ${this._level==='hard'   ?'active':''}" onclick="Riddles.setLevel('hard')"   title="Сложный"></button>
+        `;
+        topBar.insertBefore(dots, shareBtn);
     },
 
     _loadAdmin() {
@@ -1020,8 +1082,7 @@ const Riddles = {
     },
 
     show() {
-        const idx = this._pos % this.data.length;
-        const item = this.data[idx];
+        const item = this._current();
         document.getElementById('riddle-text').textContent = item.q;
         const inp = document.getElementById('riddle-input');
         const imgEl = document.getElementById('riddle-img');
@@ -1038,23 +1099,22 @@ const Riddles = {
     },
 
     check() {
-        const idx = this._pos % this.data.length;
+        const item = this._current();
         const val = document.getElementById('riddle-input').value.trim().toLowerCase();
         const msg = document.getElementById('riddle-msg');
         const inp = document.getElementById('riddle-input');
         if (!val) { msg.textContent = '✏️ Введи ответ!'; msg.className = 'warn'; return; }
         this._hasUnsaved = false;
-        if (val === this.data[idx].a.toLowerCase()) {
+        if (val === item.a.toLowerCase()) {
             inp.className = 'correct';
-            msg.textContent = `🎉 Правильно! Ответ: ${this.data[idx].a}`;
+            msg.textContent = `🎉 Правильно! Ответ: ${item.a}`;
             msg.className = 'ok';
-            // Создаём и показываем картинку только при правильном ответе
             const imgEl2 = document.getElementById('riddle-img');
             imgEl2.innerHTML = '';
             imgEl2.style.display = 'none';
-            if (this.data[idx].pic) {
+            if (item.pic) {
                 const revImg = document.createElement('img');
-                revImg.src = this.data[idx].pic;
+                revImg.src = item.pic;
                 revImg.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;border-radius:var(--radius);';
                 revImg.onload = () => {
                     imgEl2.innerHTML = '';
@@ -1086,8 +1146,8 @@ const Riddles = {
     },
 
     share() {
-        const idx = this._pos % this.data.length;
-        const text = this.data[idx].q;
+        const item = this._current();
+        const text = item.q;
         if (!text || text === '—') { showToast('⚠️ Нет текста загадки'); return; }
         const msg = `🤔 Отгадай загадку!\n\n${text}`;
         if (navigator.share) {
@@ -1236,36 +1296,36 @@ const Admin = {
                 { id:4, name:'🔗 Пример ссылки', body:'Наш сайт: [Говоруша](https://govorusha.ru)\nНаписать нам: [Telegram](https://t.me/govorusha)' },
             ],
             riddles: [
-                { id:1, text:'Белым снегом всё одето, значит наступает ...', answer:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' },
-                { id:2, text:'Охраняет часто дом, повиляет всем хвостом, зарычит, коль ты чужой, и оближет, если свой.', answer:'Собака', pic:'assets/images/riddles_pictures_opt/sobaka.webp' },
-                { id:3, text:'По реке плывёт бревно, ох и злющее оно,  тем, кто в речку угодил, нос откусит ...', answer:'Крокодил', pic:'assets/images/riddles_pictures_opt/krokodil.webp' },
-                { id:7, text:'Мимо улья проходил косолапый ...', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' },
-                { id:8, text:'Ночью каждое оконце слабо освещает ...', answer:'Луна', pic:'assets/images/riddles_pictures_opt/luna.webp' },
-                { id:9, text:'Овощ это непростой,\nВызовет слезу порой,\nНо уж больно он полезный\nЗащищает от болезней!', answer:'Лук', pic:'assets/images/riddles_pictures_opt/luk.webp' },
-                { id:10, text:'Кто мычит там на лугу,\nСочную жует траву,\nУгощает молоком\nИ полезным творожком.', answer:'Корова', pic:'assets/images/riddles_pictures_opt/korova.webp' },
-                { id:11, text:'С ветки прыгает на ветку\nРыжая красавица.\nШишки, желуди, орехи\nЗапасает на зиму.', answer:'белка', pic:'assets/images/riddles_pictures_opt/belka.webp' },
-                { id:12, text:'Он хвостастый и зубастый,\nНа луну он воет часто,\nВсе в лесу его боятся,\nА в особенности, зайцы.', answer:'волк', pic:'assets/images/riddles_pictures_opt/volk.webp' },
-                { id:13, text:'В лесу живёт плутовка,\nХитры её глаза,\nА цветом, как морковка,\nПушистая...', answer:'Лиса', pic:'assets/images/riddles_pictures_opt/lisa.webp' },
-                { id:14, text:'Живет в берлоге он в лесу,\nПугает волка и лису,\nЛюбит ягоды и мед,\nКосолапо он идет.', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' },
-                { id:16, text:'Он пятнистый, с длинной шеей,\nГде-то в Африке живет.\nИ с огромных он деревьев\nЛегко листья достает.', answer:'Жираф', pic:'assets/images/riddles_pictures_opt/zhiraf.webp' },
-                { id:17, text:'Траву жуёт. Носит матроску\nВ чёрно - белую полоску.', answer:'Зебра', pic:'assets/images/riddles_pictures_opt/zebra.webp' },
-                { id:18, text:'В цирке трюки выполняет,\nБрёвна хоботом таскает.\nСерый и громадный он,\nКто же это? Это ...', answer:'Слон', pic:'assets/images/riddles_pictures_opt/slon.webp' },
-                { id:19, text:'В зоопарке, в синей клетке\nЛовко прыгает по сетке,\nКорчит рожи, ест бананы.\nКто? Конечно', answer:'Обезьяна', pic:'assets/images/riddles_pictures_opt/obezyana.webp' },
-                { id:20, text:'Нет того, кто не боится\nЭтой грозной хищной птицы.\nКто куда бы не забрёл,\nСверху видит всё…', answer:'Орёл', pic:'assets/images/riddles_pictures_opt/orel.webp' },
-                { id:21, text:'Хвост веером, на голове корона, нет птицы краше чем ...', answer:'Павлин', pic:'assets/images/riddles_pictures_opt/pavlin.webp' },
-                { id:22, text:'Рано он всегда встаёт,\nПо утрам всегда поёт,\nНосит гребень и серёжки,\nВ перьях все его одёжки.', answer:'Петух', pic:'assets/images/riddles_pictures_opt/petukh.webp' },
-                { id:23, text:'Маленькая птичка\nЧирикает отлично,\nПрыгает по веткам,\nЖить не станет в клетке.\nНе таится от людей\nРазвесёлый...', answer:'воробей', pic:'assets/images/riddles_pictures_opt/vorobey.webp' },
-                { id:24, text:'Перья черные летят,\nВсюду каркают, кричат,\nЧто за важная персона?\nЭто черная...', answer:'Ворона', pic:'assets/images/riddles_pictures_opt/vorona.webp' },
-                { id:25, text:'Я по травке не спешу.\nЕсли станет страшно вдруг,\nСпрячусь в домик, милый друг.', answer:'Улитка', pic:'assets/images/riddles_pictures_opt/ulitka.webp' },
-                { id:26, text:'На пруду на живёт,\nГромко песенки поёт,\nПучеглазая зверюшка\nНазывается...', answer:'Лягушка', pic:'assets/images/riddles_pictures_opt/lyagushka.webp' },
-                { id:27, text:'В пустыне живёт,\nПодолгу не пьёт,\nС жарой легко справляется,\nКолючками питается.', answer:'Верблюд', pic:'assets/images/riddles_pictures_opt/verblyud.webp' },
-                { id:29, text:'Через море-океан\nПлывёт чудо-великан,\nПрячет ус во рту,\nРастянулся на версту.', answer:'Кит', pic:'assets/images/riddles_pictures_opt/kit.webp' },
-                { id:30, text:'Ем я уголь, пью я воду,\nКак напьюсь — прибавлю ходу.\nВезу обоз на сто колес\nИ называюсь...', answer:'Паровоз', pic:'assets/images/riddles_pictures_opt/parovoz.webp' },
-                { id:31, text:'Она идет и зиму прогоняет.\nКогда придет, вокруг всё расцветает.\nОт солнышка прекрасного ясна.\nЗовут ее, конечно же ...', answer:'Весна', pic:'assets/images/riddles_pictures_opt/vesna.webp' },
-                { id:32, text:'Если крылья распахнет —\nКрасотой с ума сведет.\nНа лугу она летает,\nВсех собою удивляет.', answer:'Бабочка', pic:'assets/images/riddles_pictures_opt/babochka.webp' },
-                { id:34, text:'Живёт в норке, грызёт корки, боится кошки.', answer:'Мышь', pic:'assets/images/riddles_pictures_opt/mysh.webp' },
-                { id:36, text:'Лечит маленьких детей,\nЛечит птичек и зверей,\nСквозь очки свои глядит\nДобрый доктор...', answer:'Айболит', pic:'assets/images/riddles_pictures_opt/aybolit.webp' },
-                { id:37, text:'Сначала пашут,\nПотом засевают,\nВремя придёт,\nУрожай собирают!', answer:'Поле', pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' },
+                { id:1, text:'Белым снегом всё одето, значит наступает ...', answer:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' , level:'easy' },
+                { id:2, text:'Охраняет часто дом, повиляет всем хвостом, зарычит, коль ты чужой, и оближет, если свой.', answer:'Собака', pic:'assets/images/riddles_pictures_opt/sobaka.webp' , level:'easy' },
+                { id:3, text:'По реке плывёт бревно, ох и злющее оно,  тем, кто в речку угодил, нос откусит ...', answer:'Крокодил', pic:'assets/images/riddles_pictures_opt/krokodil.webp' , level:'easy' },
+                { id:7, text:'Мимо улья проходил косолапый ...', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' , level:'easy' },
+                { id:8, text:'Ночью каждое оконце слабо освещает ...', answer:'Луна', pic:'assets/images/riddles_pictures_opt/luna.webp' , level:'easy' },
+                { id:9, text:'Овощ это непростой,\nВызовет слезу порой,\nНо уж больно он полезный\nЗащищает от болезней!', answer:'Лук', pic:'assets/images/riddles_pictures_opt/luk.webp' , level:'easy' },
+                { id:10, text:'Кто мычит там на лугу,\nСочную жует траву,\nУгощает молоком\nИ полезным творожком.', answer:'Корова', pic:'assets/images/riddles_pictures_opt/korova.webp' , level:'easy' },
+                { id:11, text:'С ветки прыгает на ветку\nРыжая красавица.\nШишки, желуди, орехи\nЗапасает на зиму.', answer:'белка', pic:'assets/images/riddles_pictures_opt/belka.webp' , level:'easy' },
+                { id:12, text:'Он хвостастый и зубастый,\nНа луну он воет часто,\nВсе в лесу его боятся,\nА в особенности, зайцы.', answer:'волк', pic:'assets/images/riddles_pictures_opt/volk.webp' , level:'easy' },
+                { id:13, text:'В лесу живёт плутовка,\nХитры её глаза,\nА цветом, как морковка,\nПушистая...', answer:'Лиса', pic:'assets/images/riddles_pictures_opt/lisa.webp' , level:'easy' },
+                { id:14, text:'Живет в берлоге он в лесу,\nПугает волка и лису,\nЛюбит ягоды и мед,\nКосолапо он идет.', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' , level:'medium' },
+                { id:16, text:'Он пятнистый, с длинной шеей,\nГде-то в Африке живет.\nИ с огромных он деревьев\nЛегко листья достает.', answer:'Жираф', pic:'assets/images/riddles_pictures_opt/zhiraf.webp' , level:'medium' },
+                { id:17, text:'Траву жуёт. Носит матроску\nВ чёрно - белую полоску.', answer:'Зебра', pic:'assets/images/riddles_pictures_opt/zebra.webp' , level:'medium' },
+                { id:18, text:'В цирке трюки выполняет,\nБрёвна хоботом таскает.\nСерый и громадный он,\nКто же это? Это ...', answer:'Слон', pic:'assets/images/riddles_pictures_opt/slon.webp' , level:'medium' },
+                { id:19, text:'В зоопарке, в синей клетке\nЛовко прыгает по сетке,\nКорчит рожи, ест бананы.\nКто? Конечно', answer:'Обезьяна', pic:'assets/images/riddles_pictures_opt/obezyana.webp' , level:'medium' },
+                { id:20, text:'Нет того, кто не боится\nЭтой грозной хищной птицы.\nКто куда бы не забрёл,\nСверху видит всё…', answer:'Орёл', pic:'assets/images/riddles_pictures_opt/orel.webp' , level:'medium' },
+                { id:21, text:'Хвост веером, на голове корона, нет птицы краше чем ...', answer:'Павлин', pic:'assets/images/riddles_pictures_opt/pavlin.webp' , level:'medium' },
+                { id:22, text:'Рано он всегда встаёт,\nПо утрам всегда поёт,\nНосит гребень и серёжки,\nВ перьях все его одёжки.', answer:'Петух', pic:'assets/images/riddles_pictures_opt/petukh.webp' , level:'medium' },
+                { id:23, text:'Маленькая птичка\nЧирикает отлично,\nПрыгает по веткам,\nЖить не станет в клетке.\nНе таится от людей\nРазвесёлый...', answer:'воробей', pic:'assets/images/riddles_pictures_opt/vorobey.webp' , level:'medium' },
+                { id:24, text:'Перья черные летят,\nВсюду каркают, кричат,\nЧто за важная персона?\nЭто черная...', answer:'Ворона', pic:'assets/images/riddles_pictures_opt/vorona.webp' , level:'medium' },
+                { id:25, text:'Я по травке не спешу.\nЕсли станет страшно вдруг,\nСпрячусь в домик, милый друг.', answer:'Улитка', pic:'assets/images/riddles_pictures_opt/ulitka.webp' , level:'hard' },
+                { id:26, text:'На пруду на живёт,\nГромко песенки поёт,\nПучеглазая зверюшка\nНазывается...', answer:'Лягушка', pic:'assets/images/riddles_pictures_opt/lyagushka.webp' , level:'hard' },
+                { id:27, text:'В пустыне живёт,\nПодолгу не пьёт,\nС жарой легко справляется,\nКолючками питается.', answer:'Верблюд', pic:'assets/images/riddles_pictures_opt/verblyud.webp' , level:'hard' },
+                { id:29, text:'Через море-океан\nПлывёт чудо-великан,\nПрячет ус во рту,\nРастянулся на версту.', answer:'Кит', pic:'assets/images/riddles_pictures_opt/kit.webp' , level:'hard' },
+                { id:30, text:'Ем я уголь, пью я воду,\nКак напьюсь — прибавлю ходу.\nВезу обоз на сто колес\nИ называюсь...', answer:'Паровоз', pic:'assets/images/riddles_pictures_opt/parovoz.webp' , level:'hard' },
+                { id:31, text:'Она идет и зиму прогоняет.\nКогда придет, вокруг всё расцветает.\nОт солнышка прекрасного ясна.\nЗовут ее, конечно же ...', answer:'Весна', pic:'assets/images/riddles_pictures_opt/vesna.webp' , level:'hard' },
+                { id:32, text:'Если крылья распахнет —\nКрасотой с ума сведет.\nНа лугу она летает,\nВсех собою удивляет.', answer:'Бабочка', pic:'assets/images/riddles_pictures_opt/babochka.webp' , level:'hard' },
+                { id:34, text:'Живёт в норке, грызёт корки, боится кошки.', answer:'Мышь', pic:'assets/images/riddles_pictures_opt/mysh.webp' , level:'hard' },
+                { id:36, text:'Лечит маленьких детей,\nЛечит птичек и зверей,\nСквозь очки свои глядит\nДобрый доктор...', answer:'Айболит', pic:'assets/images/riddles_pictures_opt/aybolit.webp' , level:'hard' },
+                { id:37, text:'Сначала пашут,\nПотом засевают,\nВремя придёт,\nУрожай собирают!', answer:'Поле', pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' , level:'hard' },
             ],
         };
         // Always refresh — force re-seed for all sections
@@ -1319,7 +1379,7 @@ const Admin = {
             div.className = 'admin-item';
             const sub = this._tab === 'songs'    ? (item.duration || '') :
                         this._tab === 'podcasts' ? ((item.desc ? item.desc.slice(0,40) + (item.desc.length>40?'…':'') : '') || item.duration || '') :
-                        this._tab === 'riddles'  ? 'Ответ: ' + item.answer :
+                        this._tab === 'riddles'  ? (item.level === 'medium' ? '🟡 ' : item.level === 'hard' ? '🔴 ' : '🟢 ') + 'Ответ: ' + item.answer :
                         this._tab === 'info'     ? (item.body ? item.body.slice(0,50) + (item.body.length>50?'…':'') : '') :
                         `${item.level || ''} | Ответ: ${item.answer || ''}`;
             div.innerHTML = `
@@ -1429,9 +1489,19 @@ const Admin = {
         // Для ребусов название = ответу, скрываем дублирующее поле
         // m-name-input/area уже управляются выше
         document.getElementById('m-answer').style.display = isQA  ? 'block' : 'none';
-        // Подсказка только для ребусов, не для загадок
+        // Подсказка только для ребусов
         document.getElementById('m-hint').style.display   = this._tab === 'puzzles' ? 'block' : 'none';
-        document.getElementById('m-level').style.display  = this._tab === 'puzzles' ? 'block' : 'none';
+        // Уровень — для ребусов И загадок
+        document.getElementById('m-level').style.display  = isQA ? 'block' : 'none';
+        if (this._tab === 'riddles') {
+            const lvSel = document.getElementById('m-level');
+            if (lvSel) {
+                lvSel.querySelector('option[value=""]').textContent = 'Уровень сложности';
+                lvSel.querySelector('option[value="easy"]').textContent   = '🟢 Простой';
+                lvSel.querySelector('option[value="medium"]').textContent = '🟡 Средний';
+                lvSel.querySelector('option[value="hard"]').textContent   = '🔴 Сложный';
+            }
+        }
         // Для info — скрываем файл/ответ/картинку
         const fileLabel = document.querySelector('.file-label');
         if (fileLabel) fileLabel.style.display = isInfo ? 'none' : '';
@@ -1485,7 +1555,8 @@ const Admin = {
                 id,
                 text:   name,
                 answer: document.getElementById('m-answer').value.trim(),
-                pic:    existing ? (existing.pic || '') : ''
+                pic:    existing ? (existing.pic || '') : '',
+                level:  document.getElementById('m-level').value || 'easy',
             };
         } else if (this._tab === 'info') {
             const bodyVal = (document.getElementById('m-body')?.value || '').trim();
@@ -1529,8 +1600,7 @@ const Admin = {
             }
         }
         if (this._tab === 'riddles') {
-            const adm = this._getData('riddles');
-            if (adm.length) Riddles.data = adm.map(r => ({ q: r.text||'—', a: r.answer||'', pic: r.pic||'' }));
+            Riddles._loadFromAdmin();
         }
         if (this._tab === 'info') Info.render();
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
