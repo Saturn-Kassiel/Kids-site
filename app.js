@@ -41,6 +41,8 @@ const App = {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
         if (el) el.classList.toggle('on', next === 'dark');
+        const ico = document.getElementById('theme-icon');
+        if (ico) ico.textContent = next === 'dark' ? '🌙' : '☀️';
         showToast(next === 'dark' ? '🌙 Тёмная тема' : '☀️ Светлая тема');
     },
 
@@ -56,6 +58,11 @@ const App = {
         document.documentElement.setAttribute('data-theme', theme);
         const tt = document.getElementById('tog-theme');
         if (tt && theme === 'dark') tt.classList.add('on');
+        // Иконка: луна/солнце
+        setTimeout(() => {
+            const ico = document.getElementById('theme-icon');
+            if (ico) ico.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }, 0);
 
         // Restore toggles
         ['sound','auto','anim'].forEach(k => {
@@ -76,7 +83,7 @@ const App = {
                 const pass = prompt('Введите пароль:');
                 if (pass === '1239940') {
                     Admin.init();
-                    App.navigate('admin', '⚙️ Админка');
+                    App.navigate('admin', 'Админка');
                 } else if (pass !== null) {
                     showToast('❌ Неверный пароль');
                 }
@@ -205,38 +212,73 @@ const Media = {
         const TITLES = { alphabet: 'Алфавит', numbers: 'Цифры', colors: 'Цвета' };
 
         if (type === 'alphabet') {
+            // Маппинг кириллических букв → имена файлов
+            const LETTER_MAP = {
+                'А':'a', 'Б':'b', 'В':'v', 'Г':'g', 'Д':'d',
+                'Е':'e', 'Ё':'yo', 'Ж':'zh', 'З':'z', 'И':'i',
+                'Й':'j', 'К':'k', 'Л':'l', 'М':'m', 'Н':'n',
+                'О':'o', 'П':'p', 'Р':'r', 'С':'s', 'Т':'t',
+                'У':'u', 'Ф':'f', 'Х':'kh', 'Ц':'ts', 'Ч':'ch',
+                'Ш':'sh', 'Щ':'shch', 'Ъ':'_', 'Ы':'y', 'Ь':'_',
+                'Э':'e', 'Ю':'yu', 'Я':'ya'
+            };
+            // Аудио-файлы: bukva_a.mp3 (для Ъ и Ь — буква_.mp3, для Э — bukva_e.mp3)
+            const AUDIO_MAP = {
+                'А':'bukva_a', 'Б':'bukva_b', 'В':'bukva_', 'Г':'bukva_g', 'Д':'bukva_d',
+                'Е':'bukva_e', 'Ё':'bukva_yo', 'Ж':'bukva_zh', 'З':'bukva_z', 'И':'bukva_i',
+                'Й':'bukva_', 'К':'bukva_k', 'Л':'bukva_l', 'М':'bukva_m', 'Н':'bukva_n',
+                'О':'bukva_o', 'П':'bukva_p', 'Р':'bukva_r', 'С':'bukva_s', 'Т':'bukva_t',
+                'У':'bukva_u', 'Ф':'bukva_f', 'Х':'bukva_kh', 'Ц':'bukva_ts', 'Ч':'bukva_ch',
+                'Ш':'bukva_sh', 'Щ':'bukva_shch', 'Ъ':'bukva_', 'Ы':'bukva_y', 'Ь':'bukva_',
+                'Э':'bukva_', 'Ю':'bukva_yu', 'Я':'bukva_ya'
+            };
+            // Видео: a.mp4 (для Ъ и Ь видео нет, для Й тоже нет)
+            const VIDEO_MAP = {
+                'А':'a', 'Б':'b', 'В':'v', 'Г':'g', 'Д':'d',
+                'Е':'e', 'Ё':'yo', 'Ж':'zh', 'З':'z', 'И':'i',
+                'Й':null, 'К':'k', 'Л':'l', 'М':'m', 'Н':'n',
+                'О':'o', 'П':'p', 'Р':'r', 'С':'s', 'Т':'t',
+                'У':'u', 'Ф':'f', 'Х':'kh', 'Ц':'ts', 'Ч':'ch',
+                'Ш':'sh', 'Щ':'shch', 'Ъ':null, 'Ы':'y', 'Ь':null,
+                'Э':'Э', 'Ю':'yu', 'Я':'ya'
+            };
+            // Специальные кириллические имена (Буква Б.mp3 и т.д.)
+            const AUDIO_CYR = { 'Б':'Буква Б', 'Ы':'Буква Ы', 'Ь':'Буква Ь', 'Э':'Буква Э' };
             const letters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
-            items = letters.map(l => ({
-                name: l, label: `Буква ${l}`, icon: '🔤',
-                audio: `assets/audio/alphabet/track_${l}.mp3`,
-                video: `assets/video/alphabet/clip_${l}.mp4`
-            }));
+            items = letters.map(l => {
+                const audioFile = AUDIO_CYR[l]
+                    ? `assets/audio/letters_songs/${AUDIO_CYR[l]}.mp3`
+                    : `assets/audio/letters_songs/${AUDIO_MAP[l]}.mp3`;
+                const vf = VIDEO_MAP[l];
+                const videoFile = vf ? `assets/video/letters_video/${vf}.mp4` : null;
+                return { name: l, label: `Буква ${l}`, icon: '🔤', audio: audioFile, video: videoFile };
+            });
         } else if (type === 'numbers') {
             const nums = ['0','1','2','3','4','5','6','7','8','9'];
             items = nums.map(n => ({
                 name: n, label: `Цифра ${n}`, icon: '🔢',
-                audio: `assets/audio/numbers/track_${n}.mp3`,
-                video: `assets/video/numbers/clip_${n}.mp4`
+                audio: `assets/audio/numbers_songs/${n}.mp3`,
+                video: `assets/video/numbers_video/${n}.MP4`
             }));
         } else if (type === 'colors') {
             const COLORS = [
-                { name:'Красный',    hex:'#ef4444', emoji:'🔴' },
-                { name:'Оранжевый',  hex:'#f97316', emoji:'🟠' },
-                { name:'Жёлтый',     hex:'#fbbf24', emoji:'🟡' },
-                { name:'Зелёный',    hex:'#22c55e', emoji:'🟢' },
-                { name:'Синий',      hex:'#3b82f6', emoji:'🔵' },
-                { name:'Фиолетовый', hex:'#a855f7', emoji:'🟣' },
-                { name:'Розовый',    hex:'#ec4899', emoji:'🌸' },
-                { name:'Голубой',    hex:'#06b6d4', emoji:'🩵' },
-                { name:'Белый',      hex:'#f1f5f9', emoji:'⬜' },
-                { name:'Чёрный',     hex:'#1e293b', emoji:'⬛' },
-                { name:'Серый',      hex:'#94a3b8', emoji:'🩶' },
-                { name:'Коричневый', hex:'#92400e', emoji:'🟫' },
+                { name:'Красный',    hex:'#ef4444', emoji:'🔴', file:'krasnyj',     videoFile:'krasnyj' },
+                { name:'Оранжевый',  hex:'#f97316', emoji:'🟠', file:'oranzhevyj',  videoFile:null },
+                { name:'Жёлтый',     hex:'#fbbf24', emoji:'🟡', file:'zhyoltyj',    videoFile:null },
+                { name:'Зелёный',    hex:'#22c55e', emoji:'🟢', file:'zelyonyj',    videoFile:null },
+                { name:'Синий',      hex:'#3b82f6', emoji:'🔵', file:'sinij',       videoFile:null },
+                { name:'Фиолетовый', hex:'#a855f7', emoji:'🟣', file:'fioletovyj',  videoFile:null },
+                { name:'Розовый',    hex:'#ec4899', emoji:'🌸', file:'rozovyj',     videoFile:null },
+                { name:'Голубой',    hex:'#06b6d4', emoji:'🩵', file:'goluboj',     videoFile:null },
+                { name:'Белый',      hex:'#f1f5f9', emoji:'⬜', file:'belyj',       videoFile:'belyj' },
+                { name:'Чёрный',     hex:'#1e293b', emoji:'⬛', file:'chyornyj',    videoFile:null },
+                { name:'Серый',      hex:'#94a3b8', emoji:'🩶', file:'seryj',       videoFile:'seryj' },
+                { name:'Коричневый', hex:'#92400e', emoji:'🟫', file:'korichnevyj', videoFile:'korichnevyj' },
             ];
             items = COLORS.map(c => ({
                 name: c.name, label: c.name, icon: c.emoji, hex: c.hex,
-                audio: `assets/audio/colors/track_${c.name}.mp3`,
-                video: `assets/video/colors/clip_${c.name}.mp4`
+                audio: `assets/audio/colors_songs/${c.file}.mp3`,
+                video: c.videoFile ? `assets/video/colors_video/${c.videoFile}.mp4` : null
             }));
         }
 
@@ -246,7 +288,11 @@ const Media = {
 
         this._renderGrid(type);
         setupProgress(this.player, 'progress-bar', 'time-cur', 'time-dur', 'prog-wrap');
-        this.player.onended = () => this.isRepeat ? this.play(this.index) : this.next();
+        this.player.onended = () => {
+            if (this.isRepeat) { this.play(this.index); return; }
+            document.getElementById('play-btn').textContent = '▶';
+            setTimeout(() => this.next(), 1000);
+        };
         this.play(0);
     },
 
@@ -279,19 +325,28 @@ const Media = {
         // Video
         const vid = document.getElementById('global-video');
         const placeholder = document.getElementById('video-placeholder');
-        vid.src = item.video;
-        vid.load();
-        vid.play().catch(() => {});
         document.getElementById('video-label').textContent = item.label;
 
-        // Show/hide placeholder
-        vid.onloadeddata = () => placeholder.style.display = 'none';
-        vid.onerror = () => { placeholder.style.display = 'flex'; };
+        if (item.video) {
+            vid.src = item.video;
+            vid.load();
+            vid.play().catch(() => {});
+            vid.onloadeddata = () => { placeholder.style.display = 'none'; };
+            vid.onerror = () => { placeholder.style.display = 'flex'; };
+        } else {
+            vid.src = '';
+            placeholder.style.display = 'flex';
+        }
 
-        // Audio
+        // Audio — только если автовоспроизведение включено
         this.player.src = item.audio;
-        AudioMgr.play(this.player, 'media');
-        document.getElementById('play-btn').textContent = '⏸';
+        const _autoOn = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
+        if (_autoOn) {
+            AudioMgr.play(this.player, 'media');
+            document.getElementById('play-btn').textContent = '⏸';
+        } else {
+            document.getElementById('play-btn').textContent = '▶';
+        }
         document.getElementById('track-name').textContent = item.label;
         document.getElementById('track-icon').textContent = item.icon;
         document.getElementById('track-sub').textContent  = this._sectionType === 'alphabet' ? 'Кириллический алфавит' : this._sectionType === 'colors' ? 'Учим цвета' : 'Учим цифры';
@@ -356,29 +411,53 @@ const Songs = {
     isRepeat: false,
 
     init() {
-        App.navigate('songs', '🎵 Песенки');
+        App.navigate('songs', 'Песенки');
         AudioMgr.stop();
 
         // Load from admin data or defaults
         const saved = this._loadData();
         this._allSongs = saved.length ? saved : [
-            { id:1, name:'Песенка про Алфавит',       duration:'2:14', src:'' },
-            { id:2, name:'Раз, два, три — Цифры!',    duration:'1:48', src:'' },
-            { id:3, name:'Радуга цветов',              duration:'2:30', src:'' },
-            { id:4, name:'Весёлая зарядка',            duration:'3:05', src:'' },
-            { id:5, name:'Мишка косолапый',            duration:'1:22', src:'' },
-            { id:6, name:'Антошка',                    duration:'2:02', src:'' },
-            { id:7, name:'Голубой вагон',              duration:'2:45', src:'' },
-            { id:8, name:'Крокодил Гена',              duration:'2:18', src:'' },
-            { id:9, name:'Чунга-Чанга',               duration:'1:55', src:'' },
-            { id:10,name:'Кабы не было зимы',         duration:'2:38', src:'' },
-            { id:11,name:'Пусть всегда будет солнце', duration:'2:10', src:'' },
-            { id:12,name:'Улыбка',                    duration:'2:22', src:'' },
+            { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',             video:'assets/video/songs_video/kolybelnaya.mp4' },
+            { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',         video:null },
+            { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',        video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
+            { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',  video:null },
+            { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3',      video:null },
+            { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3',         video:'assets/video/songs_video/pesenka_pro_lva.mp4' },
+            { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3',     video:null },
+            { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3',    video:'assets/video/songs_video/pesenka_pro_nosoroga.mp4' },
+            { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3',         video:null },
+            { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3',     video:null },
+            { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3',       video:null },
+            { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3',        video:'assets/video/songs_video/pesenka_pro_zebru.mp4' },
+            { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3', video:null },
         ];
         this._filtered = [...this._allSongs];
         this.render();
         setupProgress(this.audio, 'song-progress-bar', 'song-time-cur', 'song-time-dur', 'song-prog-wrap');
-        this.audio.onended = () => this.isRepeat ? this.play(this.index) : this.nextSong();
+        this.audio.onended = () => {
+            if (this.isRepeat) { this.play(this.index); return; }
+            document.getElementById('song-play-btn').textContent = '▶';
+            setTimeout(() => this.nextSong(), 1000);
+        };
+        // Auto-load durations for all songs
+        this._loadDurations();
+    },
+
+    _loadDurations() {
+        this._allSongs.forEach((song, i) => {
+            if (song.duration) return; // already set
+            const a = new Audio();
+            a.preload = 'metadata';
+            a.src = song.src;
+            a.addEventListener('loadedmetadata', () => {
+                const d = a.duration;
+                if (d && !isNaN(d)) {
+                    this._allSongs[i].duration = fmtTime(d);
+                    if (this._filtered[i]) this._filtered[i].duration = this._allSongs[i].duration;
+                    this.render(); // refresh list to show duration
+                }
+            });
+        });
     },
 
     _loadData() {
@@ -407,11 +486,30 @@ const Songs = {
         this.index = i;
         const song = this._allSongs[i];
         this.audio.src = song.src || '';
-        AudioMgr.play(this.audio, 'songs');
-        document.getElementById('song-play-btn').textContent = '⏸';
+        const _autoS = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
+        if (_autoS) {
+            AudioMgr.play(this.audio, 'songs');
+            document.getElementById('song-play-btn').textContent = '⏸';
+        } else {
+            document.getElementById('song-play-btn').textContent = '▶';
+        }
         document.getElementById('song-name').textContent = song.name;
         document.getElementById('song-sub').textContent  = song.duration || '';
         document.getElementById('song-progress-bar').style.width = '0%';
+        // Show video if available for this song
+        const songVidWrap = document.getElementById('song-video-wrap');
+        const songVid = document.getElementById('song-video');
+        if (songVidWrap && songVid) {
+            if (song.video) {
+                songVid.src = song.video;
+                songVid.load();
+                songVid.play().catch(() => {});
+                songVidWrap.style.display = 'block';
+            } else {
+                songVid.src = '';
+                songVidWrap.style.display = 'none';
+            }
+        }
         this.render();
         // Track stat
         const cur = parseInt(localStorage.getItem('stat_songs') || 0);
@@ -457,6 +555,136 @@ const Songs = {
 };
 
 // =============================================
+// PODCASTS
+// =============================================
+const Podcasts = {
+    audio: new Audio(),
+    _allPodcasts: [],
+    _filtered: [],
+    index: -1,
+    isShuffle: false,
+    isRepeat: false,
+
+    init() {
+        App.navigate('podcasts', 'Подкасты');
+        AudioMgr.stop();
+        const saved = this._loadData();
+        this._allPodcasts = saved.length ? saved : [
+            { id:1, name:'Благодарность',    duration:'', src:'assets/audio/podcasts/blagodarnost.mp3' },
+            { id:2, name:'Доверие ребёнка',   duration:'', src:'assets/audio/podcasts/doverie_rebyonka.mp3' },
+            { id:3, name:'Мозг дошкольника',  duration:'', src:'assets/audio/podcasts/mozg_doshkolnika.mp3' },
+            { id:4, name:'Поколение Альфа',    duration:'', src:'assets/audio/podcasts/pokolenie_alfa.mp3' },
+            { id:5, name:'Слушать сердцем',    duration:'', src:'assets/audio/podcasts/slushat_serdtsem.mp3' },
+            { id:6, name:'Сравнение',          duration:'', src:'assets/audio/podcasts/sravnenie.mp3' },
+        ];
+        this._filtered = [...this._allPodcasts];
+        this.render();
+        setupProgress(this.audio, 'podcast-progress-bar', 'podcast-time-cur', 'podcast-time-dur', 'podcast-prog-wrap');
+        this.audio.onended = () => {
+            if (this.isRepeat) { this.play(this.index); return; }
+            document.getElementById('podcast-play-btn').textContent = '▶';
+            setTimeout(() => this.nextPodcast(), 1000);
+        };
+        this._loadDurations();
+    },
+
+    _loadData() {
+        try { return JSON.parse(localStorage.getItem('admin_podcasts')) || []; } catch { return []; }
+    },
+
+    _loadDurations() {
+        this._allPodcasts.forEach((p, i) => {
+            if (p.duration) return;
+            const a = new Audio();
+            a.preload = 'metadata';
+            a.src = p.src;
+            a.addEventListener('loadedmetadata', () => {
+                const d = a.duration;
+                if (d && !isNaN(d)) {
+                    this._allPodcasts[i].duration = fmtTime(d);
+                    if (this._filtered[i]) this._filtered[i].duration = this._allPodcasts[i].duration;
+                    this.render();
+                }
+            });
+        });
+    },
+
+    render() {
+        const list = document.getElementById('podcasts-list');
+        list.innerHTML = '';
+        this._filtered.forEach((pod) => {
+            const realIdx = this._allPodcasts.indexOf(pod);
+            const isPlaying = realIdx === this.index;
+            const div = document.createElement('div');
+            div.className = 'song-item' + (isPlaying ? ' playing' : '');
+            div.innerHTML = `
+                <div class="song-num ${isPlaying ? 'pi-icon' : ''}">${isPlaying ? '▶' : realIdx + 1}</div>
+                <div class="song-name">${pod.name}</div>
+                <div class="song-dur">${pod.duration || ''}</div>
+            `;
+            div.addEventListener('click', () => this.play(realIdx));
+            list.appendChild(div);
+        });
+    },
+
+    play(i) {
+        this.index = i;
+        const pod = this._allPodcasts[i];
+        this.audio.src = pod.src || '';
+        const _autoP = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
+        if (_autoP) {
+            AudioMgr.play(this.audio, 'podcasts');
+            document.getElementById('podcast-play-btn').textContent = '⏸';
+        } else {
+            document.getElementById('podcast-play-btn').textContent = '▶';
+        }
+        document.getElementById('podcast-name').textContent = pod.name;
+        document.getElementById('podcast-sub').textContent = pod.duration || '';
+        const descEl = document.getElementById('podcast-desc');
+        if (descEl) descEl.textContent = pod.desc || '';
+        document.getElementById('podcast-progress-bar').style.width = '0%';
+        this.render();
+    },
+
+    toggle() {
+        if (this.index === -1) { this.play(0); return; }
+        if (this.audio.paused) {
+            AudioMgr.play(this.audio, 'podcasts');
+            document.getElementById('podcast-play-btn').textContent = '⏸';
+        } else {
+            this.audio.pause();
+            document.getElementById('podcast-play-btn').textContent = '▶';
+        }
+    },
+
+    prev() { this.play((this.index - 1 + this._allPodcasts.length) % this._allPodcasts.length); },
+
+    nextPodcast() {
+        const next = this.isShuffle
+            ? Math.floor(Math.random() * this._allPodcasts.length)
+            : (this.index + 1) % this._allPodcasts.length;
+        this.play(next);
+    },
+
+    toggleShuffle() {
+        this.isShuffle = !this.isShuffle;
+        document.getElementById('podcast-shuffle-btn').classList.toggle('active', this.isShuffle);
+        showToast(this.isShuffle ? '🔀 Перемешать вкл.' : '🔀 Выкл.');
+    },
+
+    toggleRepeat() {
+        this.isRepeat = !this.isRepeat;
+        document.getElementById('podcast-repeat-btn').classList.toggle('active', this.isRepeat);
+        showToast(this.isRepeat ? '🔁 Повтор вкл.' : '🔁 Выкл.');
+    },
+
+    filter(q) {
+        this._filtered = this._allPodcasts.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+        this.render();
+    }
+};
+
+// =============================================
 // PUZZLES
 // =============================================
 const Puzzles = {
@@ -467,28 +695,58 @@ const Puzzles = {
 
     _data: {
         easy: [
-            { img:'🏠➕🔑', hint:'Дом + то, чем открывают замок', answer:'ключ от дома' },
-            { img:'☀️➕💧', hint:'Небесное тело + капли воды',    answer:'дождь' },
-            { img:'🐱➕🐟', hint:'Животное + его любимая еда',   answer:'рыба' },
-            { img:'🌺➕🌿', hint:'Цветок + листья',               answer:'цветок' },
+            { pic:'assets/images/rebuses_pictures_opt/ryba.webp',      hint:'Присмотрись к картинке', answer:'рыба' },
+            { pic:'assets/images/rebuses_pictures_opt/lozhka.webp',    hint:'Присмотрись к картинке', answer:'ложка' },
+            { pic:'assets/images/rebuses_pictures_opt/vilka.webp',     hint:'Присмотрись к картинке', answer:'вилка' },
+            { pic:'assets/images/rebuses_pictures_opt/more.webp',      hint:'Присмотрись к картинке', answer:'море' },
+            { pic:'assets/images/rebuses_pictures_opt/raduga.webp',    hint:'Присмотрись к картинке', answer:'радуга' },
+            { pic:'assets/images/rebuses_pictures_opt/slon.webp',      hint:'Присмотрись к картинке', answer:'слон' },
         ],
         medium: [
-            { img:'🌙➕⭐', hint:'Ночные светила',                  answer:'ночь' },
-            { img:'🚗➕💨', hint:'Транспорт + скорость',             answer:'гонка' },
-            { img:'🐻➕🎵', hint:'Большое животное + музыка',       answer:'медведь' },
-            { img:'🌊➕🏄', hint:'Море + спорт на воде',            answer:'серфинг' },
+            { pic:'assets/images/rebuses_pictures_opt/babochka.webp',  hint:'Присмотрись к картинке', answer:'бабочка' },
+            { pic:'assets/images/rebuses_pictures_opt/konki.webp',     hint:'Присмотрись к картинке', answer:'коньки' },
+            { pic:'assets/images/rebuses_pictures_opt/traktor.webp',   hint:'Присмотрись к картинке', answer:'трактор' },
+            { pic:'assets/images/rebuses_pictures_opt/tucha.webp',     hint:'Присмотрись к картинке', answer:'туча' },
+            { pic:'assets/images/rebuses_pictures_opt/tuman.webp',     hint:'Присмотрись к картинке', answer:'туман' },
+            { pic:'assets/images/rebuses_pictures_opt/zelen.webp',     hint:'Присмотрись к картинке', answer:'зелень' },
         ],
         hard: [
-            { img:'📚➕✏️➕🎒', hint:'Учёба и школьные принадлежности', answer:'школа' },
-            { img:'🌊➕⛵➕⚓',  hint:'Морское путешествие',              answer:'корабль' },
-            { img:'🌡️➕❄️➕🌨️', hint:'Холодная погода',                  answer:'мороз' },
-            { img:'🔭➕⭐➕🌌',  hint:'Изучение космоса',                 answer:'астроном' },
+            { pic:'assets/images/rebuses_pictures_opt/krevetka.webp',  hint:'Присмотрись к картинке', answer:'креветка' },
+            { pic:'assets/images/rebuses_pictures_opt/zabor.webp',     hint:'Присмотрись к картинке', answer:'забор' },
+            { pic:'assets/images/rebuses_pictures_opt/tokar.webp',     hint:'Присмотрись к картинке', answer:'токарь' },
         ],
     },
 
     init() {
-        App.navigate('puzzles', '🧩 Ребусы');
+        App.navigate('puzzles', 'Ребусы');
+        this._loadFromAdmin();
+        this._pos = { easy: 0, medium: 0, hard: 0 };
         this.show();
+    },
+
+    // Загружаем актуальные данные из Admin localStorage
+    _loadFromAdmin() {
+        const adminPuzzles = (() => {
+            try { return JSON.parse(localStorage.getItem('admin_puzzles')) || []; } catch { return []; }
+        })();
+        if (!adminPuzzles.length) return; // используем статичные данные
+        // Перестраиваем _data по уровням из Admin
+        this._data = { easy: [], medium: [], hard: [] };
+        adminPuzzles.forEach(p => {
+            const lv = p.level || 'easy';
+            if (this._data[lv]) {
+                this._data[lv].push({
+                    pic:    p.pic    || '',
+                    hint:   p.hint   || 'Присмотрись к картинке',
+                    answer: p.answer || '',
+                    img:    p.img    || ''
+                });
+            }
+        });
+        // Если какой-то уровень пуст — не оставляем пустым
+        if (!this._data.easy.length)   this._data.easy   = [{ pic:'', hint:'', answer:'?' }];
+        if (!this._data.medium.length) this._data.medium = [{ pic:'', hint:'', answer:'?' }];
+        if (!this._data.hard.length)   this._data.hard   = [{ pic:'', hint:'', answer:'?' }];
     },
 
     _current() {
@@ -498,7 +756,17 @@ const Puzzles = {
 
     show() {
         const p = this._current();
-        document.getElementById('puzzle-img').textContent = p.img;
+        const puzImgEl = document.getElementById('puzzle-img');
+        puzImgEl.innerHTML = '';
+        if (p.pic) {
+            const im = document.createElement('img');
+            im.src = p.pic;
+            im.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+            im.onerror = () => { puzImgEl.textContent = '🧩'; };
+            puzImgEl.appendChild(im);
+        } else {
+            puzImgEl.textContent = p.img || '🧩';
+        }
         document.getElementById('puzzle-hint').innerHTML = `💡 <b>Подсказка:</b> ${p.hint}`;
         const inp = document.getElementById('puzzle-input');
         inp.value = '';
@@ -562,29 +830,57 @@ const Riddles = {
     _solved: false,
 
     data: [
-        { q:'Зимой и летом\nодним цветом.',          a:'ёлка',   img:'🌲' },
-        { q:'Не лает, не кусает,\nа в дом не пускает.', a:'замок',  img:'🔒' },
-        { q:'Два кольца, два конца,\nпосередине гвоздик.', a:'ножницы', img:'✂️' },
-        { q:'Без рук, без ног,\nа рисовать умеет.',   a:'мороз',  img:'❄️' },
-        { q:'Всегда во рту,\nа не проглотишь.',        a:'язык',   img:'👅' },
-        { q:'В воде купался,\nа сухим остался.',        a:'гусь',   img:'🦢' },
-        { q:'Маленький, кругленький,\nза хвост не поймаешь.', a:'клубок', img:'🧶' },
-        { q:'Сам не видит,\nи другим не даёт.',        a:'туман',  img:'🌫️' },
-        { q:'Сидит дед,\nв сто шуб одет.',              a:'лук',    img:'🧅' },
-        { q:'Красная девица\nсидит в темнице.',         a:'морковь',img:'🥕' },
+        { q:'—', a:'ёлка',     pic:'assets/images/riddles_pictures_opt/zima.webp' },
+        { q:'—', a:'замок',    pic:'assets/images/riddles_pictures_opt/sobaka.webp' },
+        { q:'—', a:'ножницы',  pic:'assets/images/riddles_pictures_opt/krokodil.webp' },
+        { q:'—', a:'мороз',    pic:'assets/images/riddles_pictures_opt/zima.webp' },
+        { q:'—', a:'язык',     pic:'assets/images/riddles_pictures_opt/lev.webp' },
+        { q:'—', a:'гусь',     pic:'assets/images/riddles_pictures_opt/ptitsa.webp' },
+        { q:'—', a:'клубок',   pic:'assets/images/riddles_pictures_opt/medved.webp' },
+        { q:'—', a:'туман',    pic:'assets/images/riddles_pictures_opt/luna.webp' },
+        { q:'—', a:'лук',      pic:'assets/images/riddles_pictures_opt/luk.webp' },
+        { q:'—', a:'морковь',  pic:'assets/images/riddles_pictures_opt/korova.webp' },
+        { q:'—', a:'белка',    pic:'assets/images/riddles_pictures_opt/belka.webp' },
+        { q:'—', a:'волк',     pic:'assets/images/riddles_pictures_opt/volk.webp' },
+        { q:'—', a:'лиса',     pic:'assets/images/riddles_pictures_opt/lisa.webp' },
+        { q:'—', a:'медведь',  pic:'assets/images/riddles_pictures_opt/medved.webp' },
+        { q:'—', a:'заяц',     pic:'assets/images/riddles_pictures_opt/zayats.webp' },
+        { q:'—', a:'жираф',    pic:'assets/images/riddles_pictures_opt/zhiraf.webp' },
+        { q:'—', a:'зебра',    pic:'assets/images/riddles_pictures_opt/zebra.webp' },
+        { q:'—', a:'слон',     pic:'assets/images/riddles_pictures_opt/slon.webp' },
+        { q:'—', a:'обезьяна', pic:'assets/images/riddles_pictures_opt/obezyana.webp' },
+        { q:'—', a:'орёл',     pic:'assets/images/riddles_pictures_opt/orel.webp' },
+        { q:'—', a:'павлин',   pic:'assets/images/riddles_pictures_opt/pavlin.webp' },
+        { q:'—', a:'петух',    pic:'assets/images/riddles_pictures_opt/petukh.webp' },
+        { q:'—', a:'воробей',  pic:'assets/images/riddles_pictures_opt/vorobey.webp' },
+        { q:'—', a:'ворона',   pic:'assets/images/riddles_pictures_opt/vorona.webp' },
+        { q:'—', a:'улитка',   pic:'assets/images/riddles_pictures_opt/ulitka.webp' },
+        { q:'—', a:'лягушка',  pic:'assets/images/riddles_pictures_opt/lyagushka.webp' },
+        { q:'—', a:'верблюд',  pic:'assets/images/riddles_pictures_opt/verblyud.webp' },
+        { q:'—', a:'дракон',   pic:'assets/images/riddles_pictures_opt/drakon.webp' },
+        { q:'—', a:'кит',      pic:'assets/images/riddles_pictures_opt/kit.webp' },
+        { q:'—', a:'паровоз',  pic:'assets/images/riddles_pictures_opt/parovoz.webp' },
+        { q:'—', a:'весна',    pic:'assets/images/riddles_pictures_opt/vesna.webp' },
+        { q:'—', a:'бабочка',  pic:'assets/images/riddles_pictures_opt/babochka.webp' },
+        { q:'—', a:'червяк',   pic:'assets/images/riddles_pictures_opt/chervyak.webp' },
+        { q:'—', a:'мышь',     pic:'assets/images/riddles_pictures_opt/mysh.webp' },
+        { q:'—', a:'снегурочка',pic:'assets/images/riddles_pictures_opt/snegurochka.webp' },
+        { q:'—', a:'Айболит',  pic:'assets/images/riddles_pictures_opt/aybolit.webp' },
+        { q:'—', a:'пшеница',  pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' },
     ],
 
     init() {
-        App.navigate('riddles', '🤔 Загадки');
-        // Load extra riddles from admin
+        App.navigate('riddles', 'Загадки');
+        // Полностью заменяем data на данные из Админки (с pic)
         const adm = this._loadAdmin();
         if (adm.length) {
-            adm.forEach(r => {
-                if (!this.data.find(d => d.q === r.text)) {
-                    this.data.push({ q: r.text, a: r.answer, img: '❓' });
-                }
-            });
+            this.data = adm.map(r => ({
+                q:   r.text   || '—',
+                a:   r.answer || '',
+                pic: r.pic    || ''
+            }));
         }
+        this._pos = 0;
         this.show();
     },
 
@@ -594,15 +890,18 @@ const Riddles = {
 
     show() {
         const idx = this._pos % this.data.length;
-        document.getElementById('riddle-text').textContent = this.data[idx].q;
+        const item = this.data[idx];
+        document.getElementById('riddle-text').textContent = item.q;
         const inp = document.getElementById('riddle-input');
-        const img = document.getElementById('riddle-img');
+        const imgEl = document.getElementById('riddle-img');
         inp.value = '';
         inp.className = '';
         document.getElementById('riddle-msg').textContent = '';
         document.getElementById('riddle-msg').className = '';
-        img.textContent = '';
-        img.className = 'answer-img';
+        // Полностью сбрасываем блок с картинкой
+        imgEl.innerHTML = '';
+        imgEl.className = 'answer-img';
+        imgEl.style.display = 'none';
         this._hasUnsaved = false;
         this._solved = false;
     },
@@ -618,9 +917,26 @@ const Riddles = {
             inp.className = 'correct';
             msg.textContent = `🎉 Правильно! Ответ: ${this.data[idx].a}`;
             msg.className = 'ok';
-            const img = document.getElementById('riddle-img');
-            img.textContent = this.data[idx].img;
-            img.className = 'answer-img show';
+            // Создаём и показываем картинку только при правильном ответе
+            const imgEl2 = document.getElementById('riddle-img');
+            imgEl2.innerHTML = '';
+            imgEl2.style.display = 'none';
+            if (this.data[idx].pic) {
+                const revImg = document.createElement('img');
+                revImg.src = this.data[idx].pic;
+                revImg.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;border-radius:var(--radius);';
+                revImg.onload = () => {
+                    imgEl2.innerHTML = '';
+                    imgEl2.appendChild(revImg);
+                    imgEl2.className = 'answer-img riddle-pic-preview show';
+                    imgEl2.style.display = '';
+                };
+                revImg.onerror = () => {
+                    imgEl2.className = 'answer-img show';
+                    imgEl2.style.display = '';
+                };
+                imgEl2.appendChild(revImg); // добавляем до onload на случай кеша
+            }
             this._solved = true;
             starsBurst();
             const cur = parseInt(localStorage.getItem('stat_riddles') || 0);
@@ -650,7 +966,7 @@ document.getElementById('puzzle-input').addEventListener('keydown', e => { if (e
 // =============================================
 const Stats = {
     show() {
-        App.navigate('stats', '📊 Статистика');
+        App.navigate('stats', 'Статистика');
         const keys = ['puzzles','riddles','songs','letters'];
         const maxes = [20, 20, 50, 33];
         keys.forEach((k, i) => {
@@ -671,15 +987,107 @@ const Admin = {
     _editId: null,
 
     init() {
-        // Seed defaults
+        // Seed defaults with full data
         const defaults = {
-            songs:    [{ id:1, name:'Песенка про Алфавит', duration:'2:14', src:'' }],
-            podcasts: [],
-            puzzles:  [{ id:1, name:'Ребус 1', img:'🏠➕🔑', hint:'Дом + ключ', answer:'ключ от дома', level:'easy' }],
-            riddles:  [{ id:1, text:'Зимой и летом одним цветом.', answer:'ёлка', emoji:'🌲' }],
+            songs: [
+                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3' },
+                { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3' },
+                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3' },
+                { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3' },
+                { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3' },
+                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3' },
+                { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3' },
+                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3' },
+                { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3' },
+                { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3' },
+                { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3' },
+                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3' },
+                { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3' },
+            ],
+            podcasts: [
+                { id:1, name:'Благодарность',    desc:'', duration:'', src:'assets/audio/podcasts/blagodarnost.mp3' },
+                { id:2, name:'Доверие ребёнка',  desc:'', duration:'', src:'assets/audio/podcasts/doverie_rebyonka.mp3' },
+                { id:3, name:'Мозг дошкольника', desc:'', duration:'', src:'assets/audio/podcasts/mozg_doshkolnika.mp3' },
+                { id:4, name:'Поколение Альфа',  desc:'', duration:'', src:'assets/audio/podcasts/pokolenie_alfa.mp3' },
+                { id:5, name:'Слушать сердцем',  desc:'', duration:'', src:'assets/audio/podcasts/slushat_serdtsem.mp3' },
+                { id:6, name:'Сравнение',         desc:'', duration:'', src:'assets/audio/podcasts/sravnenie.mp3' },
+            ],
+            puzzles: [
+                { id:1,  name:'Рыба',      pic:'assets/images/rebuses_pictures_opt/ryba.webp',     hint:'Присмотрись к картинке', answer:'рыба',     level:'easy' },
+                { id:2,  name:'Ложка',     pic:'assets/images/rebuses_pictures_opt/lozhka.webp',   hint:'Присмотрись к картинке', answer:'ложка',    level:'easy' },
+                { id:3,  name:'Вилка',     pic:'assets/images/rebuses_pictures_opt/vilka.webp',    hint:'Присмотрись к картинке', answer:'вилка',    level:'easy' },
+                { id:4,  name:'Море',      pic:'assets/images/rebuses_pictures_opt/more.webp',     hint:'Присмотрись к картинке', answer:'море',     level:'easy' },
+                { id:5,  name:'Радуга',    pic:'assets/images/rebuses_pictures_opt/raduga.webp',   hint:'Присмотрись к картинке', answer:'радуга',   level:'easy' },
+                { id:6,  name:'Слон',      pic:'assets/images/rebuses_pictures_opt/slon.webp',     hint:'Присмотрись к картинке', answer:'слон',     level:'easy' },
+                { id:7,  name:'Бабочка',   pic:'assets/images/rebuses_pictures_opt/babochka.webp', hint:'Присмотрись к картинке', answer:'бабочка',  level:'medium' },
+                { id:8,  name:'Коньки',    pic:'assets/images/rebuses_pictures_opt/konki.webp',    hint:'Присмотрись к картинке', answer:'коньки',   level:'medium' },
+                { id:9,  name:'Трактор',   pic:'assets/images/rebuses_pictures_opt/traktor.webp',  hint:'Присмотрись к картинке', answer:'трактор',  level:'medium' },
+                { id:10, name:'Туча',      pic:'assets/images/rebuses_pictures_opt/tucha.webp',    hint:'Присмотрись к картинке', answer:'туча',     level:'medium' },
+                { id:11, name:'Туман',     pic:'assets/images/rebuses_pictures_opt/tuman.webp',    hint:'Присмотрись к картинке', answer:'туман',    level:'medium' },
+                { id:12, name:'Зелень',    pic:'assets/images/rebuses_pictures_opt/zelen.webp',    hint:'Присмотрись к картинке', answer:'зелень',   level:'medium' },
+                { id:13, name:'Креветка',  pic:'assets/images/rebuses_pictures_opt/krevetka.webp', hint:'Присмотрись к картинке', answer:'креветка', level:'hard' },
+                { id:14, name:'Забор',     pic:'assets/images/rebuses_pictures_opt/zabor.webp',    hint:'Присмотрись к картинке', answer:'забор',    level:'hard' },
+                { id:15, name:'Токарь',    pic:'assets/images/rebuses_pictures_opt/tokar.webp',    hint:'Присмотрись к картинке', answer:'токарь',   level:'hard' },
+            ],
+            riddles: [
+                { id:1,  text:'—', answer:'ёлка',     pic:'assets/images/riddles_pictures_opt/zima.webp' },
+                { id:2,  text:'—', answer:'замок',    pic:'assets/images/riddles_pictures_opt/sobaka.webp' },
+                { id:3,  text:'—', answer:'ножницы',  pic:'assets/images/riddles_pictures_opt/krokodil.webp' },
+                { id:4,  text:'—', answer:'мороз',    pic:'assets/images/riddles_pictures_opt/zima.webp' },
+                { id:5,  text:'—', answer:'язык',     pic:'assets/images/riddles_pictures_opt/lev.webp' },
+                { id:6,  text:'—', answer:'гусь',     pic:'assets/images/riddles_pictures_opt/ptitsa.webp' },
+                { id:7,  text:'—', answer:'клубок',   pic:'assets/images/riddles_pictures_opt/medved.webp' },
+                { id:8,  text:'—', answer:'туман',    pic:'assets/images/riddles_pictures_opt/luna.webp' },
+                { id:9,  text:'—', answer:'лук',      pic:'assets/images/riddles_pictures_opt/luk.webp' },
+                { id:10, text:'—', answer:'морковь',  pic:'assets/images/riddles_pictures_opt/korova.webp' },
+                { id:11, text:'—', answer:'белка',    pic:'assets/images/riddles_pictures_opt/belka.webp' },
+                { id:12, text:'—', answer:'волк',     pic:'assets/images/riddles_pictures_opt/volk.webp' },
+                { id:13, text:'—', answer:'лиса',     pic:'assets/images/riddles_pictures_opt/lisa.webp' },
+                { id:14, text:'—', answer:'медведь',  pic:'assets/images/riddles_pictures_opt/medved.webp' },
+                { id:15, text:'—', answer:'заяц',     pic:'assets/images/riddles_pictures_opt/zayats.webp' },
+                { id:16, text:'—', answer:'жираф',    pic:'assets/images/riddles_pictures_opt/zhiraf.webp' },
+                { id:17, text:'—', answer:'зебра',    pic:'assets/images/riddles_pictures_opt/zebra.webp' },
+                { id:18, text:'—', answer:'слон',     pic:'assets/images/riddles_pictures_opt/slon.webp' },
+                { id:19, text:'—', answer:'обезьяна', pic:'assets/images/riddles_pictures_opt/obezyana.webp' },
+                { id:20, text:'—', answer:'орёл',     pic:'assets/images/riddles_pictures_opt/orel.webp' },
+                { id:21, text:'—', answer:'павлин',   pic:'assets/images/riddles_pictures_opt/pavlin.webp' },
+                { id:22, text:'—', answer:'петух',    pic:'assets/images/riddles_pictures_opt/petukh.webp' },
+                { id:23, text:'—', answer:'воробей',  pic:'assets/images/riddles_pictures_opt/vorobey.webp' },
+                { id:24, text:'—', answer:'ворона',   pic:'assets/images/riddles_pictures_opt/vorona.webp' },
+                { id:25, text:'—', answer:'улитка',   pic:'assets/images/riddles_pictures_opt/ulitka.webp' },
+                { id:26, text:'—', answer:'лягушка',  pic:'assets/images/riddles_pictures_opt/lyagushka.webp' },
+                { id:27, text:'—', answer:'верблюд',  pic:'assets/images/riddles_pictures_opt/verblyud.webp' },
+                { id:28, text:'—', answer:'дракон',   pic:'assets/images/riddles_pictures_opt/drakon.webp' },
+                { id:29, text:'—', answer:'кит',      pic:'assets/images/riddles_pictures_opt/kit.webp' },
+                { id:30, text:'—', answer:'паровоз',  pic:'assets/images/riddles_pictures_opt/parovoz.webp' },
+                { id:31, text:'—', answer:'весна',    pic:'assets/images/riddles_pictures_opt/vesna.webp' },
+                { id:32, text:'—', answer:'бабочка',  pic:'assets/images/riddles_pictures_opt/babochka.webp' },
+                { id:33, text:'—', answer:'червяк',   pic:'assets/images/riddles_pictures_opt/chervyak.webp' },
+                { id:34, text:'—', answer:'мышь',     pic:'assets/images/riddles_pictures_opt/mysh.webp' },
+                { id:35, text:'—', answer:'снегурочка',pic:'assets/images/riddles_pictures_opt/snegurochka.webp' },
+                { id:36, text:'—', answer:'Айболит',  pic:'assets/images/riddles_pictures_opt/aybolit.webp' },
+                { id:37, text:'—', answer:'пшеница',  pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' },
+            ],
         };
+        // Always refresh — force re-seed for all sections
         ['songs','podcasts','puzzles','riddles'].forEach(k => {
-            if (!localStorage.getItem('admin_' + k)) {
+            const stored = localStorage.getItem('admin_' + k);
+            let needsReseed = !stored;
+            if (!needsReseed) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    // Reseed if empty, or podcasts is old placeholder, or riddles use old emoji format
+                    if (parsed.length === 0) needsReseed = true;
+                    if (k === 'podcasts' && parsed.length < 3) needsReseed = true;
+                    if (k === 'riddles' && parsed[0] && parsed[0].emoji !== undefined) needsReseed = true;
+                    // Убираем старые ребусы без pic или с неверными файлами
+                    if (k === 'puzzles' && parsed.some(p => !p.pic || p.pic.includes('5+2'))) needsReseed = true;
+                    // Убираем если есть ребусы с пустым answer (битые)
+                    if (k === 'puzzles' && parsed.some(p => !p.answer)) needsReseed = true;
+                    if (k === 'puzzles' && parsed[0] && parsed[0].img && !parsed[0].pic) needsReseed = true;
+                } catch { needsReseed = true; }
+            }
+            if (needsReseed) {
                 localStorage.setItem('admin_' + k, JSON.stringify(defaults[k]));
             }
         });
@@ -707,8 +1115,9 @@ const Admin = {
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'admin-item';
-            const sub = this._tab === 'songs' || this._tab === 'podcasts' ? (item.duration || '') :
-                        this._tab === 'riddles' ? 'Ответ: ' + item.answer :
+            const sub = this._tab === 'songs'    ? (item.duration || '') :
+                        this._tab === 'podcasts' ? ((item.desc ? item.desc.slice(0,40) + (item.desc.length>40?'…':'') : '') || item.duration || '') :
+                        this._tab === 'riddles'  ? 'Ответ: ' + item.answer :
                         `${item.level || ''} | Ответ: ${item.answer || ''}`;
             div.innerHTML = `
                 <div class="admin-item-info">
@@ -733,18 +1142,81 @@ const Admin = {
         }));
     },
 
+    // Stores current src/pic while editing
+    _editSrc: '',
+    _editPic: '',
+
+    _onFileChange(input) {
+        const name = input.files[0]?.name || 'Файл не выбран';
+        document.getElementById('m-file-name').textContent = name;
+    },
+
     openModal(item) {
-        this._editId = item ? item.id : null;
+        this._editId  = item ? item.id  : null;
+        this._editSrc = item ? (item.src || '') : '';
+        this._editPic = item ? (item.pic || '') : '';
+
         document.getElementById('modal-title').textContent = item ? 'Редактировать' : 'Добавить';
-        document.getElementById('m-name').value   = item ? (item.name || item.text || '') : '';
+        // Управляем полями в зависимости от вкладки
+        const nameInput = document.getElementById('m-name-input');
+        const nameArea  = document.getElementById('m-name-area');
+        const descArea  = document.getElementById('m-desc');
+        const isRiddle  = this._tab === 'riddles';
+        const isPodcast = this._tab === 'podcasts';
+        const isPuzzle  = this._tab === 'puzzles';
+        // Показываем нужное поле для названия
+        nameInput.style.display = (isRiddle || isPuzzle) ? 'none' : 'block';
+        nameArea.style.display  = isRiddle ? 'block' : 'none';
+        nameArea.placeholder    = 'Текст загадки...';
+        descArea.style.display  = isPodcast ? 'block' : 'none';
+        // Заполняем значения
+        const nameVal = item ? (item.name || item.text || '') : '';
+        nameInput.value = nameVal;
+        nameArea.value  = nameVal;
+        if (descArea) descArea.value = item ? (item.desc || '') : '';
         document.getElementById('m-answer').value = item ? (item.answer || '') : '';
-        document.getElementById('m-hint').value   = item ? (item.hint || item.img || '') : '';
+        document.getElementById('m-hint').value   = item ? (item.hint  || item.img || '') : '';
         document.getElementById('m-level').value  = item ? (item.level || '') : '';
+
+        // Reset file input
+        const fileInput = document.getElementById('m-file');
+        if (fileInput) fileInput.value = '';
+
+        const isAudio = this._tab === 'songs' || this._tab === 'podcasts';
+        const isQA    = this._tab === 'riddles' || this._tab === 'puzzles';
+
+        // Show current file name
+        const currentPath = isAudio ? this._editSrc : this._editPic;
+        const currentFileName = currentPath ? currentPath.split('/').pop() : '';
+        const curFileEl = document.getElementById('m-current-file');
+        if (curFileEl) {
+            if (currentFileName) {
+                curFileEl.textContent = '📁 Текущий файл: ' + currentFileName;
+                curFileEl.classList.add('visible');
+            } else {
+                curFileEl.textContent = '';
+                curFileEl.classList.remove('visible');
+            }
+        }
         document.getElementById('m-file-name').textContent = 'Файл не выбран';
 
-        const isQA = this._tab === 'riddles' || this._tab === 'puzzles';
-        document.getElementById('m-answer').style.display = isQA ? 'block' : 'none';
-        document.getElementById('m-hint').style.display   = isQA ? 'block' : 'none';
+        // Show image preview for riddles/puzzles
+        const preview = document.getElementById('m-pic-preview');
+        if (preview) {
+            if (this._editPic && isQA) {
+                preview.src = this._editPic;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+                preview.src = '';
+            }
+        }
+
+        // Для ребусов название = ответу, скрываем дублирующее поле
+        // m-name-input/area уже управляются выше
+        document.getElementById('m-answer').style.display = isQA  ? 'block' : 'none';
+        // Подсказка только для ребусов, не для загадок
+        document.getElementById('m-hint').style.display   = this._tab === 'puzzles' ? 'block' : 'none';
         document.getElementById('m-level').style.display  = this._tab === 'puzzles' ? 'block' : 'none';
 
         document.getElementById('modal').classList.remove('hidden');
@@ -753,28 +1225,58 @@ const Admin = {
     closeModal(e) {
         if (!e || e.target === document.getElementById('modal')) {
             document.getElementById('modal').classList.add('hidden');
+            this._editSrc = '';
+            this._editPic = '';
+            const preview = document.getElementById('m-pic-preview');
+            if (preview) { preview.style.display = 'none'; preview.src = ''; }
+            const curFileEl = document.getElementById('m-current-file');
+            if (curFileEl) { curFileEl.textContent = ''; curFileEl.classList.remove('visible'); }
+            const ni = document.getElementById('m-name-input'); if (ni) ni.value = '';
+            const na = document.getElementById('m-name-area');  if (na) na.value = '';
+            const nd = document.getElementById('m-desc');       if (nd) nd.value = '';
         }
     },
 
     save() {
-        const name = document.getElementById('m-name').value.trim();
+        // Читаем из правильного поля (input или textarea)
+        const nameInput = document.getElementById('m-name-input');
+        const nameArea  = document.getElementById('m-name-area');
+        const isRiddle  = this._tab === 'riddles';
+        const isPodcast = this._tab === 'podcasts';
+        const name = (isRiddle ? nameArea : nameInput).value.trim();
         if (!name) { showToast('⚠️ Введите название'); return; }
 
         const items = this._getData(this._tab);
         const id = this._editId || Date.now();
+        // Find existing item to preserve src/pic/duration
+        const existing = this._editId ? items.find(i => i.id === this._editId) : null;
 
         let newItem;
         if (this._tab === 'songs' || this._tab === 'podcasts') {
-            newItem = { id, name, duration: '0:00', src: '' };
-        } else if (this._tab === 'riddles') {
-            newItem = { id, text: name, answer: document.getElementById('m-answer').value.trim(), emoji: '❓' };
-        } else {
+            const descVal = document.getElementById('m-desc')?.value.trim() || '';
             newItem = {
                 id, name,
-                img: document.getElementById('m-hint').value.trim(),
-                hint: document.getElementById('m-hint').value.trim(),
+                desc:     isPodcast ? descVal : '',
+                duration: existing ? (existing.duration || '') : '',
+                src:      existing ? (existing.src      || '') : ''
+            };
+        } else if (this._tab === 'riddles') {
+            newItem = {
+                id,
+                text:   name,
                 answer: document.getElementById('m-answer').value.trim(),
-                level: document.getElementById('m-level').value || 'easy',
+                pic:    existing ? (existing.pic || '') : ''
+            };
+        } else {
+            // puzzles — name = answer (m-name скрыт для ребусов)
+            const puzzleAnswer = document.getElementById('m-answer').value.trim();
+            newItem = {
+                id,
+                name:   puzzleAnswer, // название = ответу
+                pic:    existing ? (existing.pic || '') : '',
+                hint:   document.getElementById('m-hint').value.trim(),
+                answer: puzzleAnswer,
+                level:  document.getElementById('m-level').value || 'easy',
             };
         }
 
@@ -788,6 +1290,24 @@ const Admin = {
         this._setData(this._tab, items);
         this.closeModal();
         this.render();
+        // Немедленно обновляем живые секции
+        if (this._tab === 'songs') Songs._allSongs = this._getData('songs').map(s => ({...s}));
+        if (this._tab === 'podcasts') Podcasts._allPodcasts = this._getData('podcasts').map(p => ({...p}));
+        if (this._tab === 'puzzles') {
+            // Перезагружаем данные ребусов без reinit (не меняем позицию)
+            const saved = this._getData('puzzles');
+            if (saved.length) {
+                Puzzles._data = { easy: [], medium: [], hard: [] };
+                saved.forEach(p => {
+                    const lv = p.level || 'easy';
+                    if (Puzzles._data[lv]) Puzzles._data[lv].push({ pic: p.pic||'', hint: p.hint||'', answer: p.answer||'' });
+                });
+            }
+        }
+        if (this._tab === 'riddles') {
+            const adm = this._getData('riddles');
+            if (adm.length) Riddles.data = adm.map(r => ({ q: r.text||'—', a: r.answer||'', pic: r.pic||'' }));
+        }
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
     },
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap');
 
 /* ===== TOKENS ===== */
 :root {
@@ -23,29 +23,60 @@
     --shadow-lg: 0 8px 36px rgba(80,100,200,0.18);
     --radius:  20px;
     --radius-sm: 13px;
-    --font: 'Nunito', 'Segoe UI', sans-serif;
-    --font-display: 'Fredoka One', cursive;
+    --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semi:   600;
     --tr: 0.22s cubic-bezier(.4,0,.2,1);
 }
+
+/* ══ ПАЛИТРА LUNA для тёмной темы ══
+   #A7EBF2 — светлый акцент (текст, иконки)
+   #54ACBF — средний акцент (кнопки, прогресс)
+   #26658C — основной синий (карточки)
+   #023859 — тёмный фон карточек
+   #011C40 — самый тёмный фон */
 [data-theme="dark"] {
-    --bg:    #0f1120;
-    --bg2:   #161830;
-    --card:  #1e2140;
-    --card2: #252847;
-    --text:  #e8ecff;
-    --text2: #8890b8;
-    --border: rgba(140,150,210,0.15);
-    --shadow: 0 4px 20px rgba(0,0,20,0.40);
-    --shadow-lg: 0 8px 36px rgba(0,0,20,0.55);
+    --luna-light:  #A7EBF2;
+    --luna-mid:    #54ACBF;
+    --luna-main:   #26658C;
+    --luna-dark:   #023859;
+    --luna-deep:   #011C40;
+
+    --bg:      #011C40;
+    --bg2:     #023859;
+    --card:    #0a2d54;
+    --card2:   #0d3464;
+    --text:    #d4f0f5;
+    --text2:   #7ab8cc;
+    --border:  rgba(84,172,191,0.18);
+    --shadow:  0 4px 24px rgba(1,28,64,0.6);
+    --shadow-lg: 0 8px 40px rgba(1,28,64,0.8);
+
+    --grad:        linear-gradient(135deg, #54ACBF, #A7EBF2);
+    --grad-purple: linear-gradient(135deg, #26658C, #54ACBF);
+    --grad-blue:   linear-gradient(135deg, #023859, #26658C);
+    --grad-pink:   linear-gradient(135deg, #54ACBF, #A7EBF2);
+    --grad-yellow: linear-gradient(135deg, #A7EBF2, #54ACBF);
+    --grad-green:  linear-gradient(135deg, #54ACBF, #26658C);
+    --grad-orange: linear-gradient(135deg, #26658C, #54ACBF);
+    --grad-red:    linear-gradient(135deg, #023859, #26658C);
+    --grad-teal:   linear-gradient(135deg, #A7EBF2, #54ACBF);
 }
 
 /* ===== RESET ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+    box-sizing: border-box; margin: 0; padding: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 400; /* Тонкий шрифт везде по умолчанию */
+}
 html { scroll-behavior: smooth; }
 body {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font);
+    font-weight: 400;
     transition: background var(--tr), color var(--tr);
     -webkit-tap-highlight-color: transparent;
     min-height: 100vh;
@@ -53,6 +84,18 @@ body {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--grad); border-radius: 99px; }
 
+/* ══ ГЛОБАЛЬНЫЙ ЗАПРЕТ НА ЖИРНЫЙ ШРИФТ ══ */
+* { font-weight: 400 !important; }
+/* Исключения: только там где нужно чуть выделить — medium/semi */
+.track-name, .song-name, h1, h2, h3, .home-logo,
+#page-title-bar, .modal-title, .admin-item-title,
+.s-label, .stat-num, .level-tab {
+    font-weight: 500 !important;
+}
+input, select, textarea, button, label, option {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-weight: 400 !important;
+}
 /* ===== LAYOUT ===== */
 #app {
     max-width: 480px;
@@ -84,9 +127,9 @@ body {
     border: none;
     border-radius: var(--radius-sm);
     padding: 8px 15px;
-    font-family: var(--font);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 500 !important;
     color: var(--text2);
     cursor: pointer;
     box-shadow: var(--shadow);
@@ -128,8 +171,7 @@ section.hidden { display: none !important; }
 /* ===== MAIN / HOME ===== */
 #main { padding-top: 10px; }
 .home-logo {
-    font-family: var(--font-display);
-    font-size: 36px;
+    font-size: 34px;
     text-align: center;
     background: var(--grad);
     -webkit-background-clip: text;
@@ -137,58 +179,40 @@ section.hidden { display: none !important; }
     background-clip: text;
     padding: 20px 0 6px;
     line-height: 1.1;
+    font-weight: 500 !important;
 }
 .home-sub {
     text-align: center;
     font-size: 14px;
     color: var(--text2);
-    font-weight: 700;
     margin-bottom: 18px;
 }
 .menu-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
 }
+/* Плашки — чистые, без полосок */
 .menu-card {
     background: var(--card);
-    border: 2px solid var(--border);
-    padding: 20px 12px;
-    border-radius: 24px;
+    border: 1.5px solid var(--border);
+    padding: 22px 14px;
+    border-radius: 18px;
     box-shadow: var(--shadow);
     cursor: pointer;
-    font-family: var(--font-display);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 9px;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.3;
     transition: all var(--tr);
-    position: relative;
-    overflow: hidden;
     text-decoration: none;
+    min-height: 72px;
 }
-.menu-card:hover  { transform: translateY(-3px) scale(1.02); box-shadow: var(--shadow-lg); }
-.menu-card:active { transform: scale(0.96); }
-.menu-card .icon-wrap {
-    width: 54px; height: 54px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-}
-.mc-alphabet .icon-wrap  { background: var(--grad-purple); }
-.mc-numbers  .icon-wrap  { background: var(--grad-blue); }
-.mc-colors   .icon-wrap  { background: var(--grad-pink); }
-.mc-songs    .icon-wrap  { background: var(--grad-yellow); }
-.mc-puzzles  .icon-wrap  { background: var(--grad-orange); }
-.mc-riddles  .icon-wrap  { background: var(--grad-green); }
-.mc-finger   .icon-wrap  { background: var(--grad-teal); }
-.mc-articul  .icon-wrap  { background: var(--grad-red); }
-.mc-breath   .icon-wrap  { background: var(--grad-purple); }
-.mc-info     .icon-wrap  { background: var(--grad-teal); }
-.mc-stats    .icon-wrap  { background: var(--grad-green); }
-.mc-settings .icon-wrap  { background: linear-gradient(135deg,#cbd5e1,#94a3b8); }
+.menu-card:hover  { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.menu-card:active { transform: scale(0.97); }
 
 /* ===== MEDIA PAGE ===== */
 #video-wrap {
@@ -196,7 +220,7 @@ section.hidden { display: none !important; }
     border-radius: var(--radius);
     overflow: hidden;
     background: #000;
-    aspect-ratio: 16/9;
+    aspect-ratio: 1/1;
     position: relative;
     margin-bottom: 12px;
 }
@@ -215,69 +239,141 @@ section.hidden { display: none !important; }
 }
 .video-placeholder-inner .pi { font-size: 38px; opacity: 0.4; }
 
-/* ===== AUDIO PLAYER ===== */
+/* ===== AUDIO PLAYER — stroke-стиль (референс) ===== */
 .audio-player {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-    box-shadow: var(--shadow);
+    background: rgba(28, 28, 35, 0.88);
+    border-radius: 22px;
+    padding: 16px 20px 18px;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.32);
     margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
 }
-.track-info {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 12px;
-}
-.track-icon {
-    width: 44px; height: 44px;
-    border-radius: 14px;
-    background: var(--grad);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-}
-.track-name { font-family: var(--font-display); font-size: 17px; }
-.track-sub  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.audio-player::before { display: none; }
 
-.progress-bar-wrap {
-    width: 100%; height: 6px;
-    background: var(--bg2); border-radius: 99px;
-    cursor: pointer; overflow: hidden; margin-bottom: 5px;
+/* track-info скрыт — название выводится в player-track-row */
+.track-info { display: none; }
+
+.player-track-row {
+    display: flex; align-items: center;
+    margin-bottom: 10px;
 }
-#progress-bar {
+.track-name {
+    font-size: 13px;
+    color: rgba(255,255,255,0.80);
+    font-weight: 400 !important;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.track-sub  { font-size: 11px; color: rgba(255,255,255,0.40); margin-top: 2px; }
+
+/* Прогресс + время в одну строку */
+.player-main-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 18px;
+}
+.progress-bar-wrap {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.16);
+    border-radius: 99px;
+    cursor: pointer;
+    position: relative;
+}
+.progress-bar-wrap > div {
     height: 100%;
-    background: var(--grad);
+    background: rgba(255,255,255,0.70);
     border-radius: 99px;
     width: 0%;
     transition: width 0.3s linear;
+    position: relative;
 }
-.progress-times {
-    display: flex; justify-content: space-between;
-    font-size: 11px; color: var(--text2); margin-bottom: 12px;
+.progress-bar-wrap > div::after {
+    content: '';
+    position: absolute;
+    right: -6px; top: 50%;
+    transform: translateY(-50%);
+    width: 12px; height: 12px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4);
 }
+.progress-times { display: none; }
+.player-time {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    white-space: nowrap;
+    min-width: 30px;
+    font-variant-numeric: tabular-nums;
+}
+.player-time-cur { text-align: right; }
+.player-time-dur { text-align: left; }
+
+/* ── Кнопки плеера — тонкие окружности как на референсе ── */
 .player-btns {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-}
-.ctrl-btn {
-    background: var(--card2); border: none;
-    border-radius: 12px; width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--text2);
-    font-size: 16px; transition: all var(--tr);
+    gap: 18px;
 }
-.ctrl-btn:hover  { background: var(--bg2); color: var(--text); transform: scale(1.08); }
-.ctrl-btn:active { transform: scale(0.92); }
-.ctrl-btn.active { background: var(--grad); color: white; }
-#play-btn {
-    width: 54px; height: 54px;
-    border-radius: 17px;
-    background: var(--grad);
-    border: none; cursor: pointer; color: white;
-    font-size: 22px;
-    box-shadow: 0 4px 16px rgba(120,100,220,0.35);
+
+/* Shuffle и Repeat — без обводки, просто иконка */
+.ctrl-btn {
+    background: transparent;
+    border: none;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: rgba(255,255,255,0.50);
+    font-size: 16px;
+    border-radius: 50%;
+    transition: all var(--tr);
+    padding: 0;
+}
+.ctrl-btn:hover  { color: rgba(255,255,255,0.90); transform: scale(1.1); }
+.ctrl-btn:active { transform: scale(0.88); }
+.ctrl-btn.active { color: rgba(255,255,255,0.92); }
+
+/* Prev / Next — тонкая окружность, меньше Play */
+.ctrl-btn.prev-btn,
+.ctrl-btn.next-btn {
+    border: 1.5px solid rgba(255,255,255,0.30);
+    width: 40px; height: 40px;
+    color: rgba(255,255,255,0.75);
+    font-size: 15px;
+}
+.ctrl-btn.prev-btn:hover,
+.ctrl-btn.next-btn:hover {
+    border-color: rgba(255,255,255,0.75);
+    color: white;
+}
+
+/* Play/Pause — крупный круг с чуть толще обводкой */
+#play-btn, #song-play-btn, #podcast-play-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.75);
+    cursor: pointer;
+    color: rgba(255,255,255,0.90);
+    font-size: 20px;
     display: flex; align-items: center; justify-content: center;
     transition: all var(--tr);
+    padding: 0;
+    flex-shrink: 0;
+    box-shadow: none;
 }
-#play-btn:hover  { transform: scale(1.1); box-shadow: 0 6px 24px rgba(120,100,220,0.5); }
-#play-btn:active { transform: scale(0.95); }
+#play-btn:hover, #song-play-btn:hover, #podcast-play-btn:hover {
+    border-color: white;
+    color: white;
+    transform: scale(1.07);
+    background: rgba(255,255,255,0.06);
+}
+#play-btn:active, #song-play-btn:active, #podcast-play-btn:active {
+    transform: scale(0.93);
+}
+
+/* Тёмная тема — тот же стиль, чуть холоднее */
+[data-theme="dark"] .audio-player {
+    background: rgba(2, 22, 46, 0.90);
+    border-color: rgba(84,172,191,0.12);
+}
 
 /* ===== CHIPS GRID ===== */
 .chips-grid {
@@ -310,7 +406,7 @@ section.hidden { display: none !important; }
     font-size: 13px;
     cursor: pointer;
     color: white;
-    font-weight: 900;
+    font-weight: 500 !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
     transition: all var(--tr);
     box-shadow: var(--shadow);
@@ -349,9 +445,9 @@ section.hidden { display: none !important; }
 .song-item:last-child { border-bottom: none; }
 .song-item:hover { background: var(--card2); }
 .song-item.playing { background: linear-gradient(90deg, rgba(167,139,250,0.12), transparent); }
-.song-num { width: 26px; text-align: center; font-size: 12px; color: var(--text2); font-weight: 800; flex-shrink: 0; }
+.song-num { width: 26px; text-align: center; font-size: 12px; color: var(--text2); font-weight: 500 !important; font-family: 'Plus Jakarta Sans', sans-serif; flex-shrink: 0; }
 .song-num.pi-icon { color: #7c3aed; }
-.song-name { flex: 1; font-weight: 800; font-size: 14px; }
+.song-name { flex: 1; font-weight: 500 !important; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
 .song-dur  { font-size: 12px; color: var(--text2); }
 
 /* ===== RIDDLES / PUZZLES ===== */
@@ -372,31 +468,35 @@ section.hidden { display: none !important; }
     border: 2px solid #f59e0b44;
     border-radius: var(--radius-sm);
     padding: 12px 15px;
-    font-size: 14px; font-weight: 700;
+    font-size: 14px; font-weight: 500 !important;
     line-height: 1.5;
     margin-bottom: 10px;
 }
 .puzzle-img-wrap {
-    width: 100%; aspect-ratio: 4/3;
+    width: 100%; aspect-ratio: 1/1;
     border-radius: var(--radius);
-    background: var(--card);
+    background: transparent;
     display: flex; align-items: center; justify-content: center;
     font-size: 64px;
-    box-shadow: var(--shadow);
+    overflow: hidden;
     margin-bottom: 10px;
 }
 .answer-img {
-    width: 100%; text-align: center;
+    display: none; /* скрыт по умолчанию */
+    width: 100%;
+    text-align: center;
     font-size: 80px;
-    background: var(--card);
     border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
     margin-top: 10px;
-    display: none;
     animation: fadeInUp 0.4s ease;
 }
-.answer-img.show { display: block; }
+/* При появлении добавляем стили */
+.answer-img.show {
+    display: block;
+    background: var(--card);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
 
 input[type=text], input[type=password] {
     width: 100%;
@@ -477,7 +577,7 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
 .settings-row:last-child { border-bottom: none; }
 .settings-row:hover { background: var(--card2); }
 .s-icon  { font-size: 22px; flex-shrink: 0; }
-.s-label { flex: 1; font-weight: 800; font-size: 15px; }
+.s-label { flex: 1; font-weight: 400 !important; font-size: 15px; }
 .s-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
 .toggle {
     width: 47px; height: 26px; background: var(--bg2);
@@ -505,7 +605,7 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
     font-size: 24px; flex-shrink: 0;
 }
 .stat-val   { font-family: var(--font-display); font-size: 26px; line-height: 1; }
-.stat-lbl   { font-size: 13px; color: var(--text2); font-weight: 700; margin-top: 3px; }
+.stat-lbl   { font-size: 13px; color: var(--text2); font-weight: 500 !important; margin-top: 3px; }
 .stat-track { width: 100%; height: 7px; background: var(--bg2); border-radius: 99px; margin-top: 6px; overflow: hidden; }
 .stat-fill  { height: 100%; border-radius: 99px; width: 0%; transition: width 1s ease; }
 
@@ -515,11 +615,13 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
     padding: 18px; box-shadow: var(--shadow); margin-bottom: 12px; line-height: 1.7;
 }
 .info-block h3 { font-family: var(--font-display); font-size: 20px; margin-bottom: 8px; }
-.info-block p  { color: var(--text2); font-size: 14px; font-weight: 600; }
+.info-block p  { color: var(--text2); font-size: 14px; font-weight: 500 !important; }
 
 /* ===== ADMIN ===== */
-.admin-tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 14px; scrollbar-width: none; }
-.admin-tabs::-webkit-scrollbar { display: none; }
+.admin-tabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 14px;
+}
 .admin-tab {
     flex-shrink: 0; padding: 8px 16px;
     background: var(--card); border: 2px solid var(--border);
@@ -527,14 +629,19 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
     cursor: pointer; transition: all var(--tr); color: var(--text2);
 }
 .admin-tab.active { background: var(--grad); color: white; border-color: transparent; }
-.admin-list { max-height: calc(100vh - 280px); overflow-y: auto; }
+.admin-list {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+}
 .admin-item {
     background: var(--card); border-radius: var(--radius-sm); padding: 13px 15px;
     margin-bottom: 8px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow);
 }
 .admin-item-info { flex: 1; }
-.admin-item-title { font-weight: 800; font-size: 14px; }
-.admin-item-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.admin-item-title { font-weight: 500 !important; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; }
+.admin-item-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif; }
 .admin-del {
     background: #ef444420; border: none; border-radius: 8px;
     width: 32px; height: 32px; color: #ef4444; cursor: pointer;
@@ -551,37 +658,54 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
 .admin-edit:hover { background: #3b82f6; color: white; }
 .admin-add-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 13px; margin-top: 10px;
+    width: 100%; padding: 13px; margin-top: 10px; flex-shrink: 0;
     background: var(--grad-green); border: none; border-radius: var(--radius-sm);
-    font-family: var(--font-display); font-size: 17px; color: white;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 500 !important; color: white;
     cursor: pointer; box-shadow: 0 4px 14px rgba(16,185,129,0.3);
     transition: all var(--tr);
 }
 .admin-add-btn:hover { transform: translateY(-2px); }
 .publish-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 13px; margin-top: 8px;
+    width: 100%; padding: 13px; margin-top: 8px; flex-shrink: 0;
     background: var(--grad-purple); border: none; border-radius: var(--radius-sm);
-    font-family: var(--font-display); font-size: 17px; color: white;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 500 !important; color: white;
     cursor: pointer; box-shadow: 0 4px 14px rgba(124,58,237,0.3);
     transition: all var(--tr);
 }
 .publish-btn:hover { transform: translateY(-2px); }
 
+
+/* ===== ADMIN LAYOUT ===== */
+#admin {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 18px;
+    /* Subtract top-bar height so list fills remaining space */
+    max-height: calc(100vh - 70px);
+}
+
+/* ===== ADMIN FOOTER (pinned buttons) ===== */
+.admin-footer {
+    flex-shrink: 0;
+    padding-top: 4px;
+}
 /* ===== MODAL ===== */
 .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    display: flex; align-items: flex-end;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
     z-index: 9999;
     animation: fadeInUp 0.2s ease;
+    padding: 18px;
 }
 .modal-box {
-    background: var(--card); width: 100%;
-    border-radius: 26px 26px 0 0;
+    background: var(--card);
+    width: 100%; max-width: 444px;
+    border-radius: var(--radius);
     padding: 22px 20px;
     display: flex; flex-direction: column; gap: 10px;
+    box-shadow: var(--shadow-lg);
 }
 .modal-title { font-family: var(--font-display); font-size: 20px; margin-bottom: 2px; }
 .modal-btns  { display: flex; gap: 8px; margin-top: 4px; }
@@ -613,7 +737,7 @@ input[type=file] { display: none; }
     transform: translateX(-50%) translateY(16px);
     background: var(--card); color: var(--text);
     padding: 11px 20px; border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-lg); font-weight: 800; font-size: 14px;
+    box-shadow: var(--shadow-lg); font-weight: 500 !important; font-size: 14px;
     z-index: 9000; opacity: 0; pointer-events: none;
     transition: all 0.28s; white-space: nowrap;
 }
@@ -655,8 +779,227 @@ input[type=file] { display: none; }
     text-align: center;
     padding-top: 4px;
 }
-.counter-badge { font-size: 13px; color: var(--text2); font-weight: 800; }
+.counter-badge { font-size: 13px; color: var(--text2); font-weight: 500 !important; }
 
 .w100 { width: 100%; }
 .sp8  { height: 8px; }
 .sp12 { height: 12px; }
+
+/* ===== RIDDLE PICTURE PREVIEW ===== */
+/* Base answer-img handles display:none/block, riddle-pic-preview adds layout */
+.answer-img.riddle-pic-preview {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1/1;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+}
+/* !important нужен чтобы перебить .answer-img.show { display: block } */
+.answer-img.riddle-pic-preview.show {
+    display: flex !important;
+}
+.answer-img.riddle-pic-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+/* ══ MODAL PICTURE PREVIEW ══ */
+#m-pic-preview {
+    display: none;
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    background: var(--card2);
+    border: 2px solid var(--border);
+    margin-bottom: 8px;
+    max-height: 180px;
+}
+.m-current-file {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    padding: 6px 10px;
+    background: var(--card2);
+    border-radius: 8px;
+    word-break: break-all;
+    display: none;
+}
+.m-current-file.visible { display: block; }
+
+/* ══ DARK MODE — ПАЛИТРА LUNA ══
+   #A7EBF2 #54ACBF #26658C #023859 #011C40 */
+
+/* Плеер в тёмной теме — кнопка play белая на тёмном */
+
+
+
+
+
+/* Прогресс-бар */
+
+
+
+
+/* Карточки меню */
+[data-theme="dark"] .menu-card {
+    background: #0a2d54;
+    border: 1px solid rgba(38,101,140,0.3);
+    color: #d4f0f5;
+    box-shadow: 0 4px 20px rgba(1,28,64,0.5);
+}
+[data-theme="dark"] .menu-card:hover {
+    background: #0d3464;
+    border-color: rgba(84,172,191,0.35);
+    box-shadow: 0 6px 28px rgba(1,28,64,0.7);
+}
+/* Цветные полоски на плашках в тёмной теме — через Luna */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Поля ввода */
+[data-theme="dark"] input[type=text],
+[data-theme="dark"] input[type=password],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: #023859;
+    border-color: rgba(38,101,140,0.5);
+    color: #d4f0f5;
+}
+[data-theme="dark"] input[type=text]:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: #54ACBF;
+    box-shadow: 0 0 0 3px rgba(84,172,191,0.15);
+}
+
+/* Кнопка назад */
+[data-theme="dark"] #back-btn {
+    background: #0a2d54;
+    border: 1px solid rgba(38,101,140,0.3);
+    color: #7ab8cc;
+}
+
+/* Треки в списке */
+[data-theme="dark"] .song-item {
+    border-bottom-color: rgba(38,101,140,0.2);
+}
+[data-theme="dark"] .song-item:hover { background: rgba(38,101,140,0.15); }
+[data-theme="dark"] .song-item.playing {
+    background: linear-gradient(90deg, rgba(84,172,191,0.12), transparent);
+}
+[data-theme="dark"] .pi-icon { color: #54ACBF; }
+
+/* Админка */
+[data-theme="dark"] .admin-tabs {
+    
+}
+[data-theme="dark"] .admin-tab {
+    border-color: rgba(38,101,140,0.3);
+    color: #7ab8cc;
+    background: transparent;
+}
+[data-theme="dark"] .admin-tab.active {
+    background: linear-gradient(135deg, #26658C, #54ACBF);
+    border-color: transparent;
+    color: #011C40;
+}
+[data-theme="dark"] .admin-item {
+    border: 1px solid rgba(38,101,140,0.2);
+    background: #0a2d54;
+}
+
+/* Модалка */
+[data-theme="dark"] .modal-box {
+    background: #023859;
+    box-shadow: 0 20px 60px rgba(1,28,64,0.8), 0 0 0 1px rgba(38,101,140,0.3);
+}
+
+/* Подсказка */
+[data-theme="dark"] .hint-box {
+    background: rgba(38,101,140,0.25);
+    border: 1px solid rgba(84,172,191,0.2);
+    color: #A7EBF2;
+}
+
+/* Загадки и ребусы */
+[data-theme="dark"] .riddle-box { background: #0a2d54; border-color: rgba(38,101,140,0.2); }
+[data-theme="dark"] .puzzle-img-wrap { background: #0a2d54; }
+
+/* Кнопки */
+[data-theme="dark"] .submit-btn {
+    background: linear-gradient(135deg, #26658C, #54ACBF);
+    box-shadow: 0 4px 20px rgba(38,101,140,0.5);
+}
+[data-theme="dark"] .next-btn {
+    background: #023859;
+    border: 1px solid rgba(38,101,140,0.3);
+    color: #7ab8cc;
+}
+
+/* Уровни */
+[data-theme="dark"] .level-tab.easy   { background: linear-gradient(135deg,#54ACBF,#A7EBF2); color:#011C40; }
+[data-theme="dark"] .level-tab.medium { background: linear-gradient(135deg,#26658C,#54ACBF); color:#d4f0f5; }
+[data-theme="dark"] .level-tab.hard   { background: linear-gradient(135deg,#023859,#26658C); color:#A7EBF2; }
+
+/* Настройки и статистика */
+[data-theme="dark"] .settings-group {
+    background: #0a2d54;
+    border: 1px solid rgba(38,101,140,0.2);
+}
+[data-theme="dark"] .stat-card {
+    background: #0a2d54;
+    border: 1px solid rgba(38,101,140,0.2);
+}
+
+/* Чипы */
+[data-theme="dark"] .chip {
+    background: #023859;
+    border: 1px solid rgba(38,101,140,0.3);
+    color: #7ab8cc;
+}
+[data-theme="dark"] .chip.active {
+    background: linear-gradient(135deg, #26658C, #54ACBF);
+    border-color: transparent;
+    color: #011C40;
+}
+
+/* Заголовок страницы */
+[data-theme="dark"] #page-title-bar {
+    color: #A7EBF2;
+    -webkit-text-fill-color: #A7EBF2;
+}
+
+/* Скроллбар */
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #011C40; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#54ACBF,#26658C); }
+
+/* ── Описание подкаста ── */
+.podcast-desc {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+    line-height: 1.5;
+    display: none;
+}
+.podcast-desc:not(:empty) { display: block; }
+
+
