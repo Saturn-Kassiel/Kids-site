@@ -1076,10 +1076,13 @@ const Info = {
                         '<a href="$1" target="_blank" rel="noopener" class="info-link">$1</a>');
             };
             div.innerHTML = `
-                <button class="info-acc-header">
-                    <span class="info-acc-title">${b.name || ''}</span>
-                    <span class="info-acc-arrow">›</span>
-                </button>
+                <div class="info-acc-header-row">
+                    <button class="info-acc-header">
+                        <span class="info-acc-title">${b.name || ''}</span>
+                        <span class="info-acc-arrow">›</span>
+                    </button>
+                    <button class="info-deeplink-btn" title="Скопировать ссылку">🔗</button>
+                </div>
                 <div class="info-acc-body">
                     <p>${parseBody(b.body)}</p>
                 </div>
@@ -1088,6 +1091,10 @@ const Info = {
                 const isOpen = div.classList.contains('open');
                 container.querySelectorAll('.info-accordion.open').forEach(a => a.classList.remove('open'));
                 if (!isOpen) div.classList.add('open');
+            });
+            div.querySelector('.info-deeplink-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyDeepLink('info', b.id, b.name);
             });
             container.appendChild(div);
         });
@@ -1593,7 +1600,7 @@ const Admin = {
 document.addEventListener('DOMContentLoaded', async () => {
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;
-    const deepLinkMatch = deepLinkHash.match(/^#(song|podcast)-(\d+)$/);
+    const deepLinkMatch = deepLinkHash.match(/^#(song|podcast|info)-(\d+)$/);
 
     // Сразу убираем хэш из URL
     if (deepLinkMatch) history.replaceState(null, '', location.pathname);
@@ -1616,6 +1623,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             Podcasts.init();
             const idx = Podcasts._allPodcasts.findIndex(p => p.id === id);
             if (idx !== -1) Podcasts.play(idx);
+        } else if (type === 'info') {
+            App.navigate('info', 'Информация');
+            Info.render();
+            // Открываем нужный аккордеон после рендера
+            setTimeout(() => {
+                const container = document.getElementById('info-blocks-container');
+                if (!container) return;
+                const blocks = (() => { try { return JSON.parse(localStorage.getItem('admin_info')) || []; } catch { return []; } })();
+                const blockIdx = blocks.findIndex(b => b.id === id);
+                if (blockIdx !== -1) {
+                    const items = container.querySelectorAll('.info-accordion');
+                    if (items[blockIdx]) {
+                        items[blockIdx].classList.add('open');
+                        items[blockIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            }, 100);
         }
 
         // Данные обновляем фоном — не блокируем запуск трека
