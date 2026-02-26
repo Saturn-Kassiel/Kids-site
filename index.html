@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Развивайка</title>
+    <title>Говоруша</title>
     <link rel="icon" href="assets/favicon/favicon.webp" type="image/webp">
     <link rel="stylesheet" href="style.css">
     <!-- Apply saved theme instantly to prevent flash -->
@@ -47,7 +47,7 @@
             <button class="menu-card mc-finger"   onclick="App.navigate('finger')">Пальчиковые игры</button>
             <button class="menu-card mc-articul"  onclick="App.navigate('articul')">Артикуляционная гимнастика</button>
             <button class="menu-card mc-breath"   onclick="App.navigate('breath')">Дыхательная гимнастика</button>
-            <button class="menu-card mc-info"     onclick="App.navigate('info')">Информация</button>
+            <button class="menu-card mc-info"     onclick="App.navigate('info', 'Информация')">Информация</button>
             <button class="menu-card mc-stats"    onclick="Stats.show()">Статистика</button>
             <button class="menu-card mc-settings" onclick="App.navigate('settings')">Настройки</button>
         </div>
@@ -214,18 +214,7 @@
 
     <!-- ========== INFO ========== -->
     <section id="info" class="hidden">
-        <div class="info-block">
-            <h3>🌟 О сайте</h3>
-            <p>Детский образовательный сайт для изучения букв, цифр, цветов и развития речи через игру и песенки.</p>
-        </div>
-        <div class="info-block">
-            <h3>📚 Разделы</h3>
-            <p>• Алфавит — учим буквы с видео и аудио<br>• Цифры — считаем от 0 до 9<br>• Цвета — изучаем цвета<br>• Песенки — любимые детские треки<br>• Ребусы и Загадки — развиваем мышление<br>• Гимнастика — пальчиковые и артик. упражнения</p>
-        </div>
-        <div class="info-block">
-            <h3>💡 Советы</h3>
-            <p>Занимайтесь каждый день по 15–20 минут. Хвалите ребёнка за каждый правильный ответ!</p>
-        </div>
+        <div id="info-blocks-container"></div>
     </section>
 
     <!-- ========== STATS ========== -->
@@ -298,7 +287,7 @@
                 <span style="color:var(--text2);font-size:18px">›</span>
             </div>
         </div>
-        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Развивайка v1.0 · Сделано с ❤️</div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Говоруша v1.0 · Сделано с ❤️</div>
     </section>
 
     <!-- ========== ADMIN ========== -->
@@ -308,6 +297,7 @@
             <button class="admin-tab" onclick="Admin.setTab('podcasts',this)">Подкасты</button>
             <button class="admin-tab" onclick="Admin.setTab('puzzles',this)">Ребусы</button>
             <button class="admin-tab" onclick="Admin.setTab('riddles',this)">Загадки</button>
+            <button class="admin-tab" onclick="Admin.setTab('info',this)">Информация</button>
         </div>
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
@@ -336,6 +326,11 @@
         <input   type="text" id="m-name-input" placeholder="Название" style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
         <textarea id="m-name-area" rows="4" placeholder="Текст загадки..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;"></textarea>
         <textarea id="m-desc" rows="4" placeholder="Описание подкаста..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;display:none;"></textarea>
+        <textarea id="m-body" rows="6" placeholder="Текст информационного блока..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:4px;resize:none;line-height:1.5;display:none;"></textarea>
+        <div id="m-body-hint" style="display:none;margin-bottom:8px;">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Красивая ссылка: <code style="background:var(--card2);padding:2px 6px;border-radius:5px;color:#54ACBF;">[Колыбельная](https://url)</code><br>Или просто вставьте URL — он станет ссылкой автоматически.</div>
+            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;">🔗 Вставить ссылку</button>
+        </div>
         <input type="text"     id="m-answer"  placeholder="Ответ (для ребусов/загадок)">
         <input type="text"     id="m-hint"    placeholder="Подсказка / Картинка-ребус (эмодзи)">
         <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">

@@ -26,8 +26,11 @@ const App = {
 
         if (!isMain) this._history.push(id);
         window.scrollTo(0, 0);
+        // Рендерим динамические разделы
+        if (id === 'info') Info.render();
     },
 
+    // Обрабатываем deep link хэш (#song-5, #podcast-3)
     back() {
         this._history.pop();
         const prev = this._history[this._history.length - 1] || 'main';
@@ -52,14 +55,24 @@ const App = {
 
     // Загружаем data.json из репозитория — ВСЕГДА при старте, ждём завершения
     async _loadRemoteData() {
-        const KEYS = ['songs','podcasts','puzzles','riddles'];
+        const KEYS = ['songs','podcasts','puzzles','riddles','info'];
         const REPO = 'Saturn-Kassiel/Kids-site';
+
+        // Локально (file://) — пропускаем, используем localStorage/defaults
+        if (location.protocol === 'file:') return;
 
         // ВСЕГДА загружаем свежий data.json из GitHub —
         // это единственный источник правды для GitHub Pages
         try {
             const url = 'https://raw.githubusercontent.com/' + REPO + '/main/data.json';
-            const resp = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
+            // Таймаут 5 сек чтобы не висеть вечно
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 5000);
+            const resp = await fetch(url + '?_=' + Date.now(), {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timer);
             if (!resp.ok) {
                 console.log('data.json не найден, используем localStorage');
                 return;
@@ -123,6 +136,25 @@ const App = {
 
 function saveSetting(key, val) {
     localStorage.setItem(`set_${key}`, val);
+}
+
+// -------- DEEP LINK COPY --------
+function copyDeepLink(type, id, name) {
+    const BASE = 'https://saturn-kassiel.github.io/Kids-site/';
+    const url  = BASE + '#' + type + '-' + id;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('🔗 Ссылка скопирована');
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('🔗 Ссылка скопирована');
+    });
 }
 
 // -------- TOAST --------
@@ -254,13 +286,14 @@ const Media = {
                 'Э':'bukva_', 'Ю':'bukva_yu', 'Я':'bukva_ya'
             };
             // Видео: a.mp4 (для Ъ и Ь видео нет, для Й тоже нет)
+            const VIDEO_EXT = { 'hf': 'MP4', 'sf': 'MP4', 'ee': 'MP4' };
             const VIDEO_MAP = {
                 'А':'a', 'Б':'b', 'В':'v', 'Г':'g', 'Д':'d',
                 'Е':'e', 'Ё':'yo', 'Ж':'zh', 'З':'z', 'И':'i',
                 'Й':'y',  'К':'k', 'Л':'l', 'М':'m', 'Н':'n',
                 'О':'o', 'П':'p', 'Р':'r', 'С':'s', 'Т':'t',
                 'У':'u', 'Ф':'f', 'Х':'kh', 'Ц':'ts', 'Ч':'ch',
-                'Ш':'sh', 'Щ':'shch', 'Ъ':null, 'Ы':null,  'Ь':null,
+                'Ш':'sh', 'Щ':'shch', 'Ъ':'hf', 'Ы':'ee',  'Ь':'sf',
                 'Э':'Э', 'Ю':'yu', 'Я':'ya'
             };
             // Специальные кириллические имена (Буква Б.mp3 и т.д.)
@@ -271,7 +304,7 @@ const Media = {
                     ? `assets/audio/letters_songs/${AUDIO_CYR[l]}.mp3`
                     : `assets/audio/letters_songs/${AUDIO_MAP[l]}.mp3`;
                 const vf = VIDEO_MAP[l];
-                const videoFile = vf ? `assets/video/letters_video/${vf}.mp4` : null;
+                const videoFile = vf ? `assets/video/letters_video/${vf}.${VIDEO_EXT[vf] || 'mp4'}` : null;
                 return { name: l, label: `Буква ${l}`, icon: '🔤', audio: audioFile, video: videoFile };
             });
         } else if (type === 'numbers') {
@@ -502,8 +535,16 @@ const Songs = {
                 <div class="song-num ${isPlaying ? 'pi-icon' : ''}">${isPlaying ? '▶' : realIdx + 1}</div>
                 <div class="song-name">${song.name}</div>
                 <div class="song-dur">${song.duration || ''}</div>
+                <button class="deeplink-btn" title="Скопировать ссылку" data-type="song" data-id="${song.id}" data-name="${song.name.replace(/"/g,'&quot;')}">🔗</button>
             `;
-            div.addEventListener('click', () => this.play(realIdx));
+            div.addEventListener('click', (e) => {
+                if (e.target.closest('.deeplink-btn')) return;
+                this.play(realIdx);
+            });
+            div.querySelector('.deeplink-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyDeepLink('song', song.id, song.name);
+            });
             list.appendChild(div);
         });
     },
@@ -646,8 +687,16 @@ const Podcasts = {
                 <div class="song-num ${isPlaying ? 'pi-icon' : ''}">${isPlaying ? '▶' : realIdx + 1}</div>
                 <div class="song-name">${pod.name}</div>
                 <div class="song-dur">${pod.duration || ''}</div>
+                <button class="deeplink-btn" title="Скопировать ссылку" data-type="podcast" data-id="${pod.id}" data-name="${pod.name.replace(/"/g,'&quot;')}">🔗</button>
             `;
-            div.addEventListener('click', () => this.play(realIdx));
+            div.addEventListener('click', (e) => {
+                if (e.target.closest('.deeplink-btn')) return;
+                this.play(realIdx);
+            });
+            div.querySelector('.deeplink-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyDeepLink('podcast', pod.id, pod.name);
+            });
             list.appendChild(div);
         });
     },
@@ -977,6 +1026,36 @@ document.getElementById('puzzle-input').addEventListener('keydown', e => { if (e
 // =============================================
 // STATS
 // =============================================
+const Info = {
+    render() {
+        const container = document.getElementById('info-blocks-container');
+        if (!container) return;
+        const blocks = (() => {
+            try { return JSON.parse(localStorage.getItem('admin_info')) || []; } catch { return []; }
+        })();
+        container.innerHTML = '';
+        if (!blocks.length) {
+            container.innerHTML = '<div style="text-align:center;color:var(--text2);padding:40px 20px;font-size:15px;">Нет информационных блоков</div>';
+            return;
+        }
+        blocks.forEach(b => {
+            const div = document.createElement('div');
+            div.className = 'info-block';
+            // Парсим [текст](url) и голые https:// → цветные ссылки
+            const parseBody = (text) => {
+                return (text || '')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+                        '<a href="$2" target="_blank" rel="noopener" class="info-link">$1</a>')
+                    .replace(/(?<!\()(https?:\/\/[^\s<]+)/g,
+                        '<a href="$1" target="_blank" rel="noopener" class="info-link">$1</a>');
+            };
+            div.innerHTML = `<h3>${b.name || ''}</h3><p>${parseBody(b.body)}</p>`;
+            container.appendChild(div);
+        });
+    }
+};
+
 const Stats = {
     show() {
         App.navigate('stats', 'Статистика');
@@ -1042,6 +1121,12 @@ const Admin = {
                 { id:14, name:'Забор',     pic:'assets/images/rebuses_pictures_opt/zabor.webp',    hint:'Присмотрись к картинке', answer:'забор',    level:'hard' },
                 { id:15, name:'Токарь',    pic:'assets/images/rebuses_pictures_opt/tokar.webp',    hint:'Присмотрись к картинке', answer:'токарь',   level:'hard' },
             ],
+            info: [
+                { id:1, name:'🌟 О приложении', body:'Говоруша — детское образовательное приложение для изучения букв, цифр, цветов и развития речи через игру и песенки.' },
+                { id:2, name:'📚 Разделы', body:'Алфавит — учим буквы с видео и аудио. Цифры — считаем от 0 до 9. Цвета — изучаем цвета. Песенки — любимые детские треки. Ребусы и Загадки — развиваем мышление. Гимнастика — пальчиковые и артик. упражнения.' },
+                { id:3, name:'💡 Советы', body:'Занимайтесь каждый день по 15–20 минут. Хвалите ребёнка за каждый правильный ответ!' },
+                { id:4, name:'🔗 Пример ссылки', body:'Наш сайт: [Говоруша](https://govorusha.ru)\nНаписать нам: [Telegram](https://t.me/govorusha)' },
+            ],
             riddles: [
                 { id:1, text:'Белым снегом всё одето, значит наступает ...', answer:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' },
                 { id:2, text:'Охраняет часто дом, повиляет всем хвостом, зарычит, коль ты чужой, и оближет, если свой.', answer:'Собака', pic:'assets/images/riddles_pictures_opt/sobaka.webp' },
@@ -1086,6 +1171,7 @@ const Admin = {
                     if (parsed.length === 0) needsReseed = true;
                     if (k === 'podcasts' && parsed.length < 3) needsReseed = true;
                     if (k === 'riddles' && parsed[0] && (parsed[0].emoji !== undefined || parsed[0].text === '—')) needsReseed = true;
+                    if (k === 'info' && parsed[0] && (!parsed[0].body || parsed.length < 4)) needsReseed = true;
                     // Убираем старые ребусы без pic или с неверными файлами
                     if (k === 'puzzles' && parsed.some(p => !p.pic || p.pic.includes('5+2'))) needsReseed = true;
                     // Убираем если есть ребусы с пустым answer (битые)
@@ -1126,10 +1212,11 @@ const Admin = {
             const sub = this._tab === 'songs'    ? (item.duration || '') :
                         this._tab === 'podcasts' ? ((item.desc ? item.desc.slice(0,40) + (item.desc.length>40?'…':'') : '') || item.duration || '') :
                         this._tab === 'riddles'  ? 'Ответ: ' + item.answer :
+                        this._tab === 'info'     ? (item.body ? item.body.slice(0,50) + (item.body.length>50?'…':'') : '') :
                         `${item.level || ''} | Ответ: ${item.answer || ''}`;
             div.innerHTML = `
                 <div class="admin-item-info">
-                    <div class="admin-item-title">${item.name || item.text || '—'}</div>
+                    <div class="admin-item-title">${item.name || item.text || item.title || '—'}</div>
                     <div class="admin-item-sub">${sub}</div>
                 </div>
                 <button class="admin-edit" data-id="${item.id}">✏️</button>
@@ -1172,11 +1259,19 @@ const Admin = {
         const isRiddle  = this._tab === 'riddles';
         const isPodcast = this._tab === 'podcasts';
         const isPuzzle  = this._tab === 'puzzles';
+        const isInfo    = this._tab === 'info';
         // Показываем нужное поле для названия
         nameInput.style.display = (isRiddle || isPuzzle) ? 'none' : 'block';
         nameArea.style.display  = isRiddle ? 'block' : 'none';
         nameArea.placeholder    = 'Текст загадки...';
         descArea.style.display  = isPodcast ? 'block' : 'none';
+        const bodyArea = document.getElementById('m-body');
+        if (bodyArea) {
+            bodyArea.style.display = isInfo ? 'block' : 'none';
+            if (isInfo) bodyArea.value = item ? (item.body || '') : '';
+        }
+        const bodyHint = document.getElementById('m-body-hint');
+        if (bodyHint) bodyHint.style.display = isInfo ? 'block' : 'none';
         // Заполняем значения
         const nameVal = item ? (item.name || item.text || '') : '';
         nameInput.value = nameVal;
@@ -1226,6 +1321,11 @@ const Admin = {
         // Подсказка только для ребусов, не для загадок
         document.getElementById('m-hint').style.display   = this._tab === 'puzzles' ? 'block' : 'none';
         document.getElementById('m-level').style.display  = this._tab === 'puzzles' ? 'block' : 'none';
+        // Для info — скрываем файл/ответ/картинку
+        const fileLabel = document.querySelector('.file-label');
+        if (fileLabel) fileLabel.style.display = isInfo ? 'none' : '';
+        const fileNameEl = document.getElementById('m-file-name');
+        if (fileNameEl) fileNameEl.style.display = isInfo ? 'none' : '';
 
         document.getElementById('modal').classList.remove('hidden');
     },
@@ -1242,6 +1342,7 @@ const Admin = {
             const ni = document.getElementById('m-name-input'); if (ni) ni.value = '';
             const na = document.getElementById('m-name-area');  if (na) na.value = '';
             const nd = document.getElementById('m-desc');       if (nd) nd.value = '';
+            const nb = document.getElementById('m-body');       if (nb) nb.value = '';
         }
     },
 
@@ -1275,6 +1376,10 @@ const Admin = {
                 answer: document.getElementById('m-answer').value.trim(),
                 pic:    existing ? (existing.pic || '') : ''
             };
+        } else if (this._tab === 'info') {
+            const bodyVal = (document.getElementById('m-body')?.value || '').trim();
+            if (!bodyVal) { showToast('⚠️ Введите текст блока'); return; }
+            newItem = { id, name, body: bodyVal };
         } else {
             // puzzles — name = answer (m-name скрыт для ребусов)
             const puzzleAnswer = document.getElementById('m-answer').value.trim();
@@ -1316,7 +1421,22 @@ const Admin = {
             const adm = this._getData('riddles');
             if (adm.length) Riddles.data = adm.map(r => ({ q: r.text||'—', a: r.answer||'', pic: r.pic||'' }));
         }
+        if (this._tab === 'info') Info.render();
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
+    },
+
+    // ── Вставка шаблона ссылки в поле m-body ──
+    _insertLinkTemplate() {
+        const ta = document.getElementById('m-body');
+        if (!ta) return;
+        const template = '[текст ссылки](https://url.com)';
+        const start = ta.selectionStart;
+        const end   = ta.selectionEnd;
+        const val   = ta.value;
+        ta.value = val.slice(0, start) + template + val.slice(end);
+        // Выделяем "текст ссылки" для удобства замены
+        ta.focus();
+        ta.setSelectionRange(start + 1, start + 13);
     },
 
     // ── GitHub Token helpers ──
@@ -1361,6 +1481,7 @@ const Admin = {
             podcasts: this._getData('podcasts'),
             puzzles:  this._getData('puzzles'),
             riddles:  this._getData('riddles'),
+            info:     this._getData('info'),
             exportedAt: new Date().toISOString()
         };
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
@@ -1429,6 +1550,37 @@ const Admin = {
 // INIT
 // =============================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Читаем хэш ДО любых операций
+    const deepLinkHash = window.location.hash;
+    const deepLinkMatch = deepLinkHash.match(/^#(song|podcast)-(\d+)$/);
+
+    // Сразу убираем хэш из URL чтобы браузер не скроллил к якорю
+    if (deepLinkMatch) {
+        history.replaceState(null, '', location.pathname);
+    }
+
+    // Ждём загрузки данных
     await App.init();
-    App.navigate('main');
+
+    // Теперь navigateMain если нет deep link
+    if (!deepLinkMatch) {
+        App.navigate('main');
+        return;
+    }
+
+    // Deep link — открываем нужный раздел и запускаем трек
+    const [, type, idStr] = deepLinkMatch;
+    const id = parseInt(idStr);
+
+    if (type === 'song') {
+        Songs.init();
+        const idx = Songs._allSongs.findIndex(s => s.id === id);
+        if (idx !== -1) Songs.play(idx);
+        else Songs.play(0); // запускаем первый если не нашли
+    } else if (type === 'podcast') {
+        Podcasts.init();
+        const idx = Podcasts._allPodcasts.findIndex(p => p.id === id);
+        if (idx !== -1) Podcasts.play(idx);
+        else Podcasts.play(0);
+    }
 });
