@@ -41,8 +41,6 @@ const App = {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
         if (el) el.classList.toggle('on', next === 'dark');
-        const ico = document.getElementById('theme-icon');
-        if (ico) ico.textContent = next === 'dark' ? '🌙' : '☀️';
         showToast(next === 'dark' ? '🌙 Тёмная тема' : '☀️ Светлая тема');
     },
 
@@ -58,11 +56,6 @@ const App = {
         document.documentElement.setAttribute('data-theme', theme);
         const tt = document.getElementById('tog-theme');
         if (tt && theme === 'dark') tt.classList.add('on');
-        // Иконка: луна/солнце
-        setTimeout(() => {
-            const ico = document.getElementById('theme-icon');
-            if (ico) ico.textContent = theme === 'dark' ? '🌙' : '☀️';
-        }, 0);
 
         // Restore toggles
         ['sound','auto','anim'].forEach(k => {
@@ -338,15 +331,10 @@ const Media = {
             placeholder.style.display = 'flex';
         }
 
-        // Audio — только если автовоспроизведение включено
+        // Audio
         this.player.src = item.audio;
-        const _autoOn = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
-        if (_autoOn) {
-            AudioMgr.play(this.player, 'media');
-            document.getElementById('play-btn').textContent = '⏸';
-        } else {
-            document.getElementById('play-btn').textContent = '▶';
-        }
+        AudioMgr.play(this.player, 'media');
+        document.getElementById('play-btn').textContent = '⏸';
         document.getElementById('track-name').textContent = item.label;
         document.getElementById('track-icon').textContent = item.icon;
         document.getElementById('track-sub').textContent  = this._sectionType === 'alphabet' ? 'Кириллический алфавит' : this._sectionType === 'colors' ? 'Учим цвета' : 'Учим цифры';
@@ -486,13 +474,8 @@ const Songs = {
         this.index = i;
         const song = this._allSongs[i];
         this.audio.src = song.src || '';
-        const _autoS = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
-        if (_autoS) {
-            AudioMgr.play(this.audio, 'songs');
-            document.getElementById('song-play-btn').textContent = '⏸';
-        } else {
-            document.getElementById('song-play-btn').textContent = '▶';
-        }
+        AudioMgr.play(this.audio, 'songs');
+        document.getElementById('song-play-btn').textContent = '⏸';
         document.getElementById('song-name').textContent = song.name;
         document.getElementById('song-sub').textContent  = song.duration || '';
         document.getElementById('song-progress-bar').style.width = '0%';
@@ -631,13 +614,8 @@ const Podcasts = {
         this.index = i;
         const pod = this._allPodcasts[i];
         this.audio.src = pod.src || '';
-        const _autoP = document.getElementById('tog-auto')?.classList.contains('on') ?? true;
-        if (_autoP) {
-            AudioMgr.play(this.audio, 'podcasts');
-            document.getElementById('podcast-play-btn').textContent = '⏸';
-        } else {
-            document.getElementById('podcast-play-btn').textContent = '▶';
-        }
+        AudioMgr.play(this.audio, 'podcasts');
+        document.getElementById('podcast-play-btn').textContent = '⏸';
         document.getElementById('podcast-name').textContent = pod.name;
         document.getElementById('podcast-sub').textContent = pod.duration || '';
         const descEl = document.getElementById('podcast-desc');

@@ -80,9 +80,9 @@
             </div>
             <div class="player-btns">
                 <button class="ctrl-btn" id="shuffle-btn" onclick="Media.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn prev-btn" onclick="Media.prev()">⏮</button>
+                <button class="ctrl-btn" onclick="Media.prev()">⏮</button>
                 <button id="play-btn" onclick="Media.toggle()">▶</button>
-                <button class="ctrl-btn next-btn" onclick="Media.next()">⏭</button>
+                <button class="ctrl-btn" onclick="Media.next()">⏭</button>
                 <button class="ctrl-btn" id="repeat-btn" onclick="Media.toggleRepeat()">🔁</button>
             </div>
         </div>
@@ -111,9 +111,9 @@
             </div>
             <div class="player-btns">
                 <button class="ctrl-btn" id="song-shuffle-btn" onclick="Songs.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn prev-btn" onclick="Songs.prev()">⏮</button>
+                <button class="ctrl-btn" onclick="Songs.prev()">⏮</button>
                 <button id="song-play-btn" onclick="Songs.toggle()">▶</button>
-                <button class="ctrl-btn next-btn" onclick="Songs.nextSong()">⏭</button>
+                <button class="ctrl-btn" onclick="Songs.nextSong()">⏭</button>
                 <button class="ctrl-btn" id="song-repeat-btn" onclick="Songs.toggleRepeat()">🔁</button>
             </div>
         </div>
@@ -144,9 +144,9 @@
             </div>
             <div class="player-btns">
                 <button class="ctrl-btn" id="podcast-shuffle-btn" onclick="Podcasts.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn prev-btn" onclick="Podcasts.prev()">⏮</button>
+                <button class="ctrl-btn" onclick="Podcasts.prev()">⏮</button>
                 <button id="podcast-play-btn" onclick="Podcasts.toggle()">▶</button>
-                <button class="ctrl-btn next-btn" onclick="Podcasts.nextPodcast()">⏭</button>
+                <button class="ctrl-btn" onclick="Podcasts.nextPodcast()">⏭</button>
                 <button class="ctrl-btn" id="podcast-repeat-btn" onclick="Podcasts.toggleRepeat()">🔁</button>
             </div>
         </div>
@@ -269,7 +269,7 @@
     <section id="settings" class="hidden">
         <div class="settings-group">
             <div class="settings-row">
-                <span class="s-icon" id="theme-icon">🌙</span>
+                <span class="s-icon">🌙</span>
                 <div><div class="s-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
                 <div class="toggle" id="tog-theme" onclick="App.toggleTheme(this)"></div>
             </div>

@@ -239,140 +239,139 @@ section.hidden { display: none !important; }
 }
 .video-placeholder-inner .pi { font-size: 38px; opacity: 0.4; }
 
-/* ===== AUDIO PLAYER — stroke-стиль (референс) ===== */
+/* ===== AUDIO PLAYER — стиль референса ===== */
 .audio-player {
-    background: rgba(28, 28, 35, 0.88);
+    background: linear-gradient(135deg, #7c4dff 0%, #26a69a 100%);
     border-radius: 22px;
-    padding: 16px 20px 18px;
-    box-shadow: 0 6px 28px rgba(0,0,0,0.32);
+    padding: 14px 18px;
+    box-shadow: 0 8px 32px rgba(124,77,255,0.35);
     margin-bottom: 12px;
-    border: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+    overflow: hidden;
 }
-.audio-player::before { display: none; }
+/* Лёгкое мерцание — оверлей */
+.audio-player::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.06) 100%);
+    border-radius: 22px;
+    pointer-events: none;
+}
 
-/* track-info скрыт — название выводится в player-track-row */
-.track-info { display: none; }
+/* Название трека над плеером — белое */
+.track-info {
+    display: none; /* скрываем — трек-инфо переносим над прогрессом */
+}
 
+/* Строка: название + длительность */
 .player-track-row {
-    display: flex; align-items: center;
+    display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 10px;
 }
 .track-name {
-    font-size: 13px;
-    color: rgba(255,255,255,0.80);
-    font-weight: 400 !important;
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    font-weight: 500 !important;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 70%;
 }
-.track-sub  { font-size: 11px; color: rgba(255,255,255,0.40); margin-top: 2px; }
+.track-sub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 0; }
 
-/* Прогресс + время в одну строку */
+/* Строка с кнопкой play + прогресс + время */
 .player-main-row {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
 }
+
+/* Прогресс-бар — посередине */
 .progress-bar-wrap {
     flex: 1;
-    height: 3px;
-    background: rgba(255,255,255,0.16);
+    height: 5px;
+    background: rgba(255,255,255,0.25);
     border-radius: 99px;
     cursor: pointer;
     position: relative;
+    margin-bottom: 0;
 }
 .progress-bar-wrap > div {
     height: 100%;
-    background: rgba(255,255,255,0.70);
+    background: rgba(255,255,255,0.85);
     border-radius: 99px;
     width: 0%;
     transition: width 0.3s linear;
     position: relative;
 }
+/* Овальная ручка на прогрессе */
 .progress-bar-wrap > div::after {
     content: '';
     position: absolute;
-    right: -6px; top: 50%;
+    right: -7px; top: 50%;
     transform: translateY(-50%);
-    width: 12px; height: 12px;
+    width: 14px; height: 14px;
     background: white;
     border-radius: 50%;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.progress-times { display: none; }
+
+/* Время — белое, по бокам прогресса */
+.progress-times {
+    display: none; /* встроим время в player-main-row */
+}
 .player-time {
-    font-size: 11px;
-    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
     white-space: nowrap;
-    min-width: 30px;
-    font-variant-numeric: tabular-nums;
+    min-width: 36px;
 }
 .player-time-cur { text-align: right; }
 .player-time-dur { text-align: left; }
 
-/* ── Кнопки плеера — тонкие окружности как на референсе ── */
+/* Кнопки управления — снизу */
 .player-btns {
     display: flex; align-items: center; justify-content: center;
-    gap: 18px;
+    gap: 24px;
+    margin-top: 14px;
 }
 
-/* Shuffle и Repeat — без обводки, просто иконка */
+/* Вспомогательные кнопки */
 .ctrl-btn {
-    background: transparent;
+    background: rgba(255,255,255,0.15);
     border: none;
     width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    color: rgba(255,255,255,0.50);
+    color: rgba(255,255,255,0.85);
     font-size: 16px;
     border-radius: 50%;
     transition: all var(--tr);
     padding: 0;
+    backdrop-filter: blur(4px);
 }
-.ctrl-btn:hover  { color: rgba(255,255,255,0.90); transform: scale(1.1); }
-.ctrl-btn:active { transform: scale(0.88); }
-.ctrl-btn.active { color: rgba(255,255,255,0.92); }
+.ctrl-btn:hover  { background: rgba(255,255,255,0.28); color: white; transform: scale(1.1); }
+.ctrl-btn:active { transform: scale(0.90); }
+.ctrl-btn.active { background: rgba(255,255,255,0.35); color: white; }
 
-/* Prev / Next — тонкая окружность, меньше Play */
-.ctrl-btn.prev-btn,
-.ctrl-btn.next-btn {
-    border: 1.5px solid rgba(255,255,255,0.30);
-    width: 40px; height: 40px;
-    color: rgba(255,255,255,0.75);
-    font-size: 15px;
-}
-.ctrl-btn.prev-btn:hover,
-.ctrl-btn.next-btn:hover {
-    border-color: rgba(255,255,255,0.75);
-    color: white;
-}
-
-/* Play/Pause — крупный круг с чуть толще обводкой */
+/* Кнопка Play — белый круг с тенью */
 #play-btn, #song-play-btn, #podcast-play-btn {
-    width: 56px; height: 56px;
+    width: 52px; height: 52px;
     border-radius: 50%;
-    background: transparent;
-    border: 2px solid rgba(255,255,255,0.75);
+    background: white;
+    border: none;
     cursor: pointer;
-    color: rgba(255,255,255,0.90);
+    color: #5e35b1;
     font-size: 20px;
     display: flex; align-items: center; justify-content: center;
     transition: all var(--tr);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     padding: 0;
     flex-shrink: 0;
-    box-shadow: none;
 }
 #play-btn:hover, #song-play-btn:hover, #podcast-play-btn:hover {
-    border-color: white;
-    color: white;
-    transform: scale(1.07);
-    background: rgba(255,255,255,0.06);
+    transform: scale(1.08);
+    box-shadow: 0 6px 28px rgba(0,0,0,0.35);
 }
 #play-btn:active, #song-play-btn:active, #podcast-play-btn:active {
-    transform: scale(0.93);
-}
-
-/* Тёмная тема — тот же стиль, чуть холоднее */
-[data-theme="dark"] .audio-player {
-    background: rgba(2, 22, 46, 0.90);
-    border-color: rgba(84,172,191,0.12);
+    transform: scale(0.94);
 }
 
 /* ===== CHIPS GRID ===== */
@@ -577,7 +576,7 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
 .settings-row:last-child { border-bottom: none; }
 .settings-row:hover { background: var(--card2); }
 .s-icon  { font-size: 22px; flex-shrink: 0; }
-.s-label { flex: 1; font-weight: 400 !important; font-size: 15px; }
+.s-label { flex: 1; font-weight: 500 !important; font-size: 15px; }
 .s-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
 .toggle {
     width: 47px; height: 26px; background: var(--bg2);
@@ -1002,4 +1001,27 @@ input[type=file] { display: none; }
 }
 .podcast-desc:not(:empty) { display: block; }
 
-
+/* ── Плеер в тёмной теме LUNA ── */
+[data-theme="dark"] .audio-player {
+    background: linear-gradient(135deg, #26658C 0%, #011C40 100%);
+    box-shadow: 0 8px 32px rgba(1,28,64,0.6);
+}
+[data-theme="dark"] #play-btn,
+[data-theme="dark"] #song-play-btn,
+[data-theme="dark"] #podcast-play-btn {
+    background: #A7EBF2;
+    color: #011C40;
+    box-shadow: 0 4px 20px rgba(167,235,242,0.35);
+}
+[data-theme="dark"] .ctrl-btn {
+    background: rgba(167,235,242,0.12);
+    color: rgba(167,235,242,0.8);
+}
+[data-theme="dark"] .ctrl-btn:hover { background: rgba(167,235,242,0.25); color: #A7EBF2; }
+[data-theme="dark"] .ctrl-btn.active { background: rgba(167,235,242,0.3); color: #A7EBF2; }
+[data-theme="dark"] .progress-bar-wrap { background: rgba(167,235,242,0.2); }
+[data-theme="dark"] .progress-bar-wrap > div { background: rgba(167,235,242,0.8); }
+[data-theme="dark"] .progress-bar-wrap > div::after {
+    background: #A7EBF2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
