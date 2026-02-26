@@ -575,17 +575,17 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
 .next-btn:hover { border-color: #a78bfa; color: var(--text); }
 /* Кнопка поделиться загадкой в топ-баре */
 #riddle-share-topbar, #puzzle-share-topbar {
+    display: flex; align-items: center; justify-content: center;
     background: var(--card); border: none;
     border-radius: var(--radius-sm);
-    width: 38px; height: 38px;
-    font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    padding: 8px 13px;
+    cursor: pointer;
     box-shadow: var(--shadow);
-    transition: transform var(--tr), background var(--tr);
-    margin-right: 2px;
+    transition: all var(--tr);
     flex-shrink: 0;
+    color: var(--text2);
 }
-#riddle-share-topbar:hover, #puzzle-share-topbar:hover { transform: scale(1.1); background: var(--card2); }
+#riddle-share-topbar:hover, #puzzle-share-topbar:hover { transform: scale(1.05); color: var(--text); }
 #riddle-msg, #puzzle-msg {
     text-align: center;
     font-family: var(--font-display);
@@ -1171,6 +1171,10 @@ input[type=file] { display: none; }
 [data-theme="dark"] .level-tab.easy   { background: linear-gradient(135deg,#54ACBF,#A7EBF2); color:#011C40; }
 [data-theme="dark"] .level-tab.medium { background: linear-gradient(135deg,#26658C,#54ACBF); color:#d4f0f5; }
 [data-theme="dark"] .level-tab.hard   { background: linear-gradient(135deg,#023859,#26658C); color:#A7EBF2; }
+/* Кружки уровней НЕ перекрашиваем в тёмной теме — они всегда цветные */
+[data-theme="dark"] .lvl-dot.easy   { background: #4ade80; }
+[data-theme="dark"] .lvl-dot.medium { background: #facc15; }
+[data-theme="dark"] .lvl-dot.hard   { background: #f87171; }
 
 /* Настройки и статистика */
 [data-theme="dark"] .settings-group {

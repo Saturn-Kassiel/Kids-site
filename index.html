@@ -27,11 +27,11 @@
     <div id="top-bar">
         <button id="back-btn" class="hidden" onclick="App.back()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Назад
+            <span id="back-text">Назад</span>
         </button>
         <span id="page-title-bar" class="hidden"></span>
         <span style="flex:1"></span>
-        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки">⚙️</button>
+        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки" style="display:none;">⚙️</button>
     </div>
 
     <!-- ========== MAIN ========== -->
@@ -164,8 +164,10 @@
         <div class="hint-box" id="puzzle-hint">💡 Подсказка</div>
         <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
         <div id="puzzle-msg"></div>
-        <button class="submit-btn" onclick="Puzzles.check()">✅ Проверить</button>
-        <button class="next-btn" onclick="Puzzles.next()">Следующий ребус →</button>
+        <div class="riddle-btns-row">
+            <button class="submit-btn" onclick="Puzzles.check()">✅ Проверить</button>
+            <button class="next-btn" onclick="Puzzles.next()">Следующий →</button>
+        </div>
     </section>
 
     <!-- ========== RIDDLES ========== -->

@@ -16,6 +16,10 @@ const App = {
         document.getElementById('back-btn').classList.toggle('hidden', isMain);
         document.getElementById('settings-icon-btn').classList.toggle('hidden', id === 'settings' || id === 'admin');
 
+        // Для ребусов и загадок — скрываем текст «Назад» и заголовок
+        const backText = document.getElementById('back-text');
+        if (backText) backText.style.display = (id === 'puzzles' || id === 'riddles') ? 'none' : '';
+
         const titleBar = document.getElementById('page-title-bar');
         if (!isMain && title) {
             titleBar.textContent = title;
@@ -26,12 +30,15 @@ const App = {
 
         if (!isMain) this._history.push(id);
         window.scrollTo(0, 0);
-        // Убираем кнопки ребусов при уходе
-        if (id !== 'puzzles') {
+        // Управляем кнопками топ-бара
+        if (id === 'puzzles') {
+            Puzzles._renderLevelDots();
+        } else {
             ['puzzle-level-dots','puzzle-share-topbar'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
         }
-        // Убираем кнопки загадок при уходе
-        if (id !== 'riddles') {
+        if (id === 'riddles') {
+            Riddles._renderTopBar();
+        } else {
             ['riddle-share-topbar','riddle-level-dots'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
         }
         // Рендерим динамические разделы
@@ -821,7 +828,7 @@ const Puzzles = {
     },
 
     init() {
-        App.navigate('puzzles', 'Ребусы');
+        App.navigate('puzzles');
         this._loadFromAdmin();
         this._pos = { easy: 0, medium: 0, hard: 0 };
         this._level = 'easy';
@@ -839,7 +846,7 @@ const Puzzles = {
         const shareBtn = document.createElement('button');
         shareBtn.id = 'puzzle-share-topbar';
         shareBtn.title = 'Поделиться ребусом';
-        shareBtn.innerHTML = '📤';
+        shareBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="17" height="17"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
         shareBtn.addEventListener('click', () => Puzzles.share());
         topBar.insertBefore(shareBtn, settingsBtn);
         // Кружки уровней
@@ -1015,7 +1022,7 @@ const Riddles = {
     ],
 
     init() {
-        App.navigate('riddles', 'Загадки');
+        App.navigate('riddles');
         this._level = 'easy';
         this._loadFromAdmin();
         this._pos = 0;
@@ -1063,7 +1070,7 @@ const Riddles = {
         const shareBtn = document.createElement('button');
         shareBtn.id = 'riddle-share-topbar';
         shareBtn.title = 'Поделиться загадкой';
-        shareBtn.innerHTML = '📤';
+        shareBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="17" height="17"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
         shareBtn.addEventListener('click', () => Riddles.share());
         topBar.insertBefore(shareBtn, settingsBtn);
         // Кружки уровней
