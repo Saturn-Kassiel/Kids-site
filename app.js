@@ -157,6 +157,32 @@ function copyDeepLink(type, id, name) {
     });
 }
 
+// -------- CONFIRM DIALOG --------
+function showConfirm(message, onConfirm) {
+    // Удаляем старый если есть
+    const old = document.getElementById('confirm-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'confirm-overlay';
+    overlay.innerHTML = `
+        <div class="confirm-box">
+            <div class="confirm-msg">${message}</div>
+            <div class="confirm-btns">
+                <button class="confirm-cancel">Отмена</button>
+                <button class="confirm-ok">Удалить</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+
+    const close = () => { overlay.classList.remove('visible'); setTimeout(() => overlay.remove(), 200); };
+    overlay.querySelector('.confirm-cancel').addEventListener('click', close);
+    overlay.querySelector('.confirm-ok').addEventListener('click', () => { close(); onConfirm(); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+}
+
 // -------- TOAST --------
 let _toastT;
 function showToast(msg, dur = 2400) {
@@ -1040,8 +1066,7 @@ const Info = {
         }
         blocks.forEach(b => {
             const div = document.createElement('div');
-            div.className = 'info-block';
-            // Парсим [текст](url) и голые https:// → цветные ссылки
+            div.className = 'info-accordion';
             const parseBody = (text) => {
                 return (text || '')
                     .replace(/\n/g, '<br>')
@@ -1050,7 +1075,20 @@ const Info = {
                     .replace(/(?<!\()(https?:\/\/[^\s<]+)/g,
                         '<a href="$1" target="_blank" rel="noopener" class="info-link">$1</a>');
             };
-            div.innerHTML = `<h3>${b.name || ''}</h3><p>${parseBody(b.body)}</p>`;
+            div.innerHTML = `
+                <button class="info-acc-header">
+                    <span class="info-acc-title">${b.name || ''}</span>
+                    <span class="info-acc-arrow">›</span>
+                </button>
+                <div class="info-acc-body">
+                    <p>${parseBody(b.body)}</p>
+                </div>
+            `;
+            div.querySelector('.info-acc-header').addEventListener('click', () => {
+                const isOpen = div.classList.contains('open');
+                container.querySelectorAll('.info-accordion.open').forEach(a => a.classList.remove('open'));
+                if (!isOpen) div.classList.add('open');
+            });
             container.appendChild(div);
         });
     }
@@ -1226,10 +1264,13 @@ const Admin = {
         });
 
         list.querySelectorAll('.admin-del').forEach(btn => btn.addEventListener('click', () => {
-            if (!confirm('Удалить?')) return;
-            this._setData(this._tab, this._getData(this._tab).filter(i => i.id !== parseInt(btn.dataset.id)));
-            this.render();
-            showToast('🗑️ Удалено');
+            const item = this._getData(this._tab).find(i => i.id === parseInt(btn.dataset.id));
+            const name = item ? (item.name || item.text || 'элемент') : 'элемент';
+            showConfirm(`Удалить «${name}»?`, () => {
+                this._setData(this._tab, this._getData(this._tab).filter(i => i.id !== parseInt(btn.dataset.id)));
+                this.render();
+                showToast('🗑️ Удалено');
+            });
         }));
         list.querySelectorAll('.admin-edit').forEach(btn => btn.addEventListener('click', () => {
             const item = this._getData(this._tab).find(i => i.id === parseInt(btn.dataset.id));

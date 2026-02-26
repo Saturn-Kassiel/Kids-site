@@ -632,12 +632,42 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
 .stat-fill  { height: 100%; border-radius: 99px; width: 0%; transition: width 1s ease; }
 
 /* ===== INFO ===== */
-.info-block {
-    background: var(--card); border-radius: var(--radius);
-    padding: 18px; box-shadow: var(--shadow); margin-bottom: 12px; line-height: 1.7;
+/* Аккордеон для раздела Информация */
+.info-accordion {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow var(--tr);
 }
-.info-block h3 { font-family: var(--font-display); font-size: 20px; margin-bottom: 8px; }
-.info-block p  { color: var(--text2); font-size: 14px; font-weight: 500 !important; }
+.info-acc-header {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px;
+    background: none; border: none; cursor: pointer;
+    text-align: left; gap: 12px;
+}
+.info-acc-title {
+    font-family: var(--font-display); font-size: 17px;
+    color: var(--text); font-weight: 500 !important;
+    flex: 1;
+}
+.info-acc-arrow {
+    font-size: 22px; color: var(--text2);
+    transition: transform 0.25s; display: inline-block; flex-shrink: 0;
+    line-height: 1;
+}
+.info-accordion.open .info-acc-arrow { transform: rotate(90deg); }
+.info-acc-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.25s;
+    padding: 0 18px;
+}
+.info-accordion.open .info-acc-body {
+    max-height: 600px;
+    padding: 0 18px 16px;
+}
+.info-acc-body p { color: var(--text2); font-size: 14px; font-weight: 500 !important; line-height: 1.7; margin: 0; }
 .info-link {
     color: #54ACBF;
     text-decoration: underline;
@@ -647,6 +677,51 @@ input.wrong   { border-color: #ef4444; background: #ef444410; }
     transition: color 0.2s, text-decoration-color 0.2s;
 }
 .info-link:hover { color: #A7EBF2; text-decoration-color: rgba(167,235,242,0.6); }
+
+/* ── Диалог подтверждения удаления ── */
+#confirm-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.18s;
+    padding: 20px;
+}
+#confirm-overlay.visible { opacity: 1; }
+.confirm-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 22px 18px;
+    width: 100%; max-width: 320px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: translateY(12px);
+    transition: transform 0.18s;
+}
+#confirm-overlay.visible .confirm-box { transform: translateY(0); }
+.confirm-msg {
+    font-size: 16px; color: var(--text);
+    font-weight: 500 !important;
+    margin-bottom: 20px; line-height: 1.5;
+    font-family: var(--font-display);
+}
+.confirm-btns {
+    display: flex; gap: 10px; justify-content: flex-end;
+}
+.confirm-cancel {
+    padding: 10px 18px;
+    background: var(--card2); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px; color: var(--text2);
+    cursor: pointer; transition: all var(--tr);
+}
+.confirm-cancel:hover { background: var(--card); color: var(--text); }
+.confirm-ok {
+    padding: 10px 18px;
+    background: rgba(239,68,68,0.15); border: 1.5px solid rgba(239,68,68,0.35);
+    border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px; color: #ef4444;
+    cursor: pointer; transition: all var(--tr);
+}
+.confirm-ok:hover { background: rgba(239,68,68,0.25); border-color: #ef4444; }
 
 /* ===== ADMIN ===== */
 .admin-tabs {
