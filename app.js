@@ -1554,33 +1554,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const deepLinkHash = window.location.hash;
     const deepLinkMatch = deepLinkHash.match(/^#(song|podcast)-(\d+)$/);
 
-    // Сразу убираем хэш из URL чтобы браузер не скроллил к якорю
+    // Сразу убираем хэш из URL
+    if (deepLinkMatch) history.replaceState(null, '', location.pathname);
+
     if (deepLinkMatch) {
-        history.replaceState(null, '', location.pathname);
-    }
+        // Deep link: инициализируем UI немедленно, данные грузим фоном
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('modal').classList.add('hidden');
+        document.getElementById('loader').style.display = 'none';
 
-    // Ждём загрузки данных
-    await App.init();
+        const [, type, idStr] = deepLinkMatch;
+        const id = parseInt(idStr);
 
-    // Теперь navigateMain если нет deep link
-    if (!deepLinkMatch) {
+        if (type === 'song') {
+            Songs.init();
+            const idx = Songs._allSongs.findIndex(s => s.id === id);
+            if (idx !== -1) Songs.play(idx);
+        } else if (type === 'podcast') {
+            Podcasts.init();
+            const idx = Podcasts._allPodcasts.findIndex(p => p.id === id);
+            if (idx !== -1) Podcasts.play(idx);
+        }
+
+        // Данные обновляем фоном — не блокируем запуск трека
+        App._loadRemoteData();
+    } else {
+        // Обычный запуск — ждём данных
+        await App.init();
         App.navigate('main');
-        return;
-    }
-
-    // Deep link — открываем нужный раздел и запускаем трек
-    const [, type, idStr] = deepLinkMatch;
-    const id = parseInt(idStr);
-
-    if (type === 'song') {
-        Songs.init();
-        const idx = Songs._allSongs.findIndex(s => s.id === id);
-        if (idx !== -1) Songs.play(idx);
-        else Songs.play(0); // запускаем первый если не нашли
-    } else if (type === 'podcast') {
-        Podcasts.init();
-        const idx = Podcasts._allPodcasts.findIndex(p => p.id === id);
-        if (idx !== -1) Podcasts.play(idx);
-        else Podcasts.play(0);
     }
 });
