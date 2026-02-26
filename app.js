@@ -50,41 +50,35 @@ const App = {
         showToast('🗑️ Прогресс сброшен');
     },
 
-    // Загружаем data.json из репозитория при первом открытии
+    // Загружаем data.json из репозитория — ВСЕГДА при старте, ждём завершения
     async _loadRemoteData() {
         const KEYS = ['songs','podcasts','puzzles','riddles'];
         const REPO = 'Saturn-Kassiel/Kids-site';
-
-        // Если данные уже есть И нет флага обновления — не перезаписываем
         const needsUpdate = localStorage.getItem('gh_data_updated') === 'true';
-        if (!needsUpdate && KEYS.some(k => localStorage.getItem('admin_' + k))) return;
-        localStorage.removeItem('gh_data_updated'); // снимаем флаг
+
+        // Пропускаем если данные есть И нет флага обновления
+        if (!needsUpdate && KEYS.every(k => localStorage.getItem('admin_' + k))) return;
+        localStorage.removeItem('gh_data_updated');
 
         try {
-            // Грузим raw файл из GitHub
             const url = 'https://raw.githubusercontent.com/' + REPO + '/main/data.json';
-            const resp = await fetch(url + '?t=' + Date.now());
-            if (!resp.ok) { console.log('data.json not found on GitHub'); return; }
+            const resp = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
+            if (!resp.ok) return;
             const data = await resp.json();
-            let loaded = 0;
             KEYS.forEach(k => {
                 if (Array.isArray(data[k]) && data[k].length) {
                     localStorage.setItem('admin_' + k, JSON.stringify(data[k]));
-                    loaded++;
                 }
             });
-            if (loaded) {
-                console.log('✅ Загружено из data.json:', loaded, 'разделов');
-                showToast('✅ Данные загружены');
-            }
+            console.log('✅ data.json загружен');
         } catch(e) {
-            console.log('data.json fetch error:', e.message);
+            console.log('data.json недоступен, используем localStorage:', e.message);
         }
     },
 
-    init() {
-        // Загружаем данные из GitHub если localStorage пустой
-        this._loadRemoteData();
+    async init() {
+        // Сначала ЖДЁМ загрузки данных — только потом скрываем loader
+        await this._loadRemoteData();
 
         // Restore theme
         const theme = localStorage.getItem('theme') || 'light';
@@ -118,13 +112,10 @@ const App = {
             }
         };
         window.addEventListener('hashchange', checkHash);
-        // Check hash on initial load
         if (window.location.hash === '#see') checkHash();
 
-        // Hide loader
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-        }, 400);
+        // Скрываем loader — данные уже загружены (await выше)
+        document.getElementById('loader').style.display = 'none';
     }
 };
 
@@ -1449,8 +1440,7 @@ const Admin = {
 // =============================================
 // INIT
 // =============================================
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
-    // Start on main
+document.addEventListener('DOMContentLoaded', async () => {
+    await App.init();
     App.navigate('main');
 });
