@@ -50,7 +50,42 @@ const App = {
         showToast('🗑️ Прогресс сброшен');
     },
 
+    // Загружаем data.json из репозитория при первом открытии
+    async _loadRemoteData() {
+        const KEYS = ['songs','podcasts','puzzles','riddles'];
+        const REPO = 'Saturn-Kassiel/Kids-site';
+
+        // Если данные уже есть И нет флага обновления — не перезаписываем
+        const needsUpdate = localStorage.getItem('gh_data_updated') === 'true';
+        if (!needsUpdate && KEYS.some(k => localStorage.getItem('admin_' + k))) return;
+        localStorage.removeItem('gh_data_updated'); // снимаем флаг
+
+        try {
+            // Грузим raw файл из GitHub
+            const url = 'https://raw.githubusercontent.com/' + REPO + '/main/data.json';
+            const resp = await fetch(url + '?t=' + Date.now());
+            if (!resp.ok) { console.log('data.json not found on GitHub'); return; }
+            const data = await resp.json();
+            let loaded = 0;
+            KEYS.forEach(k => {
+                if (Array.isArray(data[k]) && data[k].length) {
+                    localStorage.setItem('admin_' + k, JSON.stringify(data[k]));
+                    loaded++;
+                }
+            });
+            if (loaded) {
+                console.log('✅ Загружено из data.json:', loaded, 'разделов');
+                showToast('✅ Данные загружены');
+            }
+        } catch(e) {
+            console.log('data.json fetch error:', e.message);
+        }
+    },
+
     init() {
+        // Загружаем данные из GitHub если localStorage пустой
+        this._loadRemoteData();
+
         // Restore theme
         const theme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', theme);
@@ -320,24 +355,25 @@ const Media = {
         const placeholder = document.getElementById('video-placeholder');
         document.getElementById('video-label').textContent = item.label;
 
-        // Всегда полностью сбрасываем видео перед загрузкой нового
+        // Полный сброс видео — скрываем элемент, показываем placeholder
         vid.pause();
         vid.removeAttribute('src');
         vid.load();
+        vid.style.display = 'none';
         placeholder.style.display = 'flex';
 
         if (item.video) {
-            vid.src = item.video;
-            vid.load();
             vid.onloadeddata = () => {
+                vid.style.display = 'block';
                 placeholder.style.display = 'none';
                 vid.play().catch(() => {});
             };
             vid.onerror = () => {
-                vid.removeAttribute('src');
-                vid.load();
+                vid.style.display = 'none';
                 placeholder.style.display = 'flex';
             };
+            vid.src = item.video;
+            vid.load();
         }
 
         // Audio
@@ -492,14 +528,18 @@ const Songs = {
         const songVidWrap = document.getElementById('song-video-wrap');
         const songVid = document.getElementById('song-video');
         if (songVidWrap && songVid) {
+            songVid.pause();
+            songVid.removeAttribute('src');
+            songVid.load();
+            songVidWrap.style.display = 'none';
             if (song.video) {
+                songVid.onloadeddata = () => {
+                    songVidWrap.style.display = 'block';
+                    songVid.play().catch(() => {});
+                };
+                songVid.onerror = () => { songVidWrap.style.display = 'none'; };
                 songVid.src = song.video;
                 songVid.load();
-                songVid.play().catch(() => {});
-                songVidWrap.style.display = 'block';
-            } else {
-                songVid.src = '';
-                songVidWrap.style.display = 'none';
             }
         }
         this.render();
@@ -1387,6 +1427,8 @@ const Admin = {
                 localStorage.setItem('gh_token', token); // сохраняем токен
                 showToast('✅ Данные опубликованы на GitHub!');
                 console.log('Published:', result.content?.html_url);
+                // Флаг: при следующем открытии сайта загрузить свежие данные
+                localStorage.setItem('gh_data_updated', 'true');
             } else {
                 const err = await putResp.json();
                 const msg = err.message || 'Ошибка';

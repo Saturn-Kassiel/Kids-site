@@ -219,7 +219,7 @@ section.hidden { display: none !important; }
     width: 100%;
     border-radius: var(--radius);
     overflow: hidden;
-    background: #000;
+    background: linear-gradient(135deg, #0d1b2e 0%, #1a2744 100%);
     aspect-ratio: 1/1;
     position: relative;
     margin-bottom: 12px;
@@ -228,16 +228,19 @@ section.hidden { display: none !important; }
     width: 100%; height: 100%;
     object-fit: cover;
     pointer-events: none;
-    display: block;
+    display: none; /* скрыт по умолчанию, показывается когда видео загружено */
 }
 .video-placeholder-inner {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 8px; color: #fff8;
-    font-size: 13px;
+    gap: 10px; color: rgba(255,255,255,0.55);
+    font-size: 15px; letter-spacing: 0.02em;
 }
-.video-placeholder-inner .pi { font-size: 38px; opacity: 0.4; }
+.video-placeholder-inner .pi {
+    font-size: 52px; opacity: 0.35;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+}
 
 /* ===== AUDIO PLAYER — стиль референса ===== */
 .audio-player {
