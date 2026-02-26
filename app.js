@@ -54,25 +54,27 @@ const App = {
     async _loadRemoteData() {
         const KEYS = ['songs','podcasts','puzzles','riddles'];
         const REPO = 'Saturn-Kassiel/Kids-site';
-        const needsUpdate = localStorage.getItem('gh_data_updated') === 'true';
 
-        // Пропускаем если данные есть И нет флага обновления
-        if (!needsUpdate && KEYS.every(k => localStorage.getItem('admin_' + k))) return;
-        localStorage.removeItem('gh_data_updated');
-
+        // ВСЕГДА загружаем свежий data.json из GitHub —
+        // это единственный источник правды для GitHub Pages
         try {
             const url = 'https://raw.githubusercontent.com/' + REPO + '/main/data.json';
             const resp = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
-            if (!resp.ok) return;
+            if (!resp.ok) {
+                console.log('data.json не найден, используем localStorage');
+                return;
+            }
             const data = await resp.json();
             KEYS.forEach(k => {
                 if (Array.isArray(data[k]) && data[k].length) {
                     localStorage.setItem('admin_' + k, JSON.stringify(data[k]));
                 }
             });
-            console.log('✅ data.json загружен');
+            localStorage.removeItem('gh_data_updated');
+            console.log('✅ data.json загружен с GitHub');
         } catch(e) {
-            console.log('data.json недоступен, используем localStorage:', e.message);
+            // Нет сети или GitHub недоступен — берём что есть в localStorage
+            console.log('data.json недоступен:', e.message);
         }
     },
 
@@ -255,10 +257,10 @@ const Media = {
             const VIDEO_MAP = {
                 'А':'a', 'Б':'b', 'В':'v', 'Г':'g', 'Д':'d',
                 'Е':'e', 'Ё':'yo', 'Ж':'zh', 'З':'z', 'И':'i',
-                'Й':null, 'К':'k', 'Л':'l', 'М':'m', 'Н':'n',
+                'Й':'y',  'К':'k', 'Л':'l', 'М':'m', 'Н':'n',
                 'О':'o', 'П':'p', 'Р':'r', 'С':'s', 'Т':'t',
                 'У':'u', 'Ф':'f', 'Х':'kh', 'Ц':'ts', 'Ч':'ch',
-                'Ш':'sh', 'Щ':'shch', 'Ъ':null, 'Ы':'y', 'Ь':null,
+                'Ш':'sh', 'Щ':'shch', 'Ъ':null, 'Ы':null,  'Ь':null,
                 'Э':'Э', 'Ю':'yu', 'Я':'ya'
             };
             // Специальные кириллические имена (Буква Б.mp3 и т.д.)
