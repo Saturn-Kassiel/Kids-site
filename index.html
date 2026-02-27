@@ -31,7 +31,7 @@
         </button>
         <span id="page-title-bar" class="hidden"></span>
         <span style="flex:1"></span>
-        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки" style="display:none;">⚙️</button>
+        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
     <!-- ========== MAIN ========== -->
@@ -58,7 +58,7 @@
         <div id="video-wrap">
             <video id="global-video" loop muted playsinline></video>
             <div class="video-placeholder-inner" id="video-placeholder">
-                <div class="pi">🎬</div>
+                <div class="pi"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg></div>
                 <span id="video-label">—</span>
             </div>
         </div>
@@ -79,11 +79,11 @@
                 <span class="player-time player-time-dur" id="time-dur">0:00</span>
             </div>
             <div class="player-btns">
-                <button class="ctrl-btn" id="shuffle-btn" onclick="Media.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn" onclick="Media.prev()">⏮</button>
-                <button id="play-btn" onclick="Media.toggle()">▶</button>
-                <button class="ctrl-btn" onclick="Media.next()">⏭</button>
-                <button class="ctrl-btn" id="repeat-btn" onclick="Media.toggleRepeat()">🔁</button>
+                <button class="ctrl-btn" id="shuffle-btn" onclick="Media.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Media.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="play-btn" onclick="Media.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Media.next()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="repeat-btn" onclick="Media.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
         </div>
         <div class="sp8"></div>
@@ -110,16 +110,16 @@
                 <span class="player-time player-time-dur" id="song-time-dur">0:00</span>
             </div>
             <div class="player-btns">
-                <button class="ctrl-btn" id="song-shuffle-btn" onclick="Songs.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn" onclick="Songs.prev()">⏮</button>
-                <button id="song-play-btn" onclick="Songs.toggle()">▶</button>
-                <button class="ctrl-btn" onclick="Songs.nextSong()">⏭</button>
-                <button class="ctrl-btn" id="song-repeat-btn" onclick="Songs.toggleRepeat()">🔁</button>
+                <button class="ctrl-btn" id="song-shuffle-btn" onclick="Songs.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Songs.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="song-play-btn" onclick="Songs.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Songs.nextSong()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="song-repeat-btn" onclick="Songs.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
         </div>
         <div class="sp8"></div>
         <div class="search-bar">
-            <span>🔍</span>
+            <span><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
             <input type="text" id="song-search" placeholder="Найти песенку..." oninput="Songs.filter(this.value)">
         </div>
         <div class="songs-list" id="songs-list"></div>
@@ -143,16 +143,16 @@
                 <span class="player-time player-time-dur" id="podcast-time-dur">0:00</span>
             </div>
             <div class="player-btns">
-                <button class="ctrl-btn" id="podcast-shuffle-btn" onclick="Podcasts.toggleShuffle()">🔀</button>
-                <button class="ctrl-btn" onclick="Podcasts.prev()">⏮</button>
-                <button id="podcast-play-btn" onclick="Podcasts.toggle()">▶</button>
-                <button class="ctrl-btn" onclick="Podcasts.nextPodcast()">⏭</button>
-                <button class="ctrl-btn" id="podcast-repeat-btn" onclick="Podcasts.toggleRepeat()">🔁</button>
+                <button class="ctrl-btn" id="podcast-shuffle-btn" onclick="Podcasts.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Podcasts.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="podcast-play-btn" onclick="Podcasts.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Podcasts.nextPodcast()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="podcast-repeat-btn" onclick="Podcasts.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
         </div>
         <div class="sp8"></div>
         <div class="search-bar">
-            <span>🔍</span>
+            <span><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
             <input type="text" id="podcast-search" placeholder="Найти подкаст..." oninput="Podcasts.filter(this.value)">
         </div>
         <div class="songs-list" id="podcasts-list"></div>
@@ -160,12 +160,12 @@
 
     <!-- ========== PUZZLES ========== -->
     <section id="puzzles" class="hidden">
-        <div class="puzzle-img-wrap" id="puzzle-img">🧩</div>
-        <div class="hint-box" id="puzzle-hint">💡 Подсказка</div>
+        <div class="puzzle-img-wrap" id="puzzle-img"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+        <div class="hint-box" id="puzzle-hint"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" class="icon-svg hint-svg"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</div>
         <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
         <div id="puzzle-msg"></div>
         <div class="riddle-btns-row">
-            <button class="submit-btn" onclick="Puzzles.check()">✅ Проверить</button>
+            <button class="submit-btn" onclick="Puzzles.check()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="20,6 9,17 4,12"/></svg> Проверить</button>
             <button class="next-btn" onclick="Puzzles.next()">Следующий →</button>
         </div>
     </section>
@@ -176,7 +176,7 @@
         <input type="text" id="riddle-input" placeholder="Введи ответ...">
         <div id="riddle-msg"></div>
         <div class="riddle-btns-row">
-            <button class="submit-btn" onclick="Riddles.check()">✅ Проверить</button>
+            <button class="submit-btn" onclick="Riddles.check()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="20,6 9,17 4,12"/></svg> Проверить</button>
             <button class="next-btn" onclick="Riddles.next()">Следующая →</button>
         </div>
         <div class="answer-img" id="riddle-img"></div>
@@ -184,7 +184,7 @@
 
     <!-- ========== FINGER GAMES ========== -->
     <section id="finger" class="hidden">
-        <div style="text-align:center;padding:40px 0;font-size:64px;">🖐️</div>
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8M6 14v2a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6v-3a2 2 0 0 0-4 0v-1a2 2 0 0 0-4 0"/></svg></div>
         <div class="riddle-box">Пальчиковые игры</div>
         <div class="info-block" style="margin-top:12px;">
             <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
@@ -193,7 +193,7 @@
 
     <!-- ========== ARTICULATION ========== -->
     <section id="articul" class="hidden">
-        <div style="text-align:center;padding:40px 0;font-size:64px;">👄</div>
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M12 19c-4.42 0-8-1.79-8-4v-1a8 8 0 0 1 16 0v1c0 2.21-3.58 4-8 4z"/><path d="M8 14s1 1 4 1 4-1 4-1"/></svg></div>
         <div class="riddle-box">Артикуляционная гимнастика</div>
         <div class="info-block" style="margin-top:12px;">
             <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
@@ -202,7 +202,7 @@
 
     <!-- ========== BREATHING ========== -->
     <section id="breath" class="hidden">
-        <div style="text-align:center;padding:40px 0;font-size:64px;">💨</div>
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg></div>
         <div class="riddle-box">Дыхательная гимнастика</div>
         <div class="info-block" style="margin-top:12px;">
             <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
@@ -217,7 +217,7 @@
     <!-- ========== STATS ========== -->
     <section id="stats" class="hidden">
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-purple)">🧩</div>
+            <div class="stat-icon" style="background:var(--grad-purple)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
             <div style="flex:1">
                 <div class="stat-val" id="st-puzzles">0</div>
                 <div class="stat-lbl">Ребусов решено</div>
@@ -225,7 +225,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-green)">🤔</div>
+            <div class="stat-icon" style="background:var(--grad-green)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div style="flex:1">
                 <div class="stat-val" id="st-riddles">0</div>
                 <div class="stat-lbl">Загадок угадано</div>
@@ -233,7 +233,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-yellow)">🎵</div>
+            <div class="stat-icon" style="background:var(--grad-yellow)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
             <div style="flex:1">
                 <div class="stat-val" id="st-songs">0</div>
                 <div class="stat-lbl">Песенок прослушано</div>
@@ -241,50 +241,50 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-blue)">🔤</div>
+            <div class="stat-icon" style="background:var(--grad-blue)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="4,7 4,4 20,4 20,7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
             <div style="flex:1">
                 <div class="stat-val" id="st-letters">0</div>
                 <div class="stat-lbl">Букв изучено</div>
                 <div class="stat-track"><div class="stat-fill" id="sf-letters" style="background:var(--grad-blue)"></div></div>
             </div>
         </div>
-        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:12px;font-weight:700;">Продолжай учиться — ты молодец! 🌟</div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:12px;font-weight:700;">Продолжай учиться — ты молодец! <svg class="icon-svg" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div>
     </section>
 
     <!-- ========== SETTINGS ========== -->
     <section id="settings" class="hidden">
         <div class="settings-group">
             <div class="settings-row">
-                <span class="s-icon">🌙</span>
+                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
                 <div><div class="s-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
                 <div class="toggle" id="tog-theme" onclick="App.toggleTheme(this)"></div>
             </div>
         </div>
         <div class="settings-group">
             <div class="settings-row">
-                <span class="s-icon">🔊</span>
+                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
                 <div><div class="s-label">Звук</div><div class="s-sub">Звуковые уведомления</div></div>
                 <div class="toggle on" id="tog-sound" onclick="this.classList.toggle('on');saveSetting('sound',this.classList.contains('on'))"></div>
             </div>
             <div class="settings-row">
-                <span class="s-icon">🎵</span>
+                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
                 <div><div class="s-label">Автовоспроизведение</div><div class="s-sub">Запускать музыку автоматически</div></div>
                 <div class="toggle on" id="tog-auto" onclick="this.classList.toggle('on');saveSetting('auto',this.classList.contains('on'))"></div>
             </div>
             <div class="settings-row">
-                <span class="s-icon">⭐</span>
+                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></span>
                 <div><div class="s-label">Анимации</div><div class="s-sub">Звёздочки и эффекты</div></div>
                 <div class="toggle on" id="tog-anim" onclick="this.classList.toggle('on');saveSetting('anim',this.classList.contains('on'))"></div>
             </div>
         </div>
         <div class="settings-group">
             <div class="settings-row" style="cursor:pointer" onclick="App.resetStats()">
-                <span class="s-icon">🗑️</span>
+                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
                 <div><div class="s-label" style="color:#ef4444">Сбросить прогресс</div><div class="s-sub">Очистить все данные</div></div>
                 <span style="color:var(--text2);font-size:18px">›</span>
             </div>
         </div>
-        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Говоруша v1.0 · Сделано с ❤️</div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Говоруша v1.0 · Сделано с <svg class="icon-svg" viewBox="0 0 24 24" fill="#f87171" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
     </section>
 
     <!-- ========== ADMIN ========== -->
@@ -298,7 +298,7 @@
         </div>
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
-            <button class="admin-add-btn" onclick="Admin.openModal(null)">➕ Добавить</button>
+            <button class="admin-add-btn" onclick="Admin.openModal(null)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить</button>
             <div class="github-token-row">
                 <div class="github-token-label">GitHub Token</div>
                 <div class="github-token-input-wrap">
@@ -306,11 +306,11 @@
                         placeholder="ghp_xxxxxxxxxxxx"
                         autocomplete="off" spellcheck="false"
                         oninput="Admin.saveToken(this.value)">
-                    <button class="github-token-eye" onclick="Admin.toggleTokenEye(this)" title="Показать/скрыть">👁</button>
+                    <button class="github-token-eye" onclick="Admin.toggleTokenEye(this)" title="Показать/скрыть"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
                 <div class="github-token-hint">Хранится только в браузере · <a href="https://github.com/settings/tokens/new?scopes=repo&description=RazvivaykaApp" target="_blank" style="color:var(--text2)">Создать новый →</a></div>
             </div>
-            <button class="publish-btn" onclick="Admin.publish()" id="publish-btn">📤 Опубликовать на GitHub</button>
+            <button class="publish-btn" onclick="Admin.publish()" id="publish-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать на GitHub</button>
         </div>
     </section>
 
@@ -326,20 +326,20 @@
         <textarea id="m-body" rows="6" placeholder="Текст информационного блока..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:4px;resize:none;line-height:1.5;display:none;"></textarea>
         <div id="m-body-hint" style="display:none;margin-bottom:8px;">
             <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Красивая ссылка: <code style="background:var(--card2);padding:2px 6px;border-radius:5px;color:#54ACBF;">[Колыбельная](https://url)</code><br>Или просто вставьте URL — он станет ссылкой автоматически.</div>
-            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;">🔗 Вставить ссылку</button>
+            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Вставить ссылку</button>
         </div>
         <input type="text"     id="m-answer"  placeholder="Ответ (для ребусов/загадок)">
         <input type="text"     id="m-hint"    placeholder="Подсказка / Картинка-ребус (эмодзи)">
         <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
             <option value="">Уровень (только для ребусов)</option>
-            <option value="easy">🟢 Простой</option>
-            <option value="medium">🟡 Средний</option>
-            <option value="hard">🔴 Сложный</option>
+            <option value="easy">Простой</option>
+            <option value="medium">Средний</option>
+            <option value="hard">Сложный</option>
         </select>
         <div class="m-current-file" id="m-current-file"></div>
         <img id="m-pic-preview" src="" alt="Превью картинки">
         <label class="file-label">
-            📎 Прикрепить новый файл (аудио / картинку)
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Прикрепить файл
             <input type="file" id="m-file" accept="audio/*,image/*" onchange="Admin._onFileChange(this)">
         </label>
         <div class="file-chosen" id="m-file-name">Файл не выбран</div>

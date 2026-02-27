@@ -135,6 +135,7 @@ const App = {
                 const pass = prompt('Введите пароль:');
                 if (pass === '1239940') {
                     Admin.init();
+                    Admin._updatePendingBadge();
                     App.navigate('admin', 'Админка');
                 } else if (pass !== null) {
                     showToast('❌ Неверный пароль');
@@ -233,6 +234,373 @@ function starsBurst() {
     showStars(window.innerWidth / 2, window.innerHeight * 0.55);
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 }
+
+
+// =============================================
+// ACHIEVEMENT SYSTEM
+// =============================================
+const Achievements = {
+    // Счётчики подряд (сбрасываются при ошибке)
+    _streak: { puzzles: 0, riddles: 0 },
+    // Лучший результат (сохраняется между сессиями)
+    _best:   { puzzles: 0, riddles: 0 },
+    // Уже показанные рубежи в текущей серии
+    _shown:  { puzzles: new Set(), riddles: new Set() },
+
+    init() {
+        const saved = JSON.parse(localStorage.getItem('achievements_best') || '{}');
+        this._best.puzzles = saved.puzzles || 0;
+        this._best.riddles = saved.riddles || 0;
+    },
+
+    correct(section) {
+        this._streak[section]++;
+        const s = this._streak[section];
+        if (this._best[section] < s) {
+            this._best[section] = s;
+            localStorage.setItem('achievements_best', JSON.stringify(this._best));
+        }
+        if (s % 5 === 0 && !this._shown[section].has(s)) {
+            this._shown[section].add(s);
+            setTimeout(() => this._show(section, s), 600);
+        }
+    },
+
+    wrong(section) {
+        this._streak[section] = 0;
+        this._shown[section]  = new Set();
+    },
+
+    _playFanfare(section) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = section === 'riddles'
+                ? [523, 659, 784, 1047]   // C E G C — загадки (мягко)
+                : [392, 523, 659, 784, 1047]; // G C E G C — ребусы (торжественно)
+            let t = ctx.currentTime;
+            notes.forEach((freq, i) => {
+                const osc  = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                osc.start(t); osc.stop(t + 0.4);
+                t += i < notes.length - 1 ? 0.12 : 0;
+            });
+        } catch(e) {}
+    },
+
+    _milestoneTheme(section, count) {
+        // Медальки по уровню
+        const tier = count >= 20 ? 4 : count >= 15 ? 3 : count >= 10 ? 2 : 1;
+        if (section === 'riddles') {
+            // Совы / лампочки
+            const items = [
+                { icon: this._drawOwl,   color: '#A7EBF2', label: 'Умная сова' },
+                { icon: this._drawBulb,  color: '#fde68a', label: 'Яркая идея' },
+                { icon: this._drawOwl,   color: '#c4b5fd', label: 'Мудрая сова' },
+                { icon: this._drawOwlGold, color: '#fcd34d', label: 'Великий знаток' },
+            ];
+            return items[tier - 1];
+        } else {
+            // Пазлы / мозг
+            const items = [
+                { icon: this._drawPuzzle, color: '#A7EBF2', label: 'Сообразительный' },
+                { icon: this._drawBrain,  color: '#86efac', label: 'Острый ум' },
+                { icon: this._drawPuzzle, color: '#c4b5fd', label: 'Мастер ребусов' },
+                { icon: this._drawBrainGold, color: '#fcd34d', label: 'Гений загадок' },
+            ];
+            return items[tier - 1];
+        }
+    },
+
+    _show(section, count) {
+        this._playFanfare(section);
+        const theme = this._milestoneTheme(section, count);
+
+        const overlay = document.createElement('div');
+        overlay.id = 'achievement-overlay';
+        overlay.innerHTML = `
+            <div class="ach-card" id="ach-card">
+                <div class="ach-canvas-wrap">
+                    <canvas id="ach-canvas" width="220" height="220"></canvas>
+                    <div class="ach-count-badge">${count}</div>
+                </div>
+                <div class="ach-label">${count} правильных ответов подряд!</div>
+                <div class="ach-sub">${theme.label}</div>
+                <div class="ach-progress-bar"><div class="ach-progress-fill" id="ach-progress"></div></div>
+                <div class="ach-btns">
+                    <button class="ach-share-btn" onclick="Achievements._share(${count},'${section}')">
+                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        Поделиться
+                    </button>
+                    <button class="ach-close-btn" onclick="Achievements._close()">Закрыть</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Рисуем иконку на canvas
+        const canvas = document.getElementById('ach-canvas');
+        if (canvas) {
+            const ctx2 = canvas.getContext('2d');
+            theme.icon.call(this, ctx2, 220, theme.color);
+        }
+
+        // Анимация появления
+        requestAnimationFrame(() => {
+            overlay.classList.add('ach-visible');
+            document.getElementById('ach-card')?.classList.add('ach-card-in');
+            // Запускаем progress bar
+            setTimeout(() => {
+                const bar = document.getElementById('ach-progress');
+                if (bar) bar.style.width = '0%';
+            }, 50);
+        });
+
+        // Конфетти
+        if (window.confetti) confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
+
+        // Автозакрытие через 10 сек
+        this._autoClose = setTimeout(() => this._close(), 10000);
+    },
+
+    _close() {
+        clearTimeout(this._autoClose);
+        const overlay = document.getElementById('achievement-overlay');
+        if (overlay) {
+            overlay.classList.remove('ach-visible');
+            setTimeout(() => overlay.remove(), 350);
+        }
+    },
+
+    async _share(count, section) {
+        const name = section === 'riddles' ? 'загадках' : 'ребусах';
+        const text = `🎉 ${count} правильных ответов подряд в ${name}! Попробуй сам: https://saturn-kassiel.github.io/Kids-site/`;
+        if (navigator.share) {
+            try { await navigator.share({ text }); } catch(e) {}
+        } else {
+            navigator.clipboard.writeText(text).catch(() => {});
+            showToast('📋 Скопировано!');
+        }
+    },
+
+    // ── Canvas рисовалки ──
+
+    _drawOwl(ctx, size, color) {
+        const cx = size/2, cy = size/2, r = size*0.36;
+        // Фон — круг с градиентом
+        const g = ctx.createRadialGradient(cx, cy-r*0.2, r*0.1, cx, cy, r*1.2);
+        g.addColorStop(0, color); g.addColorStop(1, color + '44');
+        ctx.beginPath(); ctx.arc(cx, cy, r*1.1, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        // Тело
+        ctx.beginPath();
+        ctx.ellipse(cx, cy+r*0.15, r*0.55, r*0.7, 0, 0, Math.PI*2);
+        ctx.fillStyle = '#5b4a2e'; ctx.fill();
+        // Голова
+        ctx.beginPath();
+        ctx.arc(cx, cy-r*0.3, r*0.4, 0, Math.PI*2);
+        ctx.fillStyle = '#7c6542'; ctx.fill();
+        // Ушки
+        ctx.beginPath();
+        ctx.moveTo(cx-r*0.28, cy-r*0.55);
+        ctx.lineTo(cx-r*0.42, cy-r*0.85);
+        ctx.lineTo(cx-r*0.08, cy-r*0.62);
+        ctx.fillStyle = '#7c6542'; ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx+r*0.28, cy-r*0.55);
+        ctx.lineTo(cx+r*0.42, cy-r*0.85);
+        ctx.lineTo(cx+r*0.08, cy-r*0.62);
+        ctx.fillStyle = '#7c6542'; ctx.fill();
+        // Глаза
+        [[cx-r*0.18, cy-r*0.32],[cx+r*0.18, cy-r*0.32]].forEach(([x,y]) => {
+            ctx.beginPath(); ctx.arc(x, y, r*0.14, 0, Math.PI*2);
+            ctx.fillStyle = '#fff'; ctx.fill();
+            ctx.beginPath(); ctx.arc(x+r*0.02, y+r*0.02, r*0.08, 0, Math.PI*2);
+            ctx.fillStyle = '#1a1a2e'; ctx.fill();
+            ctx.beginPath(); ctx.arc(x+r*0.04, y-r*0.04, r*0.03, 0, Math.PI*2);
+            ctx.fillStyle = '#fff'; ctx.fill();
+        });
+        // Клюв
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-r*0.18); ctx.lineTo(cx-r*0.08, cy-r*0.1); ctx.lineTo(cx+r*0.08, cy-r*0.1);
+        ctx.fillStyle = '#f59e0b'; ctx.fill();
+        // Брови удивлённые
+        ctx.strokeStyle = '#3d2b00'; ctx.lineWidth = r*0.05; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(cx-r*0.28, cy-r*0.48); ctx.lineTo(cx-r*0.08, cy-r*0.44); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx+r*0.28, cy-r*0.48); ctx.lineTo(cx+r*0.08, cy-r*0.44); ctx.stroke();
+        // Звёздочки
+        Achievements._drawStars(ctx, cx, cy, r, color);
+    },
+
+    _drawOwlGold(ctx, size, color) {
+        Achievements._drawOwl(ctx, size, color);
+        // Корона
+        const cx = size/2, cy = size/2, r = size*0.36;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.rect(cx-r*0.35, cy-r*0.85, r*0.7, r*0.22);
+        ctx.fill();
+        for(let i=0; i<5; i++){
+            ctx.beginPath();
+            ctx.moveTo(cx-r*0.35+i*r*0.175, cy-r*0.85);
+            ctx.lineTo(cx-r*0.315+i*r*0.175, cy-r*1.05);
+            ctx.lineTo(cx-r*0.28+i*r*0.175, cy-r*0.85);
+            ctx.fillStyle = '#f59e0b'; ctx.fill();
+        }
+    },
+
+    _drawBulb(ctx, size, color) {
+        const cx = size/2, cy = size/2, r = size*0.36;
+        const g = ctx.createRadialGradient(cx, cy-r*0.2, r*0.1, cx, cy, r*1.2);
+        g.addColorStop(0, color); g.addColorStop(1, color + '44');
+        ctx.beginPath(); ctx.arc(cx, cy, r*1.1, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        // Лампочка
+        ctx.beginPath();
+        ctx.arc(cx, cy-r*0.15, r*0.5, Math.PI, 0);
+        ctx.lineTo(cx+r*0.3, cy+r*0.2);
+        ctx.bezierCurveTo(cx+r*0.3, cy+r*0.45, cx-r*0.3, cy+r*0.45, cx-r*0.3, cy+r*0.2);
+        ctx.closePath();
+        ctx.fillStyle = '#fef08a'; ctx.fill();
+        ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = r*0.06; ctx.stroke();
+        // Цоколь
+        ctx.beginPath(); ctx.rect(cx-r*0.22, cy+r*0.42, r*0.44, r*0.12);
+        ctx.fillStyle = '#9ca3af'; ctx.fill();
+        ctx.beginPath(); ctx.rect(cx-r*0.18, cy+r*0.54, r*0.36, r*0.1);
+        ctx.fillStyle = '#9ca3af'; ctx.fill();
+        // Свечение
+        ctx.beginPath(); ctx.arc(cx, cy-r*0.15, r*0.65, 0, Math.PI*2);
+        ctx.strokeStyle = '#fde047' + '55'; ctx.lineWidth = r*0.12; ctx.stroke();
+        // Лучи
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = r*0.05;
+        for(let a=0; a<8; a++){
+            const angle = (a/8)*Math.PI*2;
+            const x1=cx+Math.cos(angle)*r*0.7, y1=cy-r*0.15+Math.sin(angle)*r*0.7;
+            const x2=cx+Math.cos(angle)*r*0.9, y2=cy-r*0.15+Math.sin(angle)*r*0.9;
+            ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+        }
+        Achievements._drawStars(ctx, cx, cy, r, color);
+    },
+
+    _drawPuzzle(ctx, size, color) {
+        const cx = size/2, cy = size/2, r = size*0.36;
+        const g = ctx.createRadialGradient(cx, cy-r*0.2, r*0.1, cx, cy, r*1.2);
+        g.addColorStop(0, color); g.addColorStop(1, color + '44');
+        ctx.beginPath(); ctx.arc(cx, cy, r*1.1, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        // 4 кусочка пазла
+        const ps = r * 0.38;
+        const pieces = [
+            {x: cx-ps*0.05, y: cy-ps*0.05, c:'#60a5fa'},
+            {x: cx+ps*0.05, y: cy-ps*0.05, c:'#34d399'},
+            {x: cx-ps*0.05, y: cy+ps*0.05, c:'#f472b6'},
+            {x: cx+ps*0.05, y: cy+ps*0.05, c:'#fbbf24'},
+        ];
+        pieces.forEach(({x,y,c},i) => {
+            const dx = i%2===0 ? -1 : 1, dy = i<2 ? -1 : 1;
+            ctx.save(); ctx.translate(x + dx*ps*0.48, y + dy*ps*0.48);
+            ctx.beginPath();
+            ctx.rect(-ps*0.46, -ps*0.46, ps*0.9, ps*0.9);
+            ctx.fillStyle = c; ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = r*0.05; ctx.stroke();
+            // Выступ пазла
+            ctx.beginPath();
+            if(i===0) ctx.arc(0, ps*0.46, ps*0.15, Math.PI, 0);
+            if(i===1) ctx.arc(-ps*0.46, 0, ps*0.15, Math.PI*0.5, -Math.PI*0.5);
+            if(i===2) ctx.arc(ps*0.46, 0, ps*0.15, -Math.PI*0.5, Math.PI*0.5);
+            if(i===3) ctx.arc(0, -ps*0.46, ps*0.15, 0, Math.PI);
+            ctx.fillStyle = c; ctx.fill();
+            ctx.restore();
+        });
+        Achievements._drawStars(ctx, cx, cy, r, color);
+    },
+
+    _drawBrain(ctx, size, color) {
+        const cx = size/2, cy = size/2, r = size*0.36;
+        const g = ctx.createRadialGradient(cx, cy, r*0.1, cx, cy, r*1.2);
+        g.addColorStop(0, color); g.addColorStop(1, color + '44');
+        ctx.beginPath(); ctx.arc(cx, cy, r*1.1, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        // Мозг — два полушария
+        ctx.strokeStyle = '#e879f9'; ctx.lineWidth = r*0.07; ctx.lineCap = 'round';
+        ctx.fillStyle = '#f0abfc';
+        // Левое полушарие
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-r*0.1);
+        ctx.bezierCurveTo(cx-r*0.1, cy-r*0.7, cx-r*0.85, cy-r*0.6, cx-r*0.8, cy-r*0.1);
+        ctx.bezierCurveTo(cx-r*0.85, cy+r*0.4, cx-r*0.2, cy+r*0.55, cx, cy+r*0.4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Правое полушарие
+        ctx.beginPath();
+        ctx.moveTo(cx, cy-r*0.1);
+        ctx.bezierCurveTo(cx+r*0.1, cy-r*0.7, cx+r*0.85, cy-r*0.6, cx+r*0.8, cy-r*0.1);
+        ctx.bezierCurveTo(cx+r*0.85, cy+r*0.4, cx+r*0.2, cy+r*0.55, cx, cy+r*0.4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Борозды
+        ctx.strokeStyle = '#d946ef'; ctx.lineWidth = r*0.045;
+        const grooves = [
+            [cx-r*0.55, cy-r*0.35, cx-r*0.3, cy-r*0.15],
+            [cx-r*0.6, cy+r*0.05, cx-r*0.25, cy+r*0.2],
+            [cx+r*0.55, cy-r*0.35, cx+r*0.3, cy-r*0.15],
+            [cx+r*0.6, cy+r*0.05, cx+r*0.25, cy+r*0.2],
+        ];
+        grooves.forEach(([x1,y1,x2,y2]) => {
+            ctx.beginPath();
+            ctx.moveTo(x1,y1); ctx.quadraticCurveTo((x1+x2)/2, (y1+y2)/2-r*0.1, x2,y2);
+            ctx.stroke();
+        });
+        // Разделитель
+        ctx.strokeStyle = '#a21caf'; ctx.lineWidth = r*0.05;
+        ctx.beginPath(); ctx.moveTo(cx, cy-r*0.1); ctx.lineTo(cx, cy+r*0.4); ctx.stroke();
+        Achievements._drawStars(ctx, cx, cy, r, color);
+    },
+
+    _drawBrainGold(ctx, size, color) {
+        Achievements._drawBrain(ctx, size, color);
+        const cx = size/2, cy = size/2, r = size*0.36;
+        // Корона поверх
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.rect(cx-r*0.4, cy-r*0.9, r*0.8, r*0.22);
+        ctx.fill();
+        for(let i=0;i<5;i++){
+            ctx.beginPath();
+            ctx.moveTo(cx-r*0.4+i*r*0.2, cy-r*0.9);
+            ctx.lineTo(cx-r*0.36+i*r*0.2, cy-r*1.12);
+            ctx.lineTo(cx-r*0.32+i*r*0.2, cy-r*0.9);
+            ctx.fillStyle = '#f59e0b'; ctx.fill();
+        }
+    },
+
+    _drawStars(ctx, cx, cy, r, color) {
+        // Маленькие звёздочки вокруг
+        const positions = [
+            [cx-r*0.85, cy-r*0.8], [cx+r*0.85, cy-r*0.8],
+            [cx-r*1.0,  cy+r*0.1], [cx+r*1.0,  cy+r*0.1],
+            [cx,        cy-r*1.1],
+        ];
+        positions.forEach(([x,y], i) => {
+            const sr = r * (i===4 ? 0.13 : 0.09);
+            ctx.save(); ctx.translate(x, y);
+            ctx.beginPath();
+            for(let p=0; p<5; p++){
+                const a = (p*4*Math.PI/5) - Math.PI/2;
+                const b = (p*4*Math.PI/5 + 2*Math.PI/5) - Math.PI/2;
+                p===0 ? ctx.moveTo(Math.cos(a)*sr, Math.sin(a)*sr)
+                      : ctx.lineTo(Math.cos(a)*sr, Math.sin(a)*sr);
+                ctx.lineTo(Math.cos(b)*sr*0.4, Math.sin(b)*sr*0.4);
+            }
+            ctx.closePath();
+            ctx.fillStyle = '#fde047'; ctx.fill();
+            ctx.restore();
+        });
+    },
+};
 
 // -------- AUDIO MANAGER --------
 // Keeps only one audio playing globally; persists across section changes
@@ -385,7 +753,7 @@ const Media = {
         setupProgress(this.player, 'progress-bar', 'time-cur', 'time-dur', 'prog-wrap');
         this.player.onended = () => {
             if (this.isRepeat) { this.play(this.index); return; }
-            document.getElementById('play-btn').textContent = '▶';
+            document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg>';
             setTimeout(() => this.next(), 1000);
         };
         this.play(0);
@@ -446,7 +814,7 @@ const Media = {
         // Audio
         this.player.src = item.audio;
         AudioMgr.play(this.player, 'media');
-        document.getElementById('play-btn').textContent = '⏸';
+        document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
         document.getElementById('track-name').textContent = item.label;
         document.getElementById('track-icon').textContent = item.icon;
         document.getElementById('track-sub').textContent  = this._sectionType === 'alphabet' ? 'Кириллический алфавит' : this._sectionType === 'colors' ? 'Учим цвета' : 'Учим цифры';
@@ -467,10 +835,10 @@ const Media = {
     toggle() {
         if (this.player.paused) {
             AudioMgr.play(this.player, 'media');
-            document.getElementById('play-btn').textContent = '⏸';
+            document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
         } else {
             this.player.pause();
-            document.getElementById('play-btn').textContent = '▶';
+            document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg>';
         }
     },
 
@@ -799,9 +1167,10 @@ const Podcasts = {
 // =============================================
 const Puzzles = {
     _level: 'easy',
-    _pos: { easy: 0, medium: 0, hard: 0 },
     _hasUnsaved: false,
     _solved: false,
+    _queue: { easy: [], medium: [], hard: [] },
+    _qpos:  { easy: 0,  medium: 0,  hard: 0  },
 
     _data: {
         easy: [
@@ -830,13 +1199,31 @@ const Puzzles = {
     init() {
         App.navigate('puzzles');
         this._loadFromAdmin();
-        this._pos = { easy: 0, medium: 0, hard: 0 };
         this._level = 'easy';
-        // Вставляем кружки уровней в топ-бар
+        this._rebuildQueues();
         this._renderLevelDots();
         this.show();
+        Achievements.init();
     },
 
+    _shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    },
+    _rebuildQueues() {
+        ['easy','medium','hard'].forEach(lv => {
+            const len = this._data[lv].length;
+            this._queue[lv] = this._shuffle([...Array(len).keys()]);
+            this._qpos[lv]  = 0;
+        });
+    },
+    _totalCount() {
+        return this._data.easy.length + this._data.medium.length + this._data.hard.length;
+    },
     _renderLevelDots() {
         ['puzzle-level-dots','puzzle-share-topbar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
         const topBar = document.getElementById('top-bar');
@@ -853,6 +1240,7 @@ const Puzzles = {
         const wrap = document.createElement('div');
         wrap.id = 'puzzle-level-dots';
         wrap.innerHTML = `
+            <span class="lvl-counter" id="puzzle-counter">${this._totalCount()}</span>
             <button class="lvl-dot easy   ${this._level==='easy'   ? 'active':''}" onclick="Puzzles.setLevel('easy')"   title="Простой"></button>
             <button class="lvl-dot medium ${this._level==='medium' ? 'active':''}" onclick="Puzzles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ? 'active':''}" onclick="Puzzles.setLevel('hard')"   title="Сложный"></button>
@@ -903,13 +1291,18 @@ const Puzzles = {
         });
         // Если какой-то уровень пуст — не оставляем пустым
         if (!this._data.easy.length)   this._data.easy   = [{ pic:'', hint:'', answer:'?' }];
-        if (!this._data.medium.length) this._data.medium = [{ pic:'', hint:'', answer:'?' }];
-        if (!this._data.hard.length)   this._data.hard   = [{ pic:'', hint:'', answer:'?' }];
+        if (!this._data.medium.length) this._data.medium = [...this._data.easy];
+        if (!this._data.hard.length)   this._data.hard   = [...this._data.easy];
+        this._rebuildQueues();
+        const cnt = document.getElementById('puzzle-counter');
+        if (cnt) cnt.textContent = this._totalCount();
     },
 
     _current() {
-        const list = this._data[this._level];
-        return list[this._pos[this._level] % list.length];
+        const list  = this._data[this._level];
+        const queue = this._queue[this._level];
+        const idx   = queue[this._qpos[this._level] % queue.length];
+        return list[idx];
     },
 
     show() {
@@ -925,7 +1318,7 @@ const Puzzles = {
         } else {
             puzImgEl.textContent = p.img || '🧩';
         }
-        document.getElementById('puzzle-hint').innerHTML = `💡 <b>Подсказка:</b> ${p.hint}`;
+        document.getElementById('puzzle-hint').innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> <b>Подсказка:</b> ${p.hint}`;
         const inp = document.getElementById('puzzle-input');
         inp.value = '';
         inp.className = '';
@@ -939,9 +1332,11 @@ const Puzzles = {
     setLevel(lv) {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить»'); return; }
         this._level = lv;
-        // Обновляем активный кружок
-        document.querySelectorAll('.lvl-dot').forEach(d => d.classList.remove('active'));
-        const active = document.querySelector(`.lvl-dot.${lv}`);
+        const len = this._data[lv].length;
+        this._queue[lv] = this._shuffle([...Array(len).keys()]);
+        this._qpos[lv]  = 0;
+        document.querySelectorAll('#puzzle-level-dots .lvl-dot').forEach(d => d.classList.remove('active'));
+        const active = document.querySelector(`#puzzle-level-dots .lvl-dot.${lv}`);
         if (active) active.classList.add('active');
         this.show();
     },
@@ -958,6 +1353,7 @@ const Puzzles = {
             msg.className = 'ok';
             this._solved = true;
             starsBurst();
+            Achievements.correct('puzzles');
             const cur = parseInt(localStorage.getItem('stat_puzzles') || 0);
             localStorage.setItem('stat_puzzles', cur + 1);
         } else {
@@ -969,7 +1365,20 @@ const Puzzles = {
 
     next() {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить»'); return; }
-        this._pos[this._level]++;
+        const lv = this._level;
+        this._qpos[lv]++;
+        if (this._qpos[lv] >= this._queue[lv].length) {
+            this._queue[lv] = this._shuffle([...Array(this._data[lv].length).keys()]);
+            this._qpos[lv]  = 0;
+            const order = ['easy','medium','hard'];
+            const next = order[(order.indexOf(lv) + 1) % order.length];
+            this._level = next;
+            document.querySelectorAll('#puzzle-level-dots .lvl-dot').forEach(d => d.classList.remove('active'));
+            const act = document.querySelector(`#puzzle-level-dots .lvl-dot.${next}`);
+            if (act) act.classList.add('active');
+            const names = {easy:'Простой', medium:'Средний', hard:'Сложный'};
+            showToast('🎯 Уровень: ' + names[next]);
+        }
         this.show();
     }
 };
@@ -982,11 +1391,12 @@ document.getElementById('puzzle-input').addEventListener('input', e => {
 // RIDDLES
 // =============================================
 const Riddles = {
-    _pos: 0,
     _hasUnsaved: false,
     _solved: false,
     _level: 'easy',
     _data: { easy: [], medium: [], hard: [] },
+    _queue: { easy: [], medium: [], hard: [] },
+    _qpos:  { easy: 0,  medium: 0,  hard: 0  },
 
     data: [
         { q:'Белым снегом всё одето, значит наступает ...', a:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' },
@@ -1021,13 +1431,32 @@ const Riddles = {
         { q:'Сначала пашут,\nПотом засевают,\nВремя придёт,\nУрожай собирают!', a:'Поле', pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' },
     ],
 
+    _shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    },
+    _rebuildQueues() {
+        ['easy','medium','hard'].forEach(lv => {
+            const len = this._data[lv].length;
+            this._queue[lv] = this._shuffle([...Array(len).keys()]);
+            this._qpos[lv]  = 0;
+        });
+    },
+    _totalCount() {
+        return this._data.easy.length + this._data.medium.length + this._data.hard.length;
+    },
+
     init() {
         App.navigate('riddles');
         this._level = 'easy';
         this._loadFromAdmin();
-        this._pos = 0;
         this._renderTopBar();
         this.show();
+        Achievements.init();
     },
 
     _loadFromAdmin() {
@@ -1044,17 +1473,24 @@ const Riddles = {
         // Если уровень пуст — берём easy
         if (!this._data.medium.length) this._data.medium = [...this._data.easy];
         if (!this._data.hard.length)   this._data.hard   = [...this._data.easy];
+        this._rebuildQueues();
+        const cnt = document.getElementById('riddle-counter');
+        if (cnt) cnt.textContent = this._totalCount();
     },
 
     _current() {
-        const list = this._data[this._level];
-        return list[this._pos % list.length];
+        const list  = this._data[this._level];
+        const queue = this._queue[this._level];
+        const idx   = queue[this._qpos[this._level] % queue.length];
+        return list[idx];
     },
 
     setLevel(lv) {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить ответ»'); return; }
         this._level = lv;
-        this._pos = 0;
+        const len = this._data[lv].length;
+        this._queue[lv] = this._shuffle([...Array(len).keys()]);
+        this._qpos[lv]  = 0;
         document.querySelectorAll('#riddle-level-dots .lvl-dot').forEach(d => d.classList.remove('active'));
         const active = document.querySelector(`#riddle-level-dots .lvl-dot.${lv}`);
         if (active) active.classList.add('active');
@@ -1077,6 +1513,7 @@ const Riddles = {
         const dots = document.createElement('div');
         dots.id = 'riddle-level-dots';
         dots.innerHTML = `
+            <span class="lvl-counter" id="riddle-counter">${this._totalCount()}</span>
             <button class="lvl-dot easy   ${this._level==='easy'   ?'active':''}" onclick="Riddles.setLevel('easy')"   title="Простой"></button>
             <button class="lvl-dot medium ${this._level==='medium' ?'active':''}" onclick="Riddles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ?'active':''}" onclick="Riddles.setLevel('hard')"   title="Сложный"></button>
@@ -1137,6 +1574,7 @@ const Riddles = {
             }
             this._solved = true;
             starsBurst();
+            Achievements.correct('riddles');
             const cur = parseInt(localStorage.getItem('stat_riddles') || 0);
             localStorage.setItem('stat_riddles', cur + 1);
         } else {
@@ -1148,7 +1586,20 @@ const Riddles = {
 
     next() {
         if (this._hasUnsaved && !this._solved) { showToast('✋ Сначала нажми «Проверить ответ»'); return; }
-        this._pos++;
+        const lv = this._level;
+        this._qpos[lv]++;
+        if (this._qpos[lv] >= this._queue[lv].length) {
+            this._queue[lv] = this._shuffle([...Array(this._data[lv].length).keys()]);
+            this._qpos[lv]  = 0;
+            const order = ['easy','medium','hard'];
+            const next = order[(order.indexOf(lv) + 1) % order.length];
+            this._level = next;
+            document.querySelectorAll('#riddle-level-dots .lvl-dot').forEach(d => d.classList.remove('active'));
+            const act = document.querySelector(`#riddle-level-dots .lvl-dot.${next}`);
+            if (act) act.classList.add('active');
+            const names = {easy:'Простой', medium:'Средний', hard:'Сложный'};
+            showToast('🎯 Уровень: ' + names[next]);
+        }
         this.show();
     },
 
@@ -1394,8 +1845,8 @@ const Admin = {
                     <div class="admin-item-title">${item.name || item.text || item.title || '—'}</div>
                     <div class="admin-item-sub">${sub}</div>
                 </div>
-                <button class="admin-edit" data-id="${item.id}">✏️</button>
-                <button class="admin-del"  data-id="${item.id}">🗑️</button>
+                <button class="admin-edit" data-id="${item.id}"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="admin-del"  data-id="${item.id}"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
             `;
             list.appendChild(div);
         });
@@ -1420,8 +1871,20 @@ const Admin = {
     _editPic: '',
 
     _onFileChange(input) {
-        const name = input.files[0]?.name || 'Файл не выбран';
-        document.getElementById('m-file-name').textContent = name;
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById('m-file-name').textContent = file.name;
+        // Показываем превью картинки сразу
+        const isQA = this._tab === 'riddles' || this._tab === 'puzzles';
+        if (isQA && file.type.startsWith('image/')) {
+            const preview = document.getElementById('m-pic-preview');
+            if (preview) {
+                const url = URL.createObjectURL(file);
+                preview.src = url;
+                preview.style.display = 'block';
+                preview.onload = () => URL.revokeObjectURL(url);
+            }
+        }
     },
 
     openModal(item) {
@@ -1472,7 +1935,7 @@ const Admin = {
         const curFileEl = document.getElementById('m-current-file');
         if (curFileEl) {
             if (currentFileName) {
-                curFileEl.textContent = '📁 Текущий файл: ' + currentFileName;
+                curFileEl.innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Текущий файл: ' + currentFileName;
                 curFileEl.classList.add('visible');
             } else {
                 curFileEl.textContent = '';
@@ -1504,9 +1967,9 @@ const Admin = {
             const lvSel = document.getElementById('m-level');
             if (lvSel) {
                 lvSel.querySelector('option[value=""]').textContent = 'Уровень сложности';
-                lvSel.querySelector('option[value="easy"]').textContent   = '🟢 Простой';
-                lvSel.querySelector('option[value="medium"]').textContent = '🟡 Средний';
-                lvSel.querySelector('option[value="hard"]').textContent   = '🔴 Сложный';
+                lvSel.querySelector('option[value="easy"]').textContent   = '● Простой';
+                lvSel.querySelector('option[value="medium"]').textContent = '● Средний';
+                lvSel.querySelector('option[value="hard"]').textContent   = '● Сложный';
             }
         }
         // Для info — скрываем файл/ответ/картинку
@@ -1534,7 +1997,7 @@ const Admin = {
         }
     },
 
-    save() {
+    async save() {
         // Читаем из правильного поля (input или textarea)
         const nameInput = document.getElementById('m-name-input');
         const nameArea  = document.getElementById('m-name-area');
@@ -1545,8 +2008,35 @@ const Admin = {
 
         const items = this._getData(this._tab);
         const id = this._editId || Date.now();
-        // Find existing item to preserve src/pic/duration
         const existing = this._editId ? items.find(i => i.id === this._editId) : null;
+
+        // ── Сохраняем картинку локально как base64 (загрузка на GitHub — при публикации) ──
+        const isQA = this._tab === 'riddles' || this._tab === 'puzzles';
+        if (isQA) {
+            const fileInput = document.getElementById('m-file');
+            const file = fileInput?.files[0];
+            if (file) {
+                const folder = this._tab === 'riddles'
+                    ? 'assets/images/riddles_pictures_opt'
+                    : 'assets/images/rebuses_pictures_opt';
+                const ext  = file.name.split('.').pop().toLowerCase();
+                const base = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-zа-яё0-9_-]/gi, '_');
+                const fileName = base + '.' + ext;
+                const filePath = folder + '/' + fileName;
+                // Читаем как base64
+                const base64 = await new Promise((res, rej) => {
+                    const fr = new FileReader();
+                    fr.onload  = () => res(fr.result); // data:image/...;base64,...
+                    fr.onerror = rej;
+                    fr.readAsDataURL(file);
+                });
+                // Сохраняем base64 в очередь на загрузку
+                const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+                pending[filePath] = base64;
+                localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                this._editPic = filePath; // путь уже финальный
+            }
+        }
 
         let newItem;
         if (this._tab === 'songs' || this._tab === 'podcasts') {
@@ -1562,7 +2052,7 @@ const Admin = {
                 id,
                 text:   name,
                 answer: document.getElementById('m-answer').value.trim(),
-                pic:    existing ? (existing.pic || '') : '',
+                pic:    this._editPic || (existing ? (existing.pic || '') : ''),
                 level:  document.getElementById('m-level').value || 'easy',
             };
         } else if (this._tab === 'info') {
@@ -1570,12 +2060,12 @@ const Admin = {
             if (!bodyVal) { showToast('⚠️ Введите текст блока'); return; }
             newItem = { id, name, body: bodyVal };
         } else {
-            // puzzles — name = answer (m-name скрыт для ребусов)
+            // puzzles — name = answer
             const puzzleAnswer = document.getElementById('m-answer').value.trim();
             newItem = {
                 id,
-                name:   puzzleAnswer, // название = ответу
-                pic:    existing ? (existing.pic || '') : '',
+                name:   puzzleAnswer,
+                pic:    this._editPic || (existing ? (existing.pic || '') : ''),
                 hint:   document.getElementById('m-hint').value.trim(),
                 answer: puzzleAnswer,
                 level:  document.getElementById('m-level').value || 'easy',
@@ -1592,11 +2082,9 @@ const Admin = {
         this._setData(this._tab, items);
         this.closeModal();
         this.render();
-        // Немедленно обновляем живые секции
         if (this._tab === 'songs') Songs._allSongs = this._getData('songs').map(s => ({...s}));
         if (this._tab === 'podcasts') Podcasts._allPodcasts = this._getData('podcasts').map(p => ({...p}));
         if (this._tab === 'puzzles') {
-            // Перезагружаем данные ребусов без reinit (не меняем позицию)
             const saved = this._getData('puzzles');
             if (saved.length) {
                 Puzzles._data = { easy: [], medium: [], hard: [] };
@@ -1606,25 +2094,22 @@ const Admin = {
                 });
             }
         }
-        if (this._tab === 'riddles') {
-            Riddles._loadFromAdmin();
-        }
+        if (this._tab === 'riddles') Riddles._loadFromAdmin();
         if (this._tab === 'info') Info.render();
+        this._updatePendingBadge();
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
     },
 
-    // ── Вставка шаблона ссылки в поле m-body ──
-    _insertLinkTemplate() {
-        const ta = document.getElementById('m-body');
-        if (!ta) return;
-        const template = '[текст ссылки](https://url.com)';
-        const start = ta.selectionStart;
-        const end   = ta.selectionEnd;
-        const val   = ta.value;
-        ta.value = val.slice(0, start) + template + val.slice(end);
-        // Выделяем "текст ссылки" для удобства замены
-        ta.focus();
-        ta.setSelectionRange(start + 1, start + 13);
+
+    // ── Обновить счётчик pending картинок на кнопке публикации ──
+    _updatePendingBadge() {
+        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+        const count = Object.keys(pending).length;
+        const btn = document.getElementById('publish-btn');
+        if (!btn) return;
+        btn.textContent = count > 0
+            ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать (${count})`
+            : '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать на GitHub';
     },
 
     // ── GitHub Token helpers ──
@@ -1638,7 +2123,7 @@ const Admin = {
         if (!inp) return;
         const isHidden = inp.type === 'password';
         inp.type = isHidden ? 'text' : 'password';
-        btn.textContent = isHidden ? '🙈' : '👁';
+        btn.innerHTML = isHidden ? '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     },
 
     // Вызывается при открытии Админки — восстанавливает токен из localStorage
@@ -1663,6 +2148,43 @@ const Admin = {
             return;
         }
 
+        const headers = {
+            'Authorization': `token ${token}`,
+            'Content-Type':  'application/json',
+            'Accept':        'application/vnd.github.v3+json'
+        };
+
+        // ── Сначала загружаем все pending картинки ──
+        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+        const pendingPaths = Object.keys(pending);
+        if (pendingPaths.length > 0) {
+            const btn2 = document.getElementById('publish-btn');
+            if (btn2) btn2.textContent = `⏳ Картинки: 0/${pendingPaths.length}...`;
+            let uploaded = 0;
+            for (const filePath of pendingPaths) {
+                const dataUrl = pending[filePath];
+                const base64  = dataUrl.split(',')[1]; // убираем data:...;base64,
+                const apiUrl  = `https://api.github.com/repos/${REPO}/contents/${filePath}`;
+                // Проверяем SHA если файл уже есть
+                let sha = null;
+                try {
+                    const gr = await fetch(apiUrl + `?ref=${BRANCH}`, { headers });
+                    if (gr.ok) { const gj = await gr.json(); sha = gj.sha; }
+                } catch (_) {}
+                const pb = { message: `🖼️ ${filePath.split('/').pop()}`, content: base64, branch: BRANCH, ...(sha ? { sha } : {}) };
+                const pr = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(pb) });
+                if (pr.ok) {
+                    uploaded++;
+                    delete pending[filePath];
+                    localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                    if (btn2) btn2.textContent = `⏳ Картинки: ${uploaded}/${pendingPaths.length}...`;
+                } else {
+                    const pe = await pr.json();
+                    showToast('❌ Ошибка картинки: ' + (pe.message || pr.status));
+                }
+            }
+        }
+
         // Собираем все данные Админки
         const data = {
             songs:    this._getData('songs'),
@@ -1680,11 +2202,6 @@ const Admin = {
 
         try {
             const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-            const headers = {
-                'Authorization': `token ${token}`,
-                'Content-Type':  'application/json',
-                'Accept':        'application/vnd.github.v3+json'
-            };
 
             // Получаем текущий SHA файла (нужен для обновления)
             let sha = null;
@@ -1713,6 +2230,8 @@ const Admin = {
             if (putResp.ok) {
                 const result = await putResp.json();
                 localStorage.setItem('gh_token', token); // сохраняем токен
+                localStorage.removeItem('admin_pending_pics');
+                const stillPending = Object.keys(JSON.parse(localStorage.getItem('admin_pending_pics') || '{}')).length;
                 showToast('✅ Данные опубликованы на GitHub!');
                 console.log('Published:', result.content?.html_url);
                 // Флаг: при следующем открытии сайта загрузить свежие данные
