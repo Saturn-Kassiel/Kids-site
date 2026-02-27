@@ -1,0 +1,32 @@
+{
+  "name": "Гоша — обучение и развитие",
+  "short_name": "Гоша",
+  "description": "Детское образовательное приложение: алфавит, цифры, цвета, песенки, загадки и ребусы",
+  "start_url": "/Kids-site/",
+  "scope": "/Kids-site/",
+  "id": "/Kids-site/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a1628",
+  "background_color": "#0a1628",
+  "lang": "ru",
+  "categories": ["education", "kids"],
+  "icons": [
+    {
+      "src": "assets/favicon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

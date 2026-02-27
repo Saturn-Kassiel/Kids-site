@@ -3,14 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Говоруша</title>
+    <title>Гоша</title>
     <link rel="icon" href="assets/favicon/favicon.webp" type="image/webp">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Гоша">
+    <link rel="apple-touch-icon" href="assets/favicon/icon-192.png">
     <link rel="stylesheet" href="style.css">
     <!-- Apply saved theme instantly to prevent flash -->
     <script>
         (function(){
             var t = localStorage.getItem('theme');
             if (t) document.documentElement.setAttribute('data-theme', t);
+            // PWA: синхронизируем theme-color с текущей темой
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -36,20 +45,81 @@
 
     <!-- ========== MAIN ========== -->
     <section id="main">
+        <div class="home-hero">
+            <div class="home-mascot-wrap">
+                <img class="home-mascot" id="home-mascot" src="assets/favicon/favicon.webp" alt="Гоша" width="72" height="72">
+            </div>
+            <div class="home-hero-text">
+                <div class="home-logo">Гоша</div>
+                <div class="home-greeting" id="home-greeting">Давай учиться играя!</div>
+            </div>
+        </div>
         <div class="menu-grid">
-            <button class="menu-card mc-alphabet" onclick="Media.initSection('alphabet')">Алфавит</button>
-            <button class="menu-card mc-numbers"  onclick="Media.initSection('numbers')">Цифры</button>
-            <button class="menu-card mc-colors"   onclick="Media.initSection('colors')">Цвета</button>
-            <button class="menu-card mc-songs"    onclick="Songs.init()">Песенки</button>
-            <button class="menu-card mc-podcasts" onclick="Podcasts.init()">Подкасты</button>
-            <button class="menu-card mc-puzzles"  onclick="Puzzles.init()">Ребусы</button>
-            <button class="menu-card mc-riddles"  onclick="Riddles.init()">Загадки</button>
-            <button class="menu-card mc-finger"   onclick="App.navigate('finger')">Пальчиковые игры</button>
-            <button class="menu-card mc-articul"  onclick="App.navigate('articul')">Артикуляционная гимнастика</button>
-            <button class="menu-card mc-breath"   onclick="App.navigate('breath')">Дыхательная гимнастика</button>
-            <button class="menu-card mc-info"     onclick="App.navigate('info', 'Информация')">Информация</button>
-            <button class="menu-card mc-stats"    onclick="Stats.show()">Статистика</button>
-            <button class="menu-card mc-settings" onclick="App.navigate('settings')">Настройки</button>
+            <button class="menu-card mc-alphabet" onclick="Media.initSection('alphabet')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h3l8-14h-3L4 20z"/><path d="M12.5 6L17 20"/><path d="M9 14h7"/></svg></span>
+                <span class="mc-label">Алфавит</span>
+            </button>
+            <button class="menu-card mc-numbers" onclick="Media.initSection('numbers')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16"/><path d="M6 4h4"/><path d="M14 8a2 2 0 1 1 4 0c0 1.5-4 3-4 5h4"/><path d="M6 20h4"/></svg></span>
+                <span class="mc-label">Цифры</span>
+            </button>
+            <button class="menu-card mc-colors" onclick="Media.initSection('colors')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 2.4.846 4.604 2.256 6.328.396.484.463 1.17.088 1.67-.512.682-.072 1.68.8 1.549A10.1 10.1 0 0 0 7 21.5c.658 0 1.293.207 1.824.582.39.276.888.418 1.39.418H12z"/></svg></span>
+                <span class="mc-label">Цвета</span>
+            </button>
+            <button class="menu-card mc-words" onclick="Words.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                <span class="mc-label">Слова</span>
+            </button>
+            <button class="menu-card mc-math" onclick="Arithmetic.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+                <span class="mc-label">Арифметика</span>
+            </button>
+            <button class="menu-card mc-songs" onclick="Songs.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+                <span class="mc-label">Песенки</span>
+            </button>
+            <button class="menu-card mc-podcasts" onclick="Podcasts.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>
+                <span class="mc-label">Подкасты</span>
+            </button>
+            <button class="menu-card mc-puzzles" onclick="Puzzles.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></span>
+                <span class="mc-label">Ребусы</span>
+            </button>
+            <button class="menu-card mc-riddles" onclick="Riddles.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <span class="mc-label">Загадки</span>
+            </button>
+            <button class="menu-card mc-finger" onclick="App.navigate('finger')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v1"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></span>
+                <span class="mc-label">Пальчиковые игры</span>
+            </button>
+            <button class="menu-card mc-articul" onclick="App.navigate('articul')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18c-4 0-6-2-6-4h12c0 2-2 4-6 4z"/><path d="M7 9.5a1.5 1.5 0 1 1 3 0"/><path d="M14 9.5a1.5 1.5 0 1 1 3 0"/><circle cx="12" cy="12" r="10"/></svg></span>
+                <span class="mc-label">Артикуляционная гимнастика</span>
+            </button>
+            <button class="menu-card mc-breath" onclick="App.navigate('breath')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a7.5 7.5 0 1 0 0 8.6"/><path d="M21 12h-6"/><path d="M18 9l3 3-3 3"/></svg></span>
+                <span class="mc-label">Дыхательная гимнастика</span>
+            </button>
+            <button class="menu-card mc-info" onclick="App.navigate('info', 'Информация')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+                <span class="mc-label">Информация</span>
+            </button>
+            <button class="menu-card mc-badges" onclick="Badges.show()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <span class="mc-label">Достижения</span>
+                <span class="mc-badge-count" id="mc-badge-count"></span>
+            </button>
+            <button class="menu-card mc-stats" onclick="Stats.show()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
+                <span class="mc-label">Статистика</span>
+            </button>
+            <button class="menu-card mc-settings" onclick="App.navigate('settings')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="mc-label">Настройки</span>
+            </button>
         </div>
     </section>
 
@@ -90,9 +160,49 @@
         <div id="media-grid"></div>
     </section>
 
+    <!-- ========== WORDS ========== -->
+    <section id="words" class="hidden">
+        <div class="words-emoji" id="words-emoji">🐱</div>
+        <div class="words-slots" id="words-slots"></div>
+        <div class="words-msg" id="words-msg"></div>
+        <div class="words-tiles" id="words-tiles"></div>
+        <div class="words-level-row">
+            <button class="words-lvl-btn active" data-lvl="easy"   onclick="Words.setLevel('easy',this)">Простой</button>
+            <button class="words-lvl-btn"        data-lvl="medium" onclick="Words.setLevel('medium',this)">Средний</button>
+            <button class="words-lvl-btn"        data-lvl="hard"   onclick="Words.setLevel('hard',this)">Сложный</button>
+        </div>
+        <div class="words-score-row">
+            <span id="words-score">0</span> собрано
+        </div>
+        <div class="riddle-btns-row" style="margin-top:8px;">
+            <button class="words-hint-btn" onclick="Words.hint()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</button>
+            <button class="next-btn" onclick="Words.next()">Следующее →</button>
+        </div>
+    </section>
+
+    <!-- ========== ARITHMETIC ========== -->
+    <section id="arithmetic" class="hidden">
+        <div class="math-problem" id="math-problem">2 + 3 = ?</div>
+        <div class="words-slots" id="math-slots"></div>
+        <div class="words-msg" id="math-msg"></div>
+        <div class="words-tiles" id="math-tiles"></div>
+        <div class="words-level-row">
+            <button class="words-lvl-btn active" data-lvl="easy"   onclick="Arithmetic.setLevel('easy',this)">Простой</button>
+            <button class="words-lvl-btn"        data-lvl="medium" onclick="Arithmetic.setLevel('medium',this)">Средний</button>
+            <button class="words-lvl-btn"        data-lvl="hard"   onclick="Arithmetic.setLevel('hard',this)">Сложный</button>
+        </div>
+        <div class="words-score-row">
+            <span id="math-score">0</span> решено
+        </div>
+        <div class="riddle-btns-row" style="margin-top:8px;">
+            <button class="words-hint-btn" onclick="Arithmetic.hint()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</button>
+            <button class="next-btn" onclick="Arithmetic.next()">Следующий →</button>
+        </div>
+    </section>
+
     <!-- ========== SONGS ========== -->
     <section id="songs" class="hidden">
-        <div id="song-video-wrap" style="display:none;width:100%;aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:#000;margin-bottom:12px;position:relative;">
+        <div id="song-video-wrap" style="display:none;width:100%;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:#000;margin-bottom:12px;position:relative;border:1.5px solid rgba(255,255,255,0.06);box-shadow:var(--shadow)">
             <video id="song-video" loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
         </div>
 <div class="audio-player">
@@ -160,7 +270,7 @@
 
     <!-- ========== PUZZLES ========== -->
     <section id="puzzles" class="hidden">
-        <div class="puzzle-img-wrap" id="puzzle-img"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+        <div class="puzzle-img-wrap" id="puzzle-img"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;opacity:0.2"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></div>
         <div class="hint-box" id="puzzle-hint"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" class="icon-svg hint-svg"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</div>
         <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
         <div id="puzzle-msg"></div>
@@ -215,76 +325,274 @@
     </section>
 
     <!-- ========== STATS ========== -->
-    <section id="stats" class="hidden">
+    <section id="stats" class="hidden stats-layout">
+        <!-- ══ ЗАКРЕП: график + кнопка ══ -->
+        <div class="stats-fixed">
+            <!-- ── График активности 7 дней ── -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Активность</span>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" data-metric="activity" onclick="Stats.setChartMetric('activity')">Всё</button>
+                    <button class="chart-tab" data-metric="answers"  onclick="Stats.setChartMetric('answers')">Ответы</button>
+                    <button class="chart-tab" data-metric="time"     onclick="Stats.setChartMetric('time')">Время</button>
+                </div>
+            </div>
+            <div class="chart-area">
+                <div class="chart-bars" id="chart-bars"></div>
+                <div class="chart-labels" id="chart-labels"></div>
+            </div>
+        </div>
+
+        <!-- ── Итоги месяца ── -->
+        <button class="month-summary-btn" onclick="Stats.shareMonth()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Итоги месяца
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+        </div>
+        <!-- ══ СКРОЛЛ: детальная статистика ══ -->
+        <div class="stats-scroll">
+            <div class="stat-section-hdr">Правильные ответы</div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-purple)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
-            <div style="flex:1">
+            <div class="stat-icon si-puzzles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></div>
+            <div style="flex:1;min-width:0">
                 <div class="stat-val" id="st-puzzles">0</div>
                 <div class="stat-lbl">Ребусов решено</div>
-                <div class="stat-track"><div class="stat-fill" id="sf-puzzles" style="background:var(--grad-purple)"></div></div>
+                
+                <div class="stat-track"><div class="stat-fill sf-puzzles" id="sf-puzzles"></div></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-green)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-            <div style="flex:1">
+            <div class="stat-icon si-riddles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div style="flex:1;min-width:0">
                 <div class="stat-val" id="st-riddles">0</div>
                 <div class="stat-lbl">Загадок угадано</div>
-                <div class="stat-track"><div class="stat-fill" id="sf-riddles" style="background:var(--grad-green)"></div></div>
+                
+                <div class="stat-track"><div class="stat-fill sf-riddles" id="sf-riddles"></div></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-yellow)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-            <div style="flex:1">
+            <div class="stat-icon si-words"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-words">0</div>
+                <div class="stat-lbl">Слов собрано</div>
+                <div class="stat-track"><div class="stat-fill sf-words" id="sf-words"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-math">0</div>
+                <div class="stat-lbl">Примеров решено</div>
+                <div class="stat-track"><div class="stat-fill sf-math" id="sf-math"></div></div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Музыка и подкасты</div>
+        <div class="stat-card">
+            <div class="stat-icon si-songs"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+            <div style="flex:1;min-width:0">
                 <div class="stat-val" id="st-songs">0</div>
                 <div class="stat-lbl">Песенок прослушано</div>
-                <div class="stat-track"><div class="stat-fill" id="sf-songs" style="background:var(--grad-yellow)"></div></div>
+                <div class="stat-sub" id="st-songs-time"></div>
+                <div class="stat-track"><div class="stat-fill sf-songs" id="sf-songs"></div></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:var(--grad-blue)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="4,7 4,4 20,4 20,7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
-            <div style="flex:1">
-                <div class="stat-val" id="st-letters">0</div>
-                <div class="stat-lbl">Букв изучено</div>
-                <div class="stat-track"><div class="stat-fill" id="sf-letters" style="background:var(--grad-blue)"></div></div>
+            <div class="stat-icon si-time-songs"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val-time" id="st-songs-time-card">—</div>
+                <div class="stat-lbl">Общее время песенок</div>
             </div>
         </div>
-        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:12px;font-weight:700;">Продолжай учиться — ты молодец! <svg class="icon-svg" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div>
+        <div class="stat-card">
+            <div class="stat-icon si-podcasts"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val-time" id="st-podcasts-time">—</div>
+                <div class="stat-lbl">Общее время подкастов</div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Обучение</div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('letters')">
+            <div class="stat-icon si-letters"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h3l8-14h-3L4 20z"/><path d="M12.5 6L17 20"/><path d="M9 14h7"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-letters">0</div>
+                        <div class="stat-lbl">Просмотров букв</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-letters"></div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('numbers')">
+            <div class="stat-icon si-numbers"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16"/><path d="M6 4h4"/><path d="M14 8a2 2 0 1 1 4 0c0 1.5-4 3-4 5h4"/><path d="M6 20h4"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-numbers">0</div>
+                        <div class="stat-lbl">Просмотров цифр</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-numbers"></div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('colors')">
+            <div class="stat-icon si-colors"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 2.4.846 4.604 2.256 6.328.396.484.463 1.17.088 1.67-.512.682-.072 1.68.8 1.549A10.1 10.1 0 0 0 7 21.5c.658 0 1.293.207 1.824.582.39.276.888.418 1.39.418H12z"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-colors">0</div>
+                        <div class="stat-lbl">Просмотров цветов</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-colors"></div>
+
+        <div class="stat-section-hdr">Достижения · Загадки</div>
+        <div class="stat-card stat-ach-card">
+            <div class="stat-icon si-ach-riddles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div style="flex:1;min-width:0" id="ach-riddles">
+                <div class="ach-stat-none">Пока нет достижений</div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Достижения · Ребусы</div>
+        <div class="stat-card stat-ach-card">
+            <div class="stat-icon si-ach-puzzles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div style="flex:1;min-width:0" id="ach-puzzles">
+                <div class="ach-stat-none">Пока нет достижений</div>
+            </div>
+        </div>
+
+        <div class="stat-footer">Продолжай учиться — ты молодец! <svg class="icon-svg" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div>
+        </div>
+    </section>
+
+    <!-- ========== BADGES ========== -->
+    <section id="badges" class="hidden">
+        <div class="badges-header">
+            <div class="badges-mascot-wrap" id="badges-mascot-wrap">
+                <img class="badges-mascot" src="assets/favicon/favicon.webp" alt="Гоша" width="64" height="64">
+            </div>
+            <div class="badges-summary">
+                <div class="badges-count"><span id="badges-unlocked">0</span> / <span id="badges-total">0</span></div>
+                <div class="badges-label">значков получено</div>
+                <div class="badges-bar"><div class="badges-bar-fill" id="badges-bar-fill"></div></div>
+            </div>
+        </div>
+        <div class="badges-grid" id="badges-grid"></div>
     </section>
 
     <!-- ========== SETTINGS ========== -->
     <section id="settings" class="hidden">
         <div class="settings-group">
             <div class="settings-row">
-                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
-                <div><div class="s-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
+                <span class="s-icon si-profile"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Имя ребёнка</div>
+                    <div class="s-sub">Для персонализации похвалы и итогов</div>
+                </div>
+                <input type="text" id="child-name-input"
+                    placeholder="Как зовут?"
+                    maxlength="20"
+                    autocomplete="off"
+                    spellcheck="false"
+                    oninput="saveChildName(this.value);updateHomeGreeting()"
+                    style="width:120px;padding:8px 12px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;color:var(--text);outline:none;text-align:center;">
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-theme" id="theme-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+                <div><div class="s-label" id="theme-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
                 <div class="toggle" id="tog-theme" onclick="App.toggleTheme(this)"></div>
             </div>
         </div>
+
+        <div class="settings-group-title">Звуки</div>
         <div class="settings-group">
             <div class="settings-row">
-                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
-                <div><div class="s-label">Звук</div><div class="s-sub">Звуковые уведомления</div></div>
-                <div class="toggle on" id="tog-sound" onclick="this.classList.toggle('on');saveSetting('sound',this.classList.contains('on'))"></div>
+                <span class="s-icon si-snd-riddle"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div><div class="s-label">Загадки · правильный ответ</div><div class="s-sub">Звук при верном ответе</div></div>
+                <div class="toggle on" id="tog-snd-riddle-correct" onclick="this.classList.toggle('on');saveSetting('snd-riddle-correct',this.classList.contains('on'))"></div>
             </div>
             <div class="settings-row">
-                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-                <div><div class="s-label">Автовоспроизведение</div><div class="s-sub">Запускать музыку автоматически</div></div>
-                <div class="toggle on" id="tog-auto" onclick="this.classList.toggle('on');saveSetting('auto',this.classList.contains('on'))"></div>
+                <span class="s-icon si-snd-achieve"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <div><div class="s-label">Загадки · поощрение</div><div class="s-sub">Фанфара за серию ответов</div></div>
+                <div class="toggle on" id="tog-snd-riddle-achieve" onclick="this.classList.toggle('on');saveSetting('snd-riddle-achieve',this.classList.contains('on'))"></div>
             </div>
             <div class="settings-row">
-                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></span>
-                <div><div class="s-label">Анимации</div><div class="s-sub">Звёздочки и эффекты</div></div>
-                <div class="toggle on" id="tog-anim" onclick="this.classList.toggle('on');saveSetting('anim',this.classList.contains('on'))"></div>
+                <span class="s-icon si-snd-puzzle"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704z"/></svg></span>
+                <div><div class="s-label">Ребусы · правильный ответ</div><div class="s-sub">Звук при верном ответе</div></div>
+                <div class="toggle on" id="tog-snd-puzzle-correct" onclick="this.classList.toggle('on');saveSetting('snd-puzzle-correct',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-achieve"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <div><div class="s-label">Ребусы · поощрение</div><div class="s-sub">Фанфара за серию ответов</div></div>
+                <div class="toggle on" id="tog-snd-puzzle-achieve" onclick="this.classList.toggle('on');saveSetting('snd-puzzle-achieve',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-words"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                <div><div class="s-label">Слова · звуки</div><div class="s-sub">Звуки при ответах</div></div>
+                <div class="toggle on" id="tog-snd-words-correct" onclick="this.classList.toggle('on');saveSetting('snd-words-correct',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+                <div><div class="s-label">Арифметика · звуки</div><div class="s-sub">Звуки при ответах</div></div>
+                <div class="toggle on" id="tog-snd-math-correct" onclick="this.classList.toggle('on');saveSetting('snd-math-correct',this.classList.contains('on'))"></div>
             </div>
         </div>
+
+        <div class="settings-group-title">Синхронизация</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-sync"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Облачная синхронизация</div>
+                    <div class="s-sub" id="sync-status">Не настроена</div>
+                </div>
+                <button class="sync-btn" id="sync-cloud-btn" onclick="Sync.cloudSync()">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                    Синхр.
+                </button>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-export"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Экспорт в файл</div>
+                    <div class="s-sub">Скачать прогресс на устройство</div>
+                </div>
+                <button class="sync-btn" onclick="Sync.exportFile()">Скачать</button>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-import"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Импорт из файла</div>
+                    <div class="s-sub">Восстановить прогресс с другого устройства</div>
+                </div>
+                <label class="sync-btn" style="cursor:pointer;">
+                    Загрузить
+                    <input type="file" accept=".json" onchange="Sync.importFile(this)" style="display:none;">
+                </label>
+            </div>
+        </div>
+
         <div class="settings-group">
             <div class="settings-row" style="cursor:pointer" onclick="App.resetStats()">
-                <span class="s-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
+                <span class="s-icon si-reset"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
                 <div><div class="s-label" style="color:#ef4444">Сбросить прогресс</div><div class="s-sub">Очистить все данные</div></div>
                 <span style="color:var(--text2);font-size:18px">›</span>
             </div>
         </div>
-        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;font-weight:700;">Говоруша v1.0 · Сделано с <svg class="icon-svg" viewBox="0 0 24 24" fill="#f87171" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;">Гоша v1.2 · Сделано с <svg class="icon-svg" viewBox="0 0 24 24" fill="#f87171" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
     </section>
 
     <!-- ========== ADMIN ========== -->
@@ -299,6 +607,7 @@
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
             <button class="admin-add-btn" onclick="Admin.openModal(null)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить</button>
+            <button class="admin-batch-btn hidden" id="admin-batch-btn" onclick="Admin.openBatch()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Загрузить пачкой</button>
             <div class="github-token-row">
                 <div class="github-token-label">GitHub Token</div>
                 <div class="github-token-input-wrap">
@@ -320,17 +629,17 @@
 <div class="modal-overlay hidden" id="modal" onclick="Admin.closeModal(event)">
     <div class="modal-box">
         <div class="modal-title" id="modal-title">Добавить</div>
-        <input   type="text" id="m-name-input" placeholder="Название" style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
-        <textarea id="m-name-area" rows="4" placeholder="Текст загадки..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;"></textarea>
-        <textarea id="m-desc" rows="4" placeholder="Описание подкаста..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;display:none;"></textarea>
-        <textarea id="m-body" rows="6" placeholder="Текст информационного блока..." style="width:100%;padding:13px 15px;background:var(--card);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;color:var(--text);outline:none;margin-bottom:4px;resize:none;line-height:1.5;display:none;"></textarea>
+        <input   type="text" id="m-name-input" placeholder="Название" style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
+        <textarea id="m-name-area" rows="4" placeholder="Текст загадки..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;"></textarea>
+        <textarea id="m-desc" rows="4" placeholder="Описание подкаста..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;display:none;"></textarea>
+        <textarea id="m-body" rows="6" placeholder="Текст информационного блока..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:4px;resize:none;line-height:1.5;display:none;"></textarea>
         <div id="m-body-hint" style="display:none;margin-bottom:8px;">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Красивая ссылка: <code style="background:var(--card2);padding:2px 6px;border-radius:5px;color:#54ACBF;">[Колыбельная](https://url)</code><br>Или просто вставьте URL — он станет ссылкой автоматически.</div>
-            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Вставить ссылку</button>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Красивая ссылка: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;color:#60a5fa;">[Колыбельная](https://url)</code><br>Или просто вставьте URL — он станет ссылкой автоматически.</div>
+            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Вставить ссылку</button>
         </div>
         <input type="text"     id="m-answer"  placeholder="Ответ (для ребусов/загадок)">
         <input type="text"     id="m-hint"    placeholder="Подсказка / Картинка-ребус (эмодзи)">
-        <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
+        <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
             <option value="">Уровень (только для ребусов)</option>
             <option value="easy">Простой</option>
             <option value="medium">Средний</option>
@@ -351,5 +660,28 @@
 </div>
 
 <script src="app.js"></script>
+
+<!-- BATCH UPLOAD MODAL -->
+<div class="modal-overlay hidden" id="batch-modal" onclick="Admin.closeBatch(event)">
+    <div class="modal-box" style="max-height:82vh;overflow-y:auto;">
+        <div class="modal-title">Пакетная загрузка картинок</div>
+        <label class="file-label" style="justify-content:center;padding:18px;border-style:dashed;">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            Выбрать картинки
+            <input type="file" id="batch-files" accept="image/*" multiple onchange="Admin._onBatchFiles(this)">
+        </label>
+        <div id="batch-preview-list"></div>
+        <div id="batch-summary" style="display:none;font-size:13px;color:var(--text2);text-align:center;"></div>
+        <select id="batch-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;">
+            <option value="easy">Уровень для всех: Простой</option>
+            <option value="medium">Уровень для всех: Средний</option>
+            <option value="hard">Уровень для всех: Сложный</option>
+        </select>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="Admin.closeBatch()">Отмена</button>
+            <button class="modal-save" id="batch-save-btn" onclick="Admin.saveBatch()">Сохранить все</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -29,6 +29,7 @@ const App = {
         }
 
         if (!isMain) this._history.push(id);
+        else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
         window.scrollTo(0, 0);
         // Управляем кнопками топ-бара
         if (id === 'puzzles') {
@@ -59,12 +60,27 @@ const App = {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
         if (el) el.classList.toggle('on', next === 'dark');
+        App._updateThemeIcon(next);
         showToast(next === 'dark' ? '🌙 Тёмная тема' : '☀️ Светлая тема');
+    },
+
+    _updateThemeIcon(theme) {
+        const icon  = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
+        if (!icon) return;
+        if (theme === 'dark') {
+            icon.innerHTML  = '<svg class=\"icon-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/></svg>';
+            if (label) label.textContent = 'Тёмная тема';
+        } else {
+            icon.innerHTML  = '<svg class=\"icon-svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"5\"/><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"/><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"/><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"/><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"/><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"/><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"/><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"/></svg>';
+            if (label) label.textContent = 'Светлая тема';
+        }
     },
 
     resetStats() {
         if (!confirm('Сбросить весь прогресс?')) return;
-        ['stat_puzzles','stat_riddles','stat_songs','stat_letters'].forEach(k => localStorage.removeItem(k));
+        StatTracker.resetAll();
+        Badges.init();
         showToast('🗑️ Прогресс сброшен');
     },
 
@@ -117,13 +133,19 @@ const App = {
         if (tt && theme === 'dark') tt.classList.add('on');
 
         // Restore toggles
-        ['sound','auto','anim'].forEach(k => {
+        ['auto','anim',
+         'snd-riddle-correct','snd-riddle-achieve',
+         'snd-puzzle-correct','snd-puzzle-achieve',
+         'snd-words-correct',
+         'snd-math-correct'].forEach(k => {
             const saved = localStorage.getItem(`set_${k}`);
             if (saved === 'false') {
                 const el = document.getElementById(`tog-${k}`);
                 if (el) el.classList.remove('on');
             }
         });
+        // Иконка темы
+        App._updateThemeIcon(theme);
 
         // Make sure modal is closed on start
         document.getElementById('modal').classList.add('hidden');
@@ -145,11 +167,52 @@ const App = {
         window.addEventListener('hashchange', checkHash);
         if (window.location.hash === '#see') checkHash();
 
+        // Динамическое приветствие
+        this._updateGreeting();
+
+        // Инициализируем значки
+        Badges.init();
+
         // Скрываем loader — данные уже загружены (await выше)
         document.getElementById('loader').style.display = 'none';
+    },
+
+    _updateGreeting() {
+        const el = document.getElementById('home-greeting');
+        if (!el) return;
+
+        const hour = new Date().getHours();
+
+        // Фразы по времени суток
+        const timeGreetings =
+            hour >= 5  && hour < 12  ? ['Доброе утро! ☀️', 'С добрым утром! 🌅', 'Утро — время открытий! 🌞']
+          : hour >= 12 && hour < 17  ? ['Добрый день! 🌤️', 'Отличный день для учёбы! 📚', 'Продолжаем учиться! 🎯']
+          : hour >= 17 && hour < 21  ? ['Добрый вечер! 🌇', 'Вечер знаний! 🌙', 'Хороший вечер для игры! ✨']
+          :                            ['Не спится? Давай поиграем! 🌟', 'Ночные приключения! 🦉', 'Тихий час знаний 💤'];
+
+        // Общие мотивационные фразы
+        const funGreetings = [
+            'Давай учиться играя! 🎮',
+            'Время новых открытий! 🚀',
+            'Сегодня узнаем что-то новое! 💡',
+            'Готов к приключениям? 🗺️',
+            'Вперёд к знаниям! 🏆',
+            'Играем и учимся! 🎈',
+            'Каждый день — новое чудо! 🌈',
+            'Ты — молодец! Продолжай! 👏'
+        ];
+
+        // 50/50 — либо фраза по времени суток, либо мотивационная
+        const pool = Math.random() < 0.5 ? timeGreetings : funGreetings;
+        el.textContent = pool[Math.floor(Math.random() * pool.length)];
     }
 };
 
+
+function getSoundSetting(key) {
+    const saved = localStorage.getItem(`set_${key}`);
+    return saved !== 'false'; // по умолчанию включено
+}
 function saveSetting(key, val) {
     localStorage.setItem(`set_${key}`, val);
 }
@@ -230,9 +293,188 @@ function showStars(cx, cy) {
     }
     setTimeout(() => host.innerHTML = '', 1800);
 }
+
+// =============================================
+// FUZZY ANSWER CHECKER
+// =============================================
+const AnswerChecker = {
+    // Нормализация: е↔ё, и↔й, регистр, лишние пробелы
+    _norm(s) {
+        return s.trim().toLowerCase()
+            .replace(/ё/g, 'е')
+            .replace(/й/g, 'и')
+            .replace(/\s+/g, ' ');
+    },
+
+    // Русский стеммер — обрезаем окончания/суффиксы
+    // Возвращает основу слова (минимум 3 буквы)
+    _stem(w) {
+        if (w.length <= 3) return w;
+        // Уменьшительно-ласкательные суффиксы (убираем перед окончаниями)
+        const diminutive = [
+            'еньк','оньк','ышк','ушк','юшк','ишк','чик','щик',
+            'ёнок','онок','ёнк','инк','очк','ечк','ичк','ник','ок','ёк'
+        ];
+        let stem = w;
+        for (const suf of diminutive) {
+            if (stem.endsWith(suf) && stem.length - suf.length >= 3) {
+                stem = stem.slice(0, -suf.length);
+                break;
+            }
+        }
+        // Падежные окончания (с учётом мягкого знака)
+        const endings = [
+            'ами','ями','ого','его','ому','ему','ой','ей',
+            'ую','юю','ых','их','ах','ях','ев','ов',
+            'ами','ями','ий','ый','ая','яя',
+            'ом','ем','ые','ие','ью','ей','ой',
+            'ам','ям','ах','ях',
+            'ат','ят','ут','ют','ит','ет',
+            'ся','сь',
+            'ах','ях','ей','ой','ой',
+            'ами','ями',
+            'ов','ев','ей',
+            'е','и','у','а','я','ю','ь','й'
+        ];
+        for (const end of endings) {
+            if (stem.endsWith(end) && stem.length - end.length >= 3) {
+                stem = stem.slice(0, -end.length);
+                break;
+            }
+        }
+        return stem;
+    },
+
+    // Основная проверка
+    // Возвращает: 'exact' | 'fuzzy' | 'wrong'
+    check(input, answer) {
+        const a = this._norm(input);
+        const b = this._norm(answer);
+
+        // 1. Точное совпадение после нормализации
+        if (a === b) return 'exact';
+
+        // 2. Многословный ответ — проверяем каждое слово
+        const wordsA = a.split(' ');
+        const wordsB = b.split(' ');
+
+        // Для каждого слова ответа проверяем нечёткое совпадение
+        const allMatch = wordsB.every(wb => {
+            return wordsA.some(wa => this._wordMatch(wa, wb));
+        });
+        if (allMatch) return 'fuzzy';
+
+        // 3. Частичное — если ввёл одно слово из многословного ответа
+        if (wordsB.length > 1 && wordsA.length === 1) {
+            const anyMatch = wordsB.some(wb => this._wordMatch(wordsA[0], wb));
+            if (anyMatch) return 'fuzzy';
+        }
+
+        return 'wrong';
+    },
+
+    _wordMatch(a, b) {
+        if (a === b) return true;
+        const sa = this._stem(a);
+        const sb = this._stem(b);
+        // Совпадение основ
+        if (sa === sb) return true;
+        // Одна основа начинается с другой (минимум 3 буквы)
+        const minLen = Math.min(sa.length, sb.length);
+        if (minLen >= 3 && (sa.startsWith(sb.slice(0,minLen)) || sb.startsWith(sa.slice(0,minLen)))) return true;
+        // Расстояние Левенштейна ≤ 1 для коротких слов, ≤ 2 для длинных
+        const dist = this._levenshtein(sa, sb);
+        const threshold = sa.length <= 5 ? 1 : 2;
+        return dist <= threshold;
+    },
+
+    _levenshtein(a, b) {
+        if (Math.abs(a.length - b.length) > 3) return 99;
+        const m = a.length, n = b.length;
+        const dp = Array.from({length: m+1}, (_,i) => [i, ...Array(n).fill(0)]);
+        for (let j = 0; j <= n; j++) dp[0][j] = j;
+        for (let i = 1; i <= m; i++)
+            for (let j = 1; j <= n; j++)
+                dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]
+                    : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        return dp[m][n];
+    }
+};
+
 function starsBurst() {
     showStars(window.innerWidth / 2, window.innerHeight * 0.55);
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+}
+
+// Тихий мягкий звук правильного ответа
+function playCorrectSound(section) {
+    const key = section === 'riddles' ? 'snd-riddle-correct'
+              : section === 'words'   ? 'snd-words-correct'
+              : section === 'math'    ? 'snd-math-correct'
+              : 'snd-puzzle-correct';
+    if (!getSoundSetting(key)) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // Два синусоидальных тона — мягкий восходящий интервал
+        const notes = [
+            { freq: 523.25, start: 0,    dur: 0.18 },  // C5
+            { freq: 783.99, start: 0.10, dur: 0.22 },  // G5
+        ];
+        notes.forEach(({ freq, start, dur }) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            // Лёгкое вибрато для мягкости
+            const vib  = ctx.createOscillator();
+            const vibG = ctx.createGain();
+            vib.frequency.value = 5.5;
+            vibG.gain.value = 3;
+            vib.connect(vibG);
+            vibG.connect(osc.frequency);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+
+            // Огибающая: тихо нарастает, плавно затухает
+            const t0 = ctx.currentTime + start;
+            gain.gain.setValueAtTime(0, t0);
+            gain.gain.linearRampToValueAtTime(0.09, t0 + 0.025);
+            gain.gain.setValueAtTime(0.09, t0 + dur * 0.4);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+            vib.start(t0); vib.stop(t0 + dur);
+            osc.start(t0); osc.stop(t0 + dur + 0.05);
+        });
+    } catch(e) {}
+}
+
+// Мягкий звук неправильного ответа (слова)
+function playWrongSound(section) {
+    const key = section === 'words' ? 'snd-words-correct'
+              : section === 'math'  ? 'snd-math-correct'
+              : 'snd-puzzle-correct';
+    if (!getSoundSetting(key)) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+            { freq: 330, start: 0,    dur: 0.18 },  // E4
+            { freq: 262, start: 0.12, dur: 0.22 },  // C4 — нисходящий
+        ];
+        notes.forEach(({ freq, start, dur }) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+            const t0 = ctx.currentTime + start;
+            gain.gain.setValueAtTime(0, t0);
+            gain.gain.linearRampToValueAtTime(0.07, t0 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+            osc.start(t0); osc.stop(t0 + dur + 0.05);
+        });
+    } catch(e) {}
 }
 
 
@@ -272,6 +514,8 @@ const Achievements = {
     },
 
     _playFanfare(section) {
+        const key = section === 'riddles' ? 'snd-riddle-achieve' : 'snd-puzzle-achieve';
+        if (!getSoundSetting(key)) return;
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const notes = section === 'riddles'
@@ -319,6 +563,7 @@ const Achievements = {
 
     _show(section, count) {
         this._playFanfare(section);
+        StatTracker.recordAchievement(section, count);
         const theme = this._milestoneTheme(section, count);
 
         const overlay = document.createElement('div');
@@ -380,6 +625,64 @@ const Achievements = {
     async _share(count, section) {
         const name = section === 'riddles' ? 'загадках' : 'ребусах';
         const text = `🎉 ${count} правильных ответов подряд в ${name}! Попробуй сам: https://saturn-kassiel.github.io/Kids-site/`;
+
+        // Пробуем поделиться вместе с картинкой
+        const canvas = document.getElementById('ach-canvas');
+        if (canvas && navigator.share) {
+            try {
+                // Создаём новый canvas с картинкой + текстом поверх
+                const shareCanvas = document.createElement('canvas');
+                shareCanvas.width = 600; shareCanvas.height = 600;
+                const sc = shareCanvas.getContext('2d');
+
+                // Белый/тёмный фон в зависимости от темы
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                sc.fillStyle = isDark ? '#0f1f36' : '#f0f9ff';
+                sc.roundRect(0, 0, 600, 600, 40);
+                sc.fill();
+
+                // Рисуем иконку в центре (перерисовываем)
+                const theme = this._milestoneTheme(section, count);
+                theme.icon.call(this, sc, 600, theme.color);
+
+                // Полупрозрачная подложка под текст
+                sc.fillStyle = isDark ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.75)';
+                sc.beginPath();
+                sc.roundRect(40, 430, 520, 130, 20);
+                sc.fill();
+
+                // Число
+                sc.font = 'bold 72px system-ui, sans-serif';
+                sc.textAlign = 'center';
+                sc.fillStyle = isDark ? '#A7EBF2' : '#0369a1';
+                sc.fillText(count, 300, 500);
+
+                // Текст
+                sc.font = '500 28px system-ui, sans-serif';
+                sc.fillStyle = isDark ? '#e2e8f0' : '#1e293b';
+                sc.fillText(`правильных ответов подряд в ${name}`, 300, 542);
+
+                // Бренд
+                sc.font = '400 20px system-ui, sans-serif';
+                sc.fillStyle = isDark ? '#94a3b8' : '#64748b';
+                sc.fillText('Говоруша · saturn-kassiel.github.io/Kids-site', 300, 576);
+
+                // Конвертируем в blob и шарим
+                shareCanvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'achievement.png', { type: 'image/png' });
+                    try {
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text });
+                        } else {
+                            await navigator.share({ text });
+                        }
+                    } catch(e) {}
+                }, 'image/png');
+                return;
+            } catch(e) {}
+        }
+
+        // Fallback — только текст или копирование
         if (navigator.share) {
             try { await navigator.share({ text }); } catch(e) {}
         } else {
@@ -602,6 +905,299 @@ const Achievements = {
     },
 };
 
+
+// =============================================
+// STAT TRACKER
+// =============================================
+const StatTracker = {
+    // 15-секундные таймеры для каждого типа контента
+    _timers: {},   // key → setInterval id
+    _secs:   {},   // key → секунды в текущей сессии
+
+    // Запустить таймер для контента
+    // onCredit() вызывается когда накоплено threshold сек (по умолчанию 15)
+    startTimer(key, onCredit, threshold = 15) {
+        this.stopTimer(key);
+        this._secs[key] = 0;
+        this._timers[key] = setInterval(() => {
+            this._secs[key]++;
+            if (this._secs[key] >= threshold) {
+                this.stopTimer(key);
+                onCredit();
+            }
+        }, 1000);
+    },
+
+    stopTimer(key) {
+        if (this._timers[key]) {
+            clearInterval(this._timers[key]);
+            delete this._timers[key];
+        }
+        delete this._secs[key];
+    },
+
+    // Добавить секунды к общему времени
+    addTime(key, seconds) {
+        if (!seconds || seconds <= 0) return;
+        const cur = parseFloat(localStorage.getItem(`stat_time_${key}`) || 0);
+        localStorage.setItem(`stat_time_${key}`, cur + seconds);
+    },
+
+    // Трекинг времени через timeupdate события
+    trackAudioTime(audioEl, timeKey) {
+        let _lastTime = null;
+        audioEl.addEventListener('timeupdate', () => {
+            if (!audioEl.paused && _lastTime !== null) {
+                const delta = audioEl.currentTime - _lastTime;
+                if (delta > 0 && delta < 2) this.addTime(timeKey, delta);
+            }
+            _lastTime = audioEl.paused ? null : audioEl.currentTime;
+        });
+        audioEl.addEventListener('pause', () => { _lastTime = null; });
+        audioEl.addEventListener('ended', () => { _lastTime = null; });
+    },
+
+    // Инкремент счётчика
+    inc(key) {
+        const cur = parseInt(localStorage.getItem(`stat_${key}`) || 0);
+        localStorage.setItem(`stat_${key}`, cur + 1);
+        // Проверяем значки
+        if (typeof Badges !== 'undefined') Badges.checkAll();
+    },
+
+    get(key) { return parseInt(localStorage.getItem(`stat_${key}`) || 0); },
+    getTime(key) { return parseFloat(localStorage.getItem(`stat_time_${key}`) || 0); },
+
+    // Форматирование времени
+    fmtDuration(secs) {
+        secs = Math.floor(secs);
+        if (secs < 60) return secs + ' сек';
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        if (h > 0) return `${h} ч ${m} мин`;
+        return `${m} мин ${s > 0 ? s + ' сек' : ''}`.trim();
+    },
+
+    // Сохранить достижение
+    recordAchievement(section, count) {
+        const key = `stat_ach_${section}`;
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        const milestone = String(count);
+        data[milestone] = (data[milestone] || 0) + 1;
+        localStorage.setItem(key, JSON.stringify(data));
+    },
+
+    getAchievements(section) {
+        return JSON.parse(localStorage.getItem(`stat_ach_${section}`) || '{}');
+    },
+
+    // Сброс всех статов
+    resetAll() {
+        const keys = [
+            'stat_songs','stat_letters','stat_numbers','stat_colors',
+            'stat_puzzles','stat_riddles','stat_words','stat_math',
+            'stat_time_songs','stat_time_podcasts',
+            'stat_ach_puzzles','stat_ach_riddles',
+            'achievements_best',
+            'badges_unlocked',
+            'viewed_letters','viewed_numbers','viewed_colors'
+        ];
+        keys.forEach(k => localStorage.removeItem(k));
+    }
+};
+
+// =============================================
+// BADGES — Коллекция достижений
+// =============================================
+const Badges = {
+    _unlocked: {},  // { badgeId: timestamp }
+
+    // Определения всех значков
+    _defs: [
+        // Алфавит
+        { id:'first_letter',  key:'letters', thr:1,   emoji:'🔤', name:'Первая буква',     desc:'Прослушай первую букву' },
+        { id:'half_alphabet', key:'letters', thr:16,  emoji:'📖', name:'Половина алфавита', desc:'Прослушай 16 букв' },
+        { id:'full_alphabet', key:'letters', thr:33,  emoji:'🎓', name:'Весь алфавит',      desc:'Прослушай все 33 буквы' },
+        // Цифры
+        { id:'first_number',  key:'numbers', thr:1,   emoji:'🔢', name:'Первая цифра',     desc:'Прослушай первую цифру' },
+        { id:'all_numbers',   key:'numbers', thr:10,  emoji:'🧮', name:'Все цифры',        desc:'Прослушай все 10 цифр' },
+        // Цвета
+        { id:'first_color',   key:'colors',  thr:1,   emoji:'🎨', name:'Первый цвет',      desc:'Прослушай первый цвет' },
+        { id:'all_colors',    key:'colors',  thr:12,  emoji:'🌈', name:'Все цвета',        desc:'Прослушай все 12 цветов' },
+        // Слова
+        { id:'first_word',    key:'words',   thr:1,   emoji:'📝', name:'Первое слово',     desc:'Собери первое слово' },
+        { id:'word_collector', key:'words',   thr:10,  emoji:'📚', name:'Словарик',         desc:'Собери 10 слов' },
+        { id:'word_master',   key:'words',   thr:25,  emoji:'✍️',  name:'Книгочей',         desc:'Собери 25 слов' },
+        // Арифметика
+        { id:'first_math',    key:'math',    thr:1,   emoji:'➕', name:'Первый пример',    desc:'Реши первый пример' },
+        { id:'math_fan',      key:'math',    thr:10,  emoji:'🔢', name:'Счетовод',         desc:'Реши 10 примеров' },
+        { id:'math_master',   key:'math',    thr:30,  emoji:'🧮', name:'Математик',        desc:'Реши 30 примеров' },
+        // Ребусы
+        { id:'first_puzzle',  key:'puzzles', thr:1,   emoji:'🧩', name:'Первый ребус',     desc:'Реши первый ребус' },
+        { id:'puzzle_pro',    key:'puzzles', thr:15,  emoji:'🧠', name:'Мастер ребусов',   desc:'Реши 15 ребусов' },
+        { id:'puzzle_legend', key:'puzzles', thr:40,  emoji:'💎', name:'Легенда ребусов',  desc:'Реши 40 ребусов' },
+        // Загадки
+        { id:'first_riddle',  key:'riddles', thr:1,   emoji:'❓', name:'Первая загадка',   desc:'Отгадай первую загадку' },
+        { id:'riddle_pro',    key:'riddles', thr:15,  emoji:'🦉', name:'Знаток загадок',   desc:'Отгадай 15 загадок' },
+        { id:'riddle_legend', key:'riddles', thr:40,  emoji:'👑', name:'Мудрец',           desc:'Отгадай 40 загадок' },
+        // Песенки
+        { id:'first_song',    key:'songs',   thr:1,   emoji:'🎵', name:'Первая песенка',   desc:'Прослушай первую песенку' },
+        { id:'meloman',       key:'songs',   thr:10,  emoji:'🎶', name:'Меломан',          desc:'Прослушай 10 песенок' },
+        // Мета (key: null — проверяются отдельно)
+        { id:'explorer',      key:null, thr:5,  emoji:'🌟', name:'Исследователь', desc:'Получи 5 значков' },
+        { id:'champion',      key:null, thr:14, emoji:'🏆', name:'Чемпион',       desc:'Получи 14 значков' },
+        { id:'completionist', key:null, thr:21, emoji:'💫', name:'Суперзвезда',   desc:'Получи 21 значок' },
+    ],
+
+    init() {
+        this._unlocked = JSON.parse(localStorage.getItem('badges_unlocked') || '{}');
+        this._updateHomeBadge();
+    },
+
+    _save() {
+        localStorage.setItem('badges_unlocked', JSON.stringify(this._unlocked));
+    },
+
+    _unlockedCount() {
+        return Object.keys(this._unlocked).length;
+    },
+
+    // Проверяем все значки — вызывается после каждого изменения стата
+    checkAll() {
+        const newBadges = [];
+        this._defs.forEach(def => {
+            if (this._unlocked[def.id]) return; // уже получен
+
+            let val;
+            if (def.key === null) {
+                // Мета-бейдж: считаем сколько обычных (не мета) значков открыто
+                val = this._defs.filter(d => d.key !== null && this._unlocked[d.id]).length;
+            } else {
+                val = StatTracker.get(def.key);
+            }
+
+            if (val >= def.thr) {
+                this._unlocked[def.id] = Date.now();
+                newBadges.push(def);
+            }
+        });
+
+        if (newBadges.length > 0) {
+            this._save();
+            this._updateHomeBadge();
+            // Показываем уведомление для первого нового значка
+            this._notify(newBadges[0]);
+            // Анимируем Гошу
+            Gosha.celebrate();
+        }
+    },
+
+    _notify(def) {
+        showToast(`${def.emoji} Новый значок: ${def.name}!`, 3200);
+        // Мини-конфетти
+        if (window.confetti) {
+            confetti({ particleCount: 50, spread: 50, origin: { y: 0.8 }, colors: ['#fbbf24','#a78bfa','#34d399','#f472b6'] });
+        }
+    },
+
+    _updateHomeBadge() {
+        const el = document.getElementById('mc-badge-count');
+        if (!el) return;
+        const count = this._unlockedCount();
+        if (count > 0) {
+            el.textContent = count;
+            el.style.display = '';
+        } else {
+            el.style.display = 'none';
+        }
+    },
+
+    // Рендер экрана достижений
+    show() {
+        App.navigate('badges', 'Достижения');
+        this._render();
+    },
+
+    _render() {
+        const grid = document.getElementById('badges-grid');
+        const total = this._defs.length;
+        const unlocked = this._unlockedCount();
+
+        document.getElementById('badges-unlocked').textContent = unlocked;
+        document.getElementById('badges-total').textContent = total;
+        const barFill = document.getElementById('badges-bar-fill');
+        setTimeout(() => { barFill.style.width = (unlocked / total * 100) + '%'; }, 100);
+
+        // Анимируем маскот на странице достижений
+        const mascotWrap = document.getElementById('badges-mascot-wrap');
+        if (mascotWrap) {
+            mascotWrap.className = unlocked >= 18 ? 'badges-mascot-wrap gosha-dance'
+                                 : unlocked >= 5  ? 'badges-mascot-wrap gosha-happy'
+                                 : 'badges-mascot-wrap';
+        }
+
+        grid.innerHTML = '';
+        this._defs.forEach((def, i) => {
+            const isUnlocked = !!this._unlocked[def.id];
+            let progress = 0;
+            if (def.key === null) {
+                progress = this._defs.filter(d => d.key !== null && this._unlocked[d.id]).length;
+            } else {
+                progress = StatTracker.get(def.key);
+            }
+            const pct = Math.min(progress / def.thr * 100, 100);
+            const date = isUnlocked ? new Date(this._unlocked[def.id]) : null;
+            const dateStr = date ? `${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}` : '';
+
+            const card = document.createElement('div');
+            card.className = 'badge-card' + (isUnlocked ? ' unlocked' : '');
+            card.style.animationDelay = (i * 0.04) + 's';
+            card.innerHTML = `
+                <div class="badge-emoji">${def.emoji}</div>
+                <div class="badge-name">${def.name}</div>
+                <div class="badge-desc">${isUnlocked ? dateStr : def.desc}</div>
+                <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
+                <div class="badge-progress-text">${Math.min(progress, def.thr)} / ${def.thr}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+};
+
+// =============================================
+// GOSHA — Анимации маскота
+// =============================================
+const Gosha = {
+    _lastCelebrate: 0,
+
+    // Вызывается при получении нового значка
+    celebrate() {
+        const wrap = document.querySelector('.home-mascot-wrap');
+        if (!wrap) return;
+        // Не чаще раза в 3 сек
+        if (Date.now() - this._lastCelebrate < 3000) return;
+        this._lastCelebrate = Date.now();
+
+        wrap.classList.remove('gosha-idle');
+        wrap.classList.add('gosha-celebrate');
+        wrap.addEventListener('animationend', () => {
+            wrap.classList.remove('gosha-celebrate');
+            wrap.classList.add('gosha-idle');
+        }, { once: true });
+    },
+
+    // Подпрыгивание при возврате на главную после прогресса
+    bounce() {
+        const wrap = document.querySelector('.home-mascot-wrap');
+        if (!wrap) return;
+        wrap.classList.add('gosha-bounce');
+        wrap.addEventListener('animationend', () => {
+            wrap.classList.remove('gosha-bounce');
+        }, { once: true });
+    }
+};
+
 // -------- AUDIO MANAGER --------
 // Keeps only one audio playing globally; persists across section changes
 const AudioMgr = {
@@ -746,17 +1342,29 @@ const Media = {
         }
 
         this.currentList = items;
-        this.index = 0;
+        const startIndex = Math.floor(Math.random() * items.length);
+        this.index = startIndex;
         App.navigate('media-page', TITLES[type] || type);
 
         this._renderGrid(type);
         setupProgress(this.player, 'progress-bar', 'time-cur', 'time-dur', 'prog-wrap');
         this.player.onended = () => {
+            // Засчитываем прослушивание
+            const _sk = this._sectionType === 'alphabet' ? 'letters'
+                      : this._sectionType === 'numbers'  ? 'numbers' : 'colors';
+            const _item = this.currentList[this.index];
+            StatTracker.inc(_sk);
+            const viewed = JSON.parse(localStorage.getItem(`viewed_${_sk}`) || '[]');
+            if (_item && !viewed.includes(_item.name)) {
+                viewed.push(_item.name);
+                localStorage.setItem(`viewed_${_sk}`, JSON.stringify(viewed));
+            }
+
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg>';
             setTimeout(() => this.next(), 1000);
         };
-        this.play(0);
+        this.play(startIndex);
     },
 
     _renderGrid(type) {
@@ -824,12 +1432,6 @@ const Media = {
         document.querySelectorAll('#media-grid button').forEach((b, idx) => {
             b.classList.toggle('active', idx === i);
         });
-
-        // Track stats for letters
-        if (this._sectionType === 'alphabet') {
-            const cur = parseInt(localStorage.getItem('stat_letters') || 0);
-            localStorage.setItem('stat_letters', cur + 1);
-        }
     },
 
     toggle() {
@@ -868,6 +1470,568 @@ const Media = {
 };
 
 // =============================================
+// WORDS — Собери слово из букв
+// =============================================
+const Words = {
+    _level: 'easy',
+    _solved: false,
+    _current: null,
+    _slots: [],        // массив: null или буква
+    _sessionScore: 0,
+    _queue: [],
+    _qpos: 0,
+
+    _data: {
+        easy: [
+            { word:'КОТ', emoji:'🐱' }, { word:'ДОМ', emoji:'🏠' }, { word:'ШАР', emoji:'🎈' },
+            { word:'ЛУК', emoji:'🧅' }, { word:'СОН', emoji:'😴' }, { word:'МАК', emoji:'🌺' },
+            { word:'СОК', emoji:'🧃' }, { word:'ЛЕС', emoji:'🌲' }, { word:'НОС', emoji:'👃' },
+            { word:'МЯЧ', emoji:'⚽' }, { word:'ЛЕВ', emoji:'🦁' }, { word:'КИТ', emoji:'🐳' },
+            { word:'ЖУК', emoji:'🪲' }, { word:'ДЫМ', emoji:'💨' }, { word:'ЛУЧ', emoji:'☀️' },
+            { word:'МЁД', emoji:'🍯' }, { word:'СЫР', emoji:'🧀' }, { word:'ПЁС', emoji:'🐕' },
+        ],
+        medium: [
+            { word:'РЫБА', emoji:'🐟' }, { word:'ЛУНА', emoji:'🌙' }, { word:'ЗИМА', emoji:'❄️' },
+            { word:'ЛИСА', emoji:'🦊' }, { word:'РОЗА', emoji:'🌹' }, { word:'КАША', emoji:'🥣' },
+            { word:'УТКА', emoji:'🦆' }, { word:'ТОРТ', emoji:'🎂' }, { word:'ГРИБ', emoji:'🍄' },
+            { word:'МОСТ', emoji:'🌉' }, { word:'АРБУЗ', emoji:'🍉' }, { word:'ЛИСТ', emoji:'🍃' },
+            { word:'ПАУК', emoji:'🕷️' }, { word:'ВОЛК', emoji:'🐺' }, { word:'СЛОН', emoji:'🐘' },
+        ],
+        hard: [
+            { word:'КНИГА', emoji:'📖' }, { word:'ШКОЛА', emoji:'🏫' }, { word:'КОШКА', emoji:'🐈' },
+            { word:'МЫШКА', emoji:'🐭' }, { word:'ОБЛАКО', emoji:'☁️' }, { word:'ДЕРЕВО', emoji:'🌳' },
+            { word:'СОЛНЦЕ', emoji:'☀️' }, { word:'РАКЕТА', emoji:'🚀' }, { word:'ЯБЛОКО', emoji:'🍎' },
+            { word:'ЗВЕЗДА', emoji:'⭐' }, { word:'БАБОЧКА', emoji:'🦋' }, { word:'РАДУГА', emoji:'🌈' },
+        ],
+    },
+
+    // Русский алфавит для букв-обманок
+    _alphabet: 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ',
+
+    init() {
+        AudioMgr.stop();
+        this._sessionScore = 0;
+        this._rebuildQueue();
+        App.navigate('words', 'Слова');
+        this._updateScore();
+        this._renderLevelBtns();
+        this.show();
+    },
+
+    _shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    },
+
+    _rebuildQueue() {
+        const list = this._data[this._level];
+        this._queue = this._shuffle([...Array(list.length).keys()]);
+        this._qpos = 0;
+    },
+
+    _getCurrent() {
+        const list = this._data[this._level];
+        const idx = this._queue[this._qpos % this._queue.length];
+        return list[idx];
+    },
+
+    setLevel(lv, btn) {
+        this._level = lv;
+        this._rebuildQueue();
+        this._renderLevelBtns();
+        this.show();
+    },
+
+    _renderLevelBtns() {
+        document.querySelectorAll('.words-lvl-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.lvl === this._level);
+        });
+    },
+
+    _getDecoyLetters(word, count) {
+        const wordLetters = new Set(word.split(''));
+        const available = this._alphabet.split('').filter(l => !wordLetters.has(l));
+        return this._shuffle(available).slice(0, count);
+    },
+
+    show() {
+        this._solved = false;
+        this._current = this._getCurrent();
+        const word = this._current.word;
+        const letters = word.split('');
+
+        // Слоты
+        this._slots = new Array(letters.length).fill(null);
+
+        // Буквы-обманки
+        const decoyCount = this._level === 'easy' ? 0 : this._level === 'medium' ? 2 : 4;
+        const decoys = this._getDecoyLetters(word, decoyCount);
+        const allTiles = this._shuffle([...letters, ...decoys]);
+
+        // Рендер
+        document.getElementById('words-emoji').textContent = this._current.emoji;
+        document.getElementById('words-msg').textContent = '';
+        document.getElementById('words-msg').className = 'words-msg';
+
+        this._renderSlots();
+        this._renderTiles(allTiles);
+    },
+
+    _renderSlots() {
+        const container = document.getElementById('words-slots');
+        container.innerHTML = '';
+        this._slots.forEach((letter, i) => {
+            const slot = document.createElement('div');
+            slot.className = 'words-slot' + (letter ? ' filled' : '');
+            slot.textContent = letter || '';
+            slot.dataset.idx = i;
+            if (letter) {
+                slot.addEventListener('click', () => this._removeFromSlot(i));
+            }
+            container.appendChild(slot);
+        });
+    },
+
+    _renderTiles(tiles) {
+        const container = document.getElementById('words-tiles');
+        container.innerHTML = '';
+        // Сохраняем tiles для переиспользования
+        this._tiles = tiles;
+        this._tileUsed = new Array(tiles.length).fill(false);
+
+        tiles.forEach((letter, i) => {
+            const tile = document.createElement('button');
+            tile.className = 'words-tile';
+            tile.textContent = letter;
+            tile.dataset.tidx = i;
+            tile.addEventListener('click', () => this._placeTile(i));
+            container.appendChild(tile);
+        });
+    },
+
+    _placeTile(tileIdx) {
+        if (this._solved || this._tileUsed[tileIdx]) return;
+
+        // Найти первый свободный слот
+        const slotIdx = this._slots.indexOf(null);
+        if (slotIdx === -1) return;
+
+        this._playTick();
+        this._slots[slotIdx] = this._tiles[tileIdx];
+        this._tileUsed[tileIdx] = true;
+
+        // Обновляем UI
+        this._renderSlots();
+        const tileEl = document.querySelector(`.words-tile[data-tidx="${tileIdx}"]`);
+        if (tileEl) tileEl.classList.add('used');
+
+        // Проверяем заполненность
+        if (!this._slots.includes(null)) {
+            this._checkWord();
+        }
+    },
+
+    _removeFromSlot(slotIdx) {
+        if (this._solved) return;
+        const letter = this._slots[slotIdx];
+        if (!letter) return;
+
+        this._slots[slotIdx] = null;
+
+        // Вернуть плитку — находим первую использованную плитку с этой буквой
+        for (let i = 0; i < this._tiles.length; i++) {
+            if (this._tileUsed[i] && this._tiles[i] === letter) {
+                this._tileUsed[i] = false;
+                const tileEl = document.querySelector(`.words-tile[data-tidx="${i}"]`);
+                if (tileEl) tileEl.classList.remove('used');
+                break;
+            }
+        }
+
+        this._renderSlots();
+        document.getElementById('words-msg').textContent = '';
+        document.getElementById('words-msg').className = 'words-msg';
+    },
+
+    _checkWord() {
+        const assembled = this._slots.join('');
+        const correct = this._current.word;
+        const msgEl = document.getElementById('words-msg');
+
+        if (assembled === correct) {
+            this._solved = true;
+            this._sessionScore++;
+            this._updateScore();
+            StatTracker.inc('words');
+
+            playCorrectSound('words');
+
+            msgEl.textContent = this._getSuccessPhrase();
+            msgEl.className = 'words-msg words-msg-ok';
+
+            // Подсветить слоты зелёным
+            document.querySelectorAll('.words-slot').forEach(s => s.classList.add('correct'));
+
+            // Конфетти
+            if (window.confetti) {
+                confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } });
+            }
+
+            // Авто-переход
+            setTimeout(() => { if (this._solved) this.next(); }, 2200);
+        } else {
+            playWrongSound('words');
+            msgEl.textContent = 'Попробуй ещё раз!';
+            msgEl.className = 'words-msg words-msg-err';
+
+            // Тряска слотов
+            const slotsEl = document.getElementById('words-slots');
+            slotsEl.classList.add('words-shake');
+            setTimeout(() => slotsEl.classList.remove('words-shake'), 500);
+        }
+    },
+
+    _getSuccessPhrase() {
+        const phrases = ['Молодец! 🎉', 'Правильно! ⭐', 'Отлично! 🏆', 'Супер! 🌟', 'Ура! 🎈', 'Верно! 👏'];
+        return phrases[Math.floor(Math.random() * phrases.length)];
+    },
+
+    hint() {
+        if (this._solved) return;
+        // Подставить первую незаполненную или неправильную букву
+        const word = this._current.word;
+
+        // Найти первый пустой слот
+        const emptyIdx = this._slots.indexOf(null);
+        if (emptyIdx === -1) return;
+
+        const correctLetter = word[emptyIdx];
+
+        // Найти плитку с этой буквой среди неиспользованных
+        for (let i = 0; i < this._tiles.length; i++) {
+            if (!this._tileUsed[i] && this._tiles[i] === correctLetter) {
+                this._placeTile(i);
+                showToast('💡 Подсказка: ' + correctLetter);
+                return;
+            }
+        }
+        showToast('🤔 Попробуй убрать неправильные буквы');
+    },
+
+    next() {
+        this._qpos++;
+        if (this._qpos >= this._queue.length) {
+            this._rebuildQueue();
+        }
+        this.show();
+    },
+
+    _updateScore() {
+        const el = document.getElementById('words-score');
+        if (el) el.textContent = this._sessionScore;
+    },
+
+    // Тихий клик при размещении буквы
+    _playTick() {
+        if (!getSoundSetting('snd-words-correct')) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.1);
+        } catch(e) {}
+    }
+};
+
+// =============================================
+// ARITHMETIC — Арифметика
+// =============================================
+const Arithmetic = {
+    _level: 'easy',
+    _solved: false,
+    _current: null,  // { expr, answer, answerStr }
+    _slots: [],
+    _tiles: [],
+    _tileUsed: [],
+    _sessionScore: 0,
+
+    init() {
+        AudioMgr.stop();
+        this._sessionScore = 0;
+        App.navigate('arithmetic', 'Арифметика');
+        this._updateScore();
+        this._renderLevelBtns();
+        this.show();
+    },
+
+    _shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    },
+
+    _rand(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    // Генерация примера в зависимости от уровня
+    _generate() {
+        let a, b, op, answer, expr;
+
+        if (this._level === 'easy') {
+            // Сложение/вычитание до 10, результат 0–10
+            op = Math.random() < 0.5 ? '+' : '−';
+            if (op === '+') {
+                a = this._rand(1, 9);
+                b = this._rand(0, 10 - a);
+                answer = a + b;
+            } else {
+                a = this._rand(1, 10);
+                b = this._rand(0, a);
+                answer = a - b;
+            }
+            expr = `${a} ${op} ${b}`;
+        } else if (this._level === 'medium') {
+            // Сложение/вычитание до 20, результат 0–20
+            const type = this._rand(0, 2);
+            if (type === 0) {
+                op = '+'; a = this._rand(2, 15); b = this._rand(1, 20 - a);
+                answer = a + b;
+            } else if (type === 1) {
+                op = '−'; a = this._rand(5, 20); b = this._rand(1, a);
+                answer = a - b;
+            } else {
+                op = '×'; a = this._rand(1, 5); b = this._rand(1, 5);
+                answer = a * b;
+            }
+            expr = `${a} ${op} ${b}`;
+        } else {
+            // Сложение до 50, вычитание до 30, умножение до 9×9
+            const type = this._rand(0, 3);
+            if (type === 0) {
+                op = '+'; a = this._rand(10, 40); b = this._rand(5, 50 - a);
+                answer = a + b;
+            } else if (type === 1) {
+                op = '−'; a = this._rand(10, 50); b = this._rand(5, a);
+                answer = a - b;
+            } else if (type === 2) {
+                op = '×'; a = this._rand(2, 9); b = this._rand(2, 9);
+                answer = a * b;
+            } else {
+                // Деление без остатка
+                b = this._rand(2, 9);
+                answer = this._rand(1, 9);
+                a = b * answer;
+                op = '÷';
+            }
+            expr = `${a} ${op} ${b}`;
+        }
+
+        return { expr, answer, answerStr: String(answer) };
+    },
+
+    setLevel(lv) {
+        this._level = lv;
+        this._renderLevelBtns();
+        this.show();
+    },
+
+    _renderLevelBtns() {
+        document.querySelectorAll('#arithmetic .words-lvl-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.lvl === this._level);
+        });
+    },
+
+    show() {
+        this._solved = false;
+        this._current = this._generate();
+        const ansDigits = this._current.answerStr.split('');
+
+        this._slots = new Array(ansDigits.length).fill(null);
+
+        // Цифры-обманки
+        const decoyCount = this._level === 'easy' ? 2 : this._level === 'medium' ? 3 : 4;
+        const ansSet = new Set(ansDigits);
+        let decoys = [];
+        const pool = '0123456789'.split('').filter(d => !ansSet.has(d));
+        decoys = this._shuffle(pool).slice(0, decoyCount);
+        const allTiles = this._shuffle([...ansDigits, ...decoys]);
+
+        // Рендер
+        document.getElementById('math-problem').textContent = this._current.expr + ' = ?';
+        document.getElementById('math-msg').textContent = '';
+        document.getElementById('math-msg').className = 'words-msg';
+
+        this._renderSlots();
+        this._renderTiles(allTiles);
+    },
+
+    _renderSlots() {
+        const container = document.getElementById('math-slots');
+        container.innerHTML = '';
+        this._slots.forEach((digit, i) => {
+            const slot = document.createElement('div');
+            slot.className = 'words-slot' + (digit !== null ? ' filled' : '');
+            slot.textContent = digit !== null ? digit : '';
+            slot.dataset.idx = i;
+            if (digit !== null) {
+                slot.addEventListener('click', () => this._removeFromSlot(i));
+            }
+            container.appendChild(slot);
+        });
+    },
+
+    _renderTiles(tiles) {
+        const container = document.getElementById('math-tiles');
+        container.innerHTML = '';
+        this._tiles = tiles;
+        this._tileUsed = new Array(tiles.length).fill(false);
+
+        tiles.forEach((digit, i) => {
+            const tile = document.createElement('button');
+            tile.className = 'words-tile';
+            tile.textContent = digit;
+            tile.dataset.tidx = i;
+            tile.addEventListener('click', () => this._placeTile(i));
+            container.appendChild(tile);
+        });
+    },
+
+    _placeTile(tileIdx) {
+        if (this._solved || this._tileUsed[tileIdx]) return;
+        const slotIdx = this._slots.indexOf(null);
+        if (slotIdx === -1) return;
+
+        this._playTick();
+        this._slots[slotIdx] = this._tiles[tileIdx];
+        this._tileUsed[tileIdx] = true;
+
+        this._renderSlots();
+        const tileEl = document.querySelector(`#math-tiles .words-tile[data-tidx="${tileIdx}"]`);
+        if (tileEl) tileEl.classList.add('used');
+
+        if (!this._slots.includes(null)) {
+            this._checkAnswer();
+        }
+    },
+
+    _removeFromSlot(slotIdx) {
+        if (this._solved) return;
+        const digit = this._slots[slotIdx];
+        if (digit === null) return;
+
+        this._slots[slotIdx] = null;
+
+        for (let i = 0; i < this._tiles.length; i++) {
+            if (this._tileUsed[i] && this._tiles[i] === digit) {
+                this._tileUsed[i] = false;
+                const tileEl = document.querySelector(`#math-tiles .words-tile[data-tidx="${i}"]`);
+                if (tileEl) tileEl.classList.remove('used');
+                break;
+            }
+        }
+
+        this._renderSlots();
+        document.getElementById('math-msg').textContent = '';
+        document.getElementById('math-msg').className = 'words-msg';
+    },
+
+    _checkAnswer() {
+        const assembled = this._slots.join('');
+        const correct = this._current.answerStr;
+        const msgEl = document.getElementById('math-msg');
+
+        if (assembled === correct) {
+            this._solved = true;
+            this._sessionScore++;
+            this._updateScore();
+            StatTracker.inc('math');
+
+            playCorrectSound('math');
+
+            const phrases = ['Молодец! 🎉', 'Правильно! ⭐', 'Верно! 🏆', 'Супер! 🌟', 'Ура! 🎈', 'Отлично! 👏'];
+            msgEl.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+            msgEl.className = 'words-msg words-msg-ok';
+
+            document.querySelectorAll('#math-slots .words-slot').forEach(s => s.classList.add('correct'));
+
+            if (window.confetti) {
+                confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } });
+            }
+
+            setTimeout(() => { if (this._solved) this.next(); }, 2200);
+        } else {
+            playWrongSound('math');
+            msgEl.textContent = 'Попробуй ещё раз!';
+            msgEl.className = 'words-msg words-msg-err';
+
+            const slotsEl = document.getElementById('math-slots');
+            slotsEl.classList.add('words-shake');
+            setTimeout(() => slotsEl.classList.remove('words-shake'), 500);
+        }
+    },
+
+    hint() {
+        if (this._solved) return;
+        const answer = this._current.answerStr;
+        const emptyIdx = this._slots.indexOf(null);
+        if (emptyIdx === -1) return;
+
+        const correctDigit = answer[emptyIdx];
+
+        for (let i = 0; i < this._tiles.length; i++) {
+            if (!this._tileUsed[i] && this._tiles[i] === correctDigit) {
+                this._placeTile(i);
+                showToast('💡 Подсказка: ' + correctDigit);
+                return;
+            }
+        }
+        showToast('🤔 Попробуй убрать неправильные цифры');
+    },
+
+    next() {
+        this.show();
+    },
+
+    _updateScore() {
+        const el = document.getElementById('math-score');
+        if (el) el.textContent = this._sessionScore;
+    },
+
+    _playTick() {
+        if (!getSoundSetting('snd-math-correct')) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.1);
+        } catch(e) {}
+    }
+};
+
+// =============================================
 // SONGS
 // =============================================
 const Songs = {
@@ -902,6 +2066,7 @@ const Songs = {
         this._filtered = [...this._allSongs];
         this.render();
         setupProgress(this.audio, 'song-progress-bar', 'song-time-cur', 'song-time-dur', 'song-prog-wrap');
+        if (!this._timeTracked) { StatTracker.trackAudioTime(this.audio, 'songs'); this._timeTracked = true; }
         this.audio.onended = () => {
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('song-play-btn').textContent = '▶';
@@ -986,9 +2151,8 @@ const Songs = {
             }
         }
         this.render();
-        // Track stat
-        const cur = parseInt(localStorage.getItem('stat_songs') || 0);
-        localStorage.setItem('stat_songs', cur + 1);
+        // Track stat: зачитывается после 15 сек прослушивания
+        StatTracker.startTimer('songs_play', () => StatTracker.inc('songs'));
     },
 
     toggle() {
@@ -1055,6 +2219,7 @@ const Podcasts = {
         this._filtered = [...this._allPodcasts];
         this.render();
         setupProgress(this.audio, 'podcast-progress-bar', 'podcast-time-cur', 'podcast-time-dur', 'podcast-prog-wrap');
+        if (!this._timeTracked) { StatTracker.trackAudioTime(this.audio, 'podcasts'); this._timeTracked = true; }
         this.audio.onended = () => {
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('podcast-play-btn').textContent = '▶';
@@ -1347,19 +2512,25 @@ const Puzzles = {
         const inp = document.getElementById('puzzle-input');
         if (!val) { msg.textContent = '✏️ Введи ответ!'; msg.className = 'warn'; return; }
         this._hasUnsaved = false;
-        if (val === this._current().answer.toLowerCase()) {
+        const result = AnswerChecker.check(val, this._current().answer);
+        if (result === 'exact' || result === 'fuzzy') {
             inp.className = 'correct';
-            msg.textContent = `🎉 Верно! Ответ: ${this._current().answer}`;
+            msg.innerHTML = result === 'fuzzy'
+                ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${this._current().answer}</b>`
+                : `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Верно! Ответ: <b>${this._current().answer}</b>`;
             msg.className = 'ok';
             this._solved = true;
             starsBurst();
+            playCorrectSound('puzzles');
             Achievements.correct('puzzles');
             const cur = parseInt(localStorage.getItem('stat_puzzles') || 0);
             localStorage.setItem('stat_puzzles', cur + 1);
+            Badges.checkAll();
         } else {
             inp.className = 'wrong';
             msg.textContent = '❌ Не угадал, попробуй ещё!';
             msg.className = 'err';
+            Achievements.wrong('puzzles');
         }
     },
 
@@ -1549,9 +2720,12 @@ const Riddles = {
         const inp = document.getElementById('riddle-input');
         if (!val) { msg.textContent = '✏️ Введи ответ!'; msg.className = 'warn'; return; }
         this._hasUnsaved = false;
-        if (val === item.a.toLowerCase()) {
+        const result = AnswerChecker.check(val, item.a || item.answer || '');
+        if (result === 'exact' || result === 'fuzzy') {
             inp.className = 'correct';
-            msg.textContent = `🎉 Правильно! Ответ: ${item.a}`;
+            msg.innerHTML = result === 'fuzzy'
+                ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${item.a || item.answer}</b>`
+                : `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${item.a || item.answer}</b>`;
             msg.className = 'ok';
             const imgEl2 = document.getElementById('riddle-img');
             imgEl2.innerHTML = '';
@@ -1574,13 +2748,16 @@ const Riddles = {
             }
             this._solved = true;
             starsBurst();
+            playCorrectSound('riddles');
             Achievements.correct('riddles');
             const cur = parseInt(localStorage.getItem('stat_riddles') || 0);
             localStorage.setItem('stat_riddles', cur + 1);
+            Badges.checkAll();
         } else {
             inp.className = 'wrong';
             msg.textContent = '❌ Не угадал, попробуй ещё!';
             msg.className = 'err';
+            Achievements.wrong('riddles');
         }
     },
 
@@ -1685,15 +2862,116 @@ const Info = {
 const Stats = {
     show() {
         App.navigate('stats', 'Статистика');
-        const keys = ['puzzles','riddles','songs','letters'];
-        const maxes = [20, 20, 50, 33];
-        keys.forEach((k, i) => {
-            const val = parseInt(localStorage.getItem(`stat_${k}`) || 0);
-            document.getElementById(`st-${k}`).textContent = val;
-            setTimeout(() => {
-                document.getElementById(`sf-${k}`).style.width = Math.min(val / maxes[i] * 100, 100) + '%';
-            }, 150);
+        this._render();
+    },
+
+    _render() {
+        const el = id => document.getElementById(id);
+        const set = (id, val) => { const e = el(id); if (e) e.textContent = val; };
+        const bar = (id, pct) => setTimeout(() => {
+            const e = el(id);
+            if (e) e.style.width = Math.min(pct, 100) + '%';
+        }, 150);
+
+        // ── Правильные ответы ──
+        const puzzles = StatTracker.get('puzzles');
+        const riddles = StatTracker.get('riddles');
+        set('st-puzzles', puzzles);
+        set('st-riddles', riddles);
+        bar('sf-puzzles', puzzles / 50 * 100);
+        bar('sf-riddles', riddles / 50 * 100);
+
+        // ── Слова ──
+        const words = StatTracker.get('words');
+        set('st-words', words);
+        bar('sf-words', words / 45 * 100);
+
+        // ── Арифметика ──
+        const math = StatTracker.get('math');
+        set('st-math', math);
+        bar('sf-math', math / 50 * 100);
+
+        // ── Песенки ──
+        const songs = StatTracker.get('songs');
+        const songsTime = StatTracker.getTime('songs');
+        set('st-songs', songs);
+        set('st-songs-time', songsTime > 0 ? StatTracker.fmtDuration(songsTime) : '—');
+        set('st-songs-time-card', songsTime > 0 ? StatTracker.fmtDuration(songsTime) : '—');
+        bar('sf-songs', songs / 30 * 100);
+
+        // ── Буквы / цифры / цвета ──
+        const letters = StatTracker.get('letters');
+        const numbers = StatTracker.get('numbers');
+        const colors  = StatTracker.get('colors');
+        set('st-letters', letters);
+        set('st-numbers', numbers);
+        set('st-colors',  colors);
+        bar('sf-letters', letters / 33 * 100);
+        bar('sf-numbers', numbers / 10 * 100);
+        bar('sf-colors',  colors  / 10 * 100);
+
+        // ── Подкасты ──
+        const podTime = StatTracker.getTime('podcasts');
+        set('st-podcasts-time', podTime > 0 ? StatTracker.fmtDuration(podTime) : '—');
+
+        // ── Достижения Загадки ──
+        this._renderAchievements('riddles', 'ach-riddles');
+        // ── Достижения Ребусы ──
+        this._renderAchievements('puzzles', 'ach-puzzles');
+    },
+
+    _renderAchievements(section, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const data = StatTracker.getAchievements(section);
+        const milestones = [5, 10, 15, 20, 25, 30];
+        let html = '';
+        let hasAny = false;
+        milestones.forEach(m => {
+            const count = data[String(m)] || 0;
+            if (count > 0) hasAny = true;
+            html += `<div class="ach-stat-row ${count > 0 ? '' : 'ach-stat-empty'}">
+                <span class="ach-stat-label">${m} подряд</span>
+                <span class="ach-stat-val">${count > 0 ? '×' + count : '—'}</span>
+            </div>`;
         });
+        container.innerHTML = hasAny ? html : '<div class="ach-stat-none">Пока нет достижений</div>';
+    },
+
+    toggleLearn(type) {
+        const acc = document.getElementById('acc-' + type);
+        if (!acc) return;
+        const isOpen = acc.classList.contains('open');
+
+        // Закрываем все
+        document.querySelectorAll('.learn-accordion.open').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.stat-learn-card.open').forEach(el => el.classList.remove('open'));
+
+        if (!isOpen) {
+            this._renderLearnDetails(type, acc);
+            acc.classList.add('open');
+            // Находим карточку-триггер
+            acc.previousElementSibling?.classList.add('open');
+        }
+    },
+
+    _renderLearnDetails(type, container) {
+        const viewed = JSON.parse(localStorage.getItem(`viewed_${type}`) || '[]');
+
+        const allItems = type === 'letters'
+            ? 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('')
+            : type === 'numbers'
+            ? ['0','1','2','3','4','5','6','7','8','9']
+            : ['Красный','Оранжевый','Жёлтый','Зелёный','Синий','Фиолетовый','Розовый','Голубой','Белый','Чёрный','Серый','Коричневый'];
+
+        let html = '<div class="learn-detail-grid">';
+        allItems.forEach(item => {
+            const done = viewed.includes(item);
+            html += `<span class="learn-item ${done ? 'done' : ''}">${item}</span>`;
+        });
+        html += '</div>';
+        html += `<div class="learn-detail-summary">${viewed.length} из ${allItems.length} изучено</div>`;
+        container.innerHTML = html;
     }
 };
 
@@ -2107,7 +3385,7 @@ const Admin = {
         const count = Object.keys(pending).length;
         const btn = document.getElementById('publish-btn');
         if (!btn) return;
-        btn.textContent = count > 0
+        btn.innerHTML = count > 0
             ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать (${count})`
             : '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать на GitHub';
     },
@@ -2197,8 +3475,8 @@ const Admin = {
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
         const btn = document.getElementById('publish-btn');
-        const origText = btn ? btn.textContent : '';
-        if (btn) { btn.textContent = '⏳ Публикация...'; btn.disabled = true; }
+        const origText = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = '⏳ Публикация...'; btn.disabled = true; }
 
         try {
             const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
@@ -2248,7 +3526,7 @@ const Admin = {
             showToast('❌ Нет соединения с GitHub');
             console.error('Publish error:', e);
         } finally {
-            if (btn) { btn.textContent = origText; btn.disabled = false; }
+            if (btn) { btn.innerHTML = origText; btn.disabled = false; }
         }
     }
 };
