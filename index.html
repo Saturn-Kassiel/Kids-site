@@ -388,6 +388,14 @@
                 <div class="stat-track"><div class="stat-fill sf-math" id="sf-math"></div></div>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon si-inter"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-interstitials">0</div>
+                <div class="stat-lbl">Перебивок пройдено</div>
+                <div class="stat-track"><div class="stat-fill sf-inter" id="sf-interstitials"></div></div>
+            </div>
+        </div>
 
                 <div class="stat-section-hdr">Музыка и подкасты</div>
         <div class="stat-card">
@@ -548,6 +556,20 @@
                 <span class="s-icon si-snd-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
                 <div><div class="s-label">Арифметика · звуки</div><div class="s-sub">Звуки при ответах</div></div>
                 <div class="toggle on" id="tog-snd-math-correct" onclick="this.classList.toggle('on');saveSetting('snd-math-correct',this.classList.contains('on'))"></div>
+            </div>
+        </div>
+
+        <div class="settings-group-title">Перебивки</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-snd-inter"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div><div class="s-label">Мини-задания</div><div class="s-sub">Перебивки между изучением контента</div></div>
+                <div class="toggle on" id="tog-interstitials" onclick="this.classList.toggle('on');saveSetting('interstitials',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-inter2"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
+                <div><div class="s-label">Перебивки · звуки</div><div class="s-sub">Звуки при ответах на перебивки</div></div>
+                <div class="toggle on" id="tog-snd-inter-correct" onclick="this.classList.toggle('on');saveSetting('snd-inter-correct',this.classList.contains('on'))"></div>
             </div>
         </div>
 

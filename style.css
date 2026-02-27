@@ -2160,6 +2160,8 @@ input[type=file] { display: none; }
     background: var(--card);
     transition: all 0.2s ease;
     cursor: default;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 .words-slot.filled {
     border-style: solid;
@@ -2215,6 +2217,10 @@ input[type=file] { display: none; }
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+.words-tile:focus-visible {
+    border-color: #a78bfa;
 }
 .words-tile:hover {
     transform: translateY(-3px);
@@ -2581,4 +2587,245 @@ input[type=file] { display: none; }
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* ═══════════════════════════════════════════
+   INTERSTITIALS — Перебивки
+   ═══════════════════════════════════════════ */
+
+/* Оверлей с размытием фона */
+#inter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: max(60px, env(safe-area-inset-top, 20px) + 40px);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#inter-overlay.inter-visible {
+    opacity: 1;
+}
+
+/* Карточка задания */
+.inter-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+    padding: 28px 24px 22px;
+    width: min(380px, calc(100vw - 32px));
+    text-align: center;
+    animation: inter-slide-in 0.4s cubic-bezier(.34,1.56,.64,1) both;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+@keyframes inter-slide-in {
+    from { opacity: 0; transform: translateY(-30px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.inter-card-pop {
+    animation: inter-slide-in 0.35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Заголовок */
+.inter-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 18px;
+    line-height: 1.2;
+}
+
+/* Дисплей эмодзи (тип 2 и 5) */
+.inter-emoji-display {
+    font-size: 36px;
+    line-height: 1.6;
+    padding: 16px 12px;
+    min-height: 70px;
+    word-break: break-word;
+    letter-spacing: 6px;
+}
+
+/* Тип 3: цветной кружок */
+.inter-color-display {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 8px;
+}
+.inter-color-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18), inset 0 -2px 6px rgba(0,0,0,0.1);
+    border: 4px solid var(--border);
+}
+
+/* Тип 4: слово с пропуском */
+.inter-word-display {
+    padding: 10px 0;
+}
+.inter-word-gap {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: 10px;
+    color: var(--text);
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Тип 5: таймер */
+.inter-timer-bar {
+    height: 6px;
+    background: var(--card2);
+    border-radius: 3px;
+    margin: 14px 0 6px;
+    overflow: hidden;
+}
+.inter-timer-fill {
+    height: 100%;
+    width: 0;
+    background: var(--grad);
+    border-radius: 3px;
+    transition: width 3s linear;
+}
+.inter-hint {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 4px;
+}
+
+/* Тип 5: мигание */
+.inter-memory-flash {
+    animation: inter-flash-pulse 0.6s ease infinite alternate;
+}
+@keyframes inter-flash-pulse {
+    from { opacity: 1; }
+    to   { opacity: 0.7; }
+}
+.inter-memory-question {
+    font-size: 60px;
+    padding: 16px 0;
+    animation: inter-think 1s ease infinite;
+}
+@keyframes inter-think {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.1); }
+}
+
+/* Кнопки вариантов ответа */
+.inter-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+}
+.inter-opt-btn {
+    font-family: var(--font);
+    font-size: 17px;
+    font-weight: 600;
+    padding: 14px 10px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.inter-opt-btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+.inter-opt-btn:disabled {
+    cursor: default;
+}
+.inter-opt-btn.inter-correct {
+    background: #22c55e !important;
+    border-color: #16a34a !important;
+    color: #fff !important;
+    animation: inter-correct-pop 0.35s ease;
+}
+.inter-opt-btn.inter-wrong {
+    background: #ef4444 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+    animation: inter-shake 0.4s ease;
+}
+@keyframes inter-correct-pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+@keyframes inter-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+
+/* Тип 6: сетка из 4 больших эмодзи */
+.inter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+}
+.inter-grid-btn {
+    font-size: 48px;
+    padding: 18px;
+    border-radius: var(--radius);
+    border: 3px solid var(--border);
+    background: var(--card2);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.inter-grid-btn:active:not(:disabled) {
+    transform: scale(0.94);
+}
+.inter-grid-btn:disabled {
+    cursor: default;
+}
+.inter-grid-btn.inter-correct {
+    border-color: #22c55e !important;
+    background: rgba(34,197,94,0.15) !important;
+    animation: inter-correct-pop 0.35s ease;
+}
+.inter-grid-btn.inter-wrong {
+    border-color: #ef4444 !important;
+    background: rgba(239,68,68,0.15) !important;
+    animation: inter-shake 0.4s ease;
+}
+
+/* Счёт внизу карточки */
+.inter-score {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text2);
+}
+.inter-score b {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* Статистика: иконка и цвет */
+.si-inter {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+.sf-inter {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+/* Настройки: иконки */
+.si-snd-inter, .si-snd-inter2 {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
 }
