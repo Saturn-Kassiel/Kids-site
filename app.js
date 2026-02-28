@@ -174,6 +174,7 @@ const App = {
         // Инициализируем значки
         Badges.init();
         Interstitials.init();
+        StatTracker._migrateDailyLog();
 
         // Скрываем loader — данные уже загружены (await выше)
         document.getElementById('loader').style.display = 'none';
@@ -917,13 +918,149 @@ const StatTracker = {
     // 15-секундные таймеры для каждого типа контента
     _timers: {},   // key → setInterval id
     _secs:   {},   // key → секунды в текущей сессии
+    _timerPaused: {},  // key → boolean
 
-    // Запустить таймер для контента
-    // onCredit() вызывается когда накоплено threshold сек (по умолчанию 15)
+    // ── Ежедневный лог активности ──
+    _todayKey() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    },
+
+    _getDailyLog() {
+        try { return JSON.parse(localStorage.getItem('stat_daily_log') || '{}'); } catch { return {}; }
+    },
+
+    _saveDailyLog(log) {
+        localStorage.setItem('stat_daily_log', JSON.stringify(log));
+    },
+
+    // Миграция: если дневной лог пуст, но накопительные статы есть —
+    // засеиваем текущий день существующими значениями
+    _migrateDailyLog() {
+        if (localStorage.getItem('stat_daily_migrated')) return;
+        const log = this._getDailyLog();
+        if (Object.keys(log).length > 0) {
+            localStorage.setItem('stat_daily_migrated', '1');
+            return;
+        }
+        const totalAnswers = this.get('puzzles') + this.get('riddles')
+            + this.get('words') + this.get('math')
+            + this.get('interstitials') + this.get('songs')
+            + this.get('letters') + this.get('numbers') + this.get('colors');
+        const totalTime = Math.round(this.getTime('songs') + this.getTime('podcasts'));
+        if (totalAnswers > 0 || totalTime > 0) {
+            const key = this._todayKey();
+            log[key] = { answers: totalAnswers, time: totalTime };
+            this._saveDailyLog(log);
+        }
+        localStorage.setItem('stat_daily_migrated', '1');
+    },
+
+    // Логируем +1 ответ на сегодня
+    _logDailyAnswer() {
+        const log = this._getDailyLog();
+        const key = this._todayKey();
+        if (!log[key]) log[key] = { answers: 0, time: 0 };
+        log[key].answers++;
+        this._saveDailyLog(log);
+    },
+
+    // Логируем время (целые секунды) на сегодня
+    _logDailyTime(seconds) {
+        if (!seconds || seconds <= 0) return;
+        seconds = Math.round(seconds);
+        if (seconds <= 0) return;
+        const log = this._getDailyLog();
+        const key = this._todayKey();
+        if (!log[key]) log[key] = { answers: 0, time: 0 };
+        log[key].time += seconds;
+        this._saveDailyLog(log);
+    },
+
+    // Получить данные за период
+    getDailyData(period) {
+        const log = this._getDailyLog();
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let days = [];
+
+        if (period === 'day') {
+            // Показываем только сегодня — одна колонка
+            days = [new Date(today)];
+        } else if (period === 'week') {
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                days.push(d);
+            }
+        } else if (period === 'month') {
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                days.push(d);
+            }
+        } else {
+            // all — все дни из лога
+            const allKeys = Object.keys(log).sort();
+            if (allKeys.length === 0) {
+                days = [new Date(today)];
+            } else {
+                const start = new Date(allKeys[0] + 'T00:00:00');
+                const end = new Date(today);
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+                    days.push(new Date(d));
+                }
+                // Если больше 60 дней — группируем по неделям
+                if (days.length > 60) {
+                    return this._groupByWeeks(days, log, today);
+                }
+            }
+        }
+
+        return days.map(d => {
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const entry = log[k] || { answers: 0, time: 0 };
+            return {
+                date: d,
+                key: k,
+                answers: entry.answers || 0,
+                time: entry.time || 0,
+                activity: (entry.answers || 0) + Math.floor((entry.time || 0) / 60),
+                isToday: d.getTime() === today.getTime()
+            };
+        });
+    },
+
+    _groupByWeeks(days, log, today) {
+        const weeks = [];
+        for (let i = 0; i < days.length; i += 7) {
+            const chunk = days.slice(i, i + 7);
+            let answers = 0, time = 0;
+            chunk.forEach(d => {
+                const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                const entry = log[k] || {};
+                answers += entry.answers || 0;
+                time += entry.time || 0;
+            });
+            weeks.push({
+                date: chunk[0],
+                dateEnd: chunk[chunk.length - 1],
+                key: 'week',
+                answers, time,
+                activity: answers + Math.floor(time / 60),
+                isToday: chunk.some(d => d.getTime() === today.getTime())
+            });
+        }
+        return weeks;
+    },
+
+    // Запустить таймер (привязан к audio через pauseTimer/resumeTimer)
     startTimer(key, onCredit, threshold = 15) {
         this.stopTimer(key);
         this._secs[key] = 0;
+        this._timerPaused[key] = false;
         this._timers[key] = setInterval(() => {
+            if (this._timerPaused[key]) return;
             this._secs[key]++;
             if (this._secs[key] >= threshold) {
                 this.stopTimer(key);
@@ -932,45 +1069,66 @@ const StatTracker = {
         }, 1000);
     },
 
+    pauseTimer(key) { this._timerPaused[key] = true; },
+    resumeTimer(key) { if (this._timers[key]) this._timerPaused[key] = false; },
+
     stopTimer(key) {
         if (this._timers[key]) {
             clearInterval(this._timers[key]);
             delete this._timers[key];
         }
         delete this._secs[key];
+        delete this._timerPaused[key];
     },
 
     // Добавить секунды к общему времени
     addTime(key, seconds) {
         if (!seconds || seconds <= 0) return;
-        const cur = parseFloat(localStorage.getItem(`stat_time_${key}`) || 0);
+        seconds = Math.round(seconds); // целые секунды
+        if (seconds <= 0) return;
+        const cur = parseInt(localStorage.getItem(`stat_time_${key}`) || 0);
         localStorage.setItem(`stat_time_${key}`, cur + seconds);
+        this._logDailyTime(seconds);
     },
 
     // Трекинг времени через timeupdate события
     trackAudioTime(audioEl, timeKey) {
         let _lastTime = null;
+        let _accumulator = 0; // накопитель дробных секунд
         audioEl.addEventListener('timeupdate', () => {
             if (!audioEl.paused && _lastTime !== null) {
                 const delta = audioEl.currentTime - _lastTime;
-                if (delta > 0 && delta < 2) this.addTime(timeKey, delta);
+                if (delta > 0 && delta < 2) {
+                    _accumulator += delta;
+                    if (_accumulator >= 1) {
+                        const whole = Math.floor(_accumulator);
+                        this.addTime(timeKey, whole);
+                        _accumulator -= whole;
+                    }
+                }
             }
             _lastTime = audioEl.paused ? null : audioEl.currentTime;
         });
         audioEl.addEventListener('pause', () => { _lastTime = null; });
-        audioEl.addEventListener('ended', () => { _lastTime = null; });
+        audioEl.addEventListener('ended', () => {
+            // Сбрасываем остаток при завершении
+            if (_accumulator >= 0.5) this.addTime(timeKey, 1);
+            _accumulator = 0;
+            _lastTime = null;
+        });
     },
 
     // Инкремент счётчика
     inc(key) {
         const cur = parseInt(localStorage.getItem(`stat_${key}`) || 0);
         localStorage.setItem(`stat_${key}`, cur + 1);
+        this._logDailyAnswer();
         // Проверяем значки
         if (typeof Badges !== 'undefined') Badges.checkAll();
     },
 
     get(key) { return parseInt(localStorage.getItem(`stat_${key}`) || 0); },
-    getTime(key) { return parseFloat(localStorage.getItem(`stat_time_${key}`) || 0); },
+    getTime(key) { return parseInt(localStorage.getItem(`stat_time_${key}`) || 0); },
 
     // Форматирование времени
     fmtDuration(secs) {
@@ -1006,9 +1164,32 @@ const StatTracker = {
             'achievements_best',
             'badges_unlocked',
             'viewed_letters','viewed_numbers','viewed_colors',
-            'stat_interstitials','inter_best_streak'
+            'stat_interstitials','inter_best_streak',
+            'stat_daily_log','stat_daily_migrated'
         ];
         keys.forEach(k => localStorage.removeItem(k));
+    },
+
+    // Считаем текущую серию дней подряд (включая сегодня)
+    getDayStreak() {
+        const log = this._getDailyLog();
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let streak = 0;
+        for (let i = 0; i < 400; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const entry = log[k];
+            if (entry && ((entry.answers || 0) > 0 || (entry.time || 0) > 0)) {
+                streak++;
+            } else {
+                // Если сегодня ещё ничего — допускаем (день не кончился), считаем от вчера
+                if (i === 0) continue;
+                break;
+            }
+        }
+        return streak;
     }
 };
 
@@ -1053,11 +1234,57 @@ const Badges = {
         { id:'first_inter',   key:'interstitials', thr:1,   emoji:'⚡', name:'Первая перебивка', desc:'Ответь на первую перебивку' },
         { id:'inter_fan',     key:'interstitials', thr:10,  emoji:'🎯', name:'Меткий глаз',     desc:'Ответь на 10 перебивок' },
         { id:'inter_master',  key:'interstitials', thr:30,  emoji:'🧠', name:'Мастер перебивок', desc:'Ответь на 30 перебивок' },
+        // Серия дней (key: 'streak' — проверяется через getDayStreak)
+        { id:'streak_week',   key:'streak', thr:7,   emoji:'📅', name:'Неделя подряд',   desc:'Занимайся 7 дней подряд' },
+        { id:'streak_month',  key:'streak', thr:30,  emoji:'📅', name:'Месяц подряд',    desc:'Занимайся 30 дней подряд' },
+        { id:'streak_quarter',key:'streak', thr:90,  emoji:'📅', name:'3 месяца подряд', desc:'Занимайся 90 дней подряд' },
+        { id:'streak_half',   key:'streak', thr:180, emoji:'📅', name:'Полгода подряд',  desc:'Занимайся 180 дней подряд' },
+        { id:'streak_year',   key:'streak', thr:365, emoji:'📅', name:'Год подряд',      desc:'Занимайся 365 дней подряд' },
         // Мета (key: null — проверяются отдельно)
         { id:'explorer',      key:null, thr:5,  emoji:'🌟', name:'Исследователь', desc:'Получи 5 значков' },
         { id:'champion',      key:null, thr:14, emoji:'🏆', name:'Чемпион',       desc:'Получи 14 значков' },
         { id:'completionist', key:null, thr:24, emoji:'💫', name:'Суперзвезда',   desc:'Получи 24 значка' },
     ],
+
+    // SVG-иконки для значков
+    _svgIcons: {
+        first_letter:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 36L22 12h4l8 24"/><path d="M18 27h12"/></svg>',
+        half_alphabet: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h28a2 2 0 012 2v24a2 2 0 01-2 2H8"/><path d="M8 10v28"/><path d="M14 18h14"/><path d="M14 24h10"/><path d="M14 30h12"/></svg>',
+        full_alphabet: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6l-2 8h-8l6.5 5-2.5 8L24 22l6 5-2.5-8L34 14h-8z"/><path d="M12 36h24"/><path d="M16 40h16"/></svg>',
+        first_number:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14l-4 2v0"/><path d="M20 14v20"/><path d="M16 34h8"/></svg>',
+        all_numbers:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="32" height="32" rx="4"/><path d="M16 16v16"/><path d="M24 16v16"/><path d="M32 16v16"/><path d="M8 20h32"/><path d="M8 28h32"/></svg>',
+        first_color:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="16" r="5"/><circle cx="30" cy="18" r="4"/><circle cx="16" cy="26" r="4"/><path d="M24 42c8 0 16-6 16-16S34 6 24 6 8 14 8 26c0 4 2 8 5 10 1 1 1 2 0 3-1 1 0 3 1 3h10z"/></svg>',
+        all_colors:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34c4-6 10-12 18-12s14 6 18 12"/><path d="M9 30c3-4 8-8 15-8s12 4 15 8"/><path d="M12 26c3-3 7-6 12-6s9 3 12 6"/></svg>',
+        first_word:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 8l6 6-20 20H12v-6z"/><path d="M28 12l6 6"/></svg>',
+        word_collector: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h20a2 2 0 012 2v32a2 2 0 01-2 2H12a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M16 6v36"/><path d="M22 16h8"/><path d="M22 22h6"/><path d="M22 28h7"/></svg>',
+        word_master:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40l4-12L30 10l6 6L18 34z"/><path d="M26 14l6 6"/><path d="M34 10l4-4"/><path d="M12 28l6 6"/></svg>',
+        first_math:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="24" y1="12" x2="24" y2="36"/><line x1="12" y1="24" x2="36" y2="24"/></svg>',
+        math_fan:      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="32" height="32" rx="4"/><line x1="16" y1="18" x2="24" y2="18"/><line x1="20" y1="14" x2="20" y2="22"/><line x1="28" y1="17" x2="36" y2="17"/><line x1="16" y1="32" x2="24" y2="32"/><line x1="28" y1="28" x2="36" y2="36"/><line x1="36" y1="28" x2="28" y2="36"/></svg>',
+        math_master:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><path d="M18 18l12 12"/><path d="M30 18l-12 12"/><path d="M24 8v4"/><path d="M24 36v4"/><path d="M8 24h4"/><path d="M36 24h4"/></svg>',
+        first_puzzle:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M34 20c2-1 4 0 4 2s-2 3-4 2"/><path d="M20 14c-1-2 0-4 2-4s3 2 2 4"/><path d="M10 10h12v8c-2 1-2 5 0 6v8H10V10z"/><path d="M22 10h12v22H22v-8c2-1 2-5 0-6z"/></svg>',
+        puzzle_pro:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6c-2 4-6 6-6 10a6 6 0 0012 0c0-4-4-6-6-10z"/><path d="M20 22c-3 2-8 6-8 12h24c0-6-5-10-8-12"/><path d="M18 38h12"/><path d="M20 42h8"/></svg>',
+        puzzle_legend: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6l4 12h12l-10 7 4 13-10-8-10 8 4-13-10-7h12z"/></svg>',
+        first_riddle:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><path d="M19 18c0-3 2-5 5-5s5 2 5 5c0 3-3 4-5 6"/><circle cx="24" cy="34" r="1.5" fill="currentColor"/></svg>',
+        riddle_pro:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 40c0-4-6-6-6-14a12 12 0 0124 0c0 8-6 10-6 14"/><path d="M18 40h12"/><path d="M20 44h8"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="20" r="2"/></svg>',
+        riddle_legend: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 38l4-10"/><path d="M36 38l-4-10"/><path d="M8 28h32"/><path d="M16 28l2-8 6-10 6 10 2 8"/></svg>',
+        first_song:    '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V14l16-4v20"/><circle cx="14" cy="34" r="4"/><circle cx="30" cy="30" r="4"/></svg>',
+        meloman:       '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V14l16-4v20"/><circle cx="14" cy="34" r="4"/><circle cx="30" cy="30" r="4"/><path d="M36 12c2-1 4 0 4 2"/><path d="M38 8c3-1 6 0 6 3"/></svg>',
+        first_inter:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 6L18 24h10l-4 18 14-22H26z"/></svg>',
+        inter_fan:     '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="4"/><circle cx="24" cy="24" r="1.5" fill="currentColor"/></svg>',
+        inter_master:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6c-2 4-6 6-6 10a6 6 0 0012 0c0-4-4-6-6-10z"/><path d="M20 22c-3 2-8 6-8 12h24c0-6-5-10-8-12"/><path d="M24 28l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/></svg>',
+        explorer:      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z"/></svg>',
+        champion:      '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8h20v12a10 10 0 01-20 0V8z"/><path d="M14 14H8c0 6 3 8 6 8"/><path d="M34 14h6c0 6-3 8-6 8"/><path d="M20 30v4h8v-4"/><path d="M16 38h16"/><path d="M20 34h8v4h-8z"/></svg>',
+        completionist: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4l4 8 8 1-6 6 2 8-8-4-8 4 2-8-6-6 8-1z"/><path d="M14 32l-4 4"/><path d="M34 32l4 4"/><path d="M24 34v6"/><circle cx="10" cy="38" r="2"/><circle cx="38" cy="38" r="2"/><circle cx="24" cy="42" r="2"/></svg>',
+        streak_week:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="32" height="30" rx="4"/><path d="M8 18h32"/><path d="M16 6v8"/><path d="M32 6v8"/><path d="M16 26h4"/><path d="M28 26h4"/><path d="M16 32h4"/></svg>',
+        streak_month:  '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="32" height="30" rx="4"/><path d="M8 18h32"/><path d="M16 6v8"/><path d="M32 6v8"/><path d="M16 26h16"/><path d="M16 32h12"/></svg>',
+        streak_quarter:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="32" height="30" rx="4"/><path d="M8 18h32"/><path d="M16 6v8"/><path d="M32 6v8"/><path d="M20 28l4 4 6-8"/></svg>',
+        streak_half:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><path d="M24 8v6"/><path d="M24 34v6"/><path d="M8 24h6"/><path d="M34 24h6"/><path d="M24 16a8 8 0 010 16" fill="none"/><path d="M24 16v16"/></svg>',
+        streak_year:   '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><path d="M24 12v6l4 2"/><path d="M14 38l2-4"/><path d="M34 38l-2-4"/><path d="M24 8v2"/><path d="M24 38v2"/><path d="M8 24h2"/><path d="M38 24h2"/><path d="M12 14l1.5 1.5"/><path d="M34.5 32.5l1.5 1.5"/><path d="M12 34l1.5-1.5"/><path d="M34.5 15.5l1.5-1.5"/></svg>',
+    },
+
+    _getBadgeSVG(id) {
+        return this._svgIcons[id] || '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="24" cy="24" r="16"/></svg>';
+    },
 
     init() {
         this._unlocked = JSON.parse(localStorage.getItem('badges_unlocked') || '{}');
@@ -1082,6 +1309,8 @@ const Badges = {
             if (def.key === null) {
                 // Мета-бейдж: считаем сколько обычных (не мета) значков открыто
                 val = this._defs.filter(d => d.key !== null && this._unlocked[d.id]).length;
+            } else if (def.key === 'streak') {
+                val = StatTracker.getDayStreak();
             } else {
                 val = StatTracker.get(def.key);
             }
@@ -1103,11 +1332,12 @@ const Badges = {
     },
 
     _notify(def) {
-        showToast(`${def.emoji} Новый значок: ${def.name}!`, 3200);
+        showToast(`🏅 Новый значок: ${def.name}!`, 3200);
         // Мини-конфетти
         if (window.confetti) {
             confetti({ particleCount: 50, spread: 50, origin: { y: 0.8 }, colors: ['#fbbf24','#a78bfa','#34d399','#f472b6'] });
         }
+        // Гоша празднует
     },
 
     _updateHomeBadge() {
@@ -1138,12 +1368,10 @@ const Badges = {
         const barFill = document.getElementById('badges-bar-fill');
         setTimeout(() => { barFill.style.width = (unlocked / total * 100) + '%'; }, 100);
 
-        // Анимируем маскот на странице достижений
+        // Анимируем маскот на странице достижений — СТАТИЧНЫЙ (зал славы)
         const mascotWrap = document.getElementById('badges-mascot-wrap');
         if (mascotWrap) {
-            mascotWrap.className = unlocked >= 18 ? 'badges-mascot-wrap gosha-dance'
-                                 : unlocked >= 5  ? 'badges-mascot-wrap gosha-happy'
-                                 : 'badges-mascot-wrap';
+            mascotWrap.className = 'badges-mascot-wrap';
         }
 
         grid.innerHTML = '';
@@ -1152,6 +1380,8 @@ const Badges = {
             let progress = 0;
             if (def.key === null) {
                 progress = this._defs.filter(d => d.key !== null && this._unlocked[d.id]).length;
+            } else if (def.key === 'streak') {
+                progress = StatTracker.getDayStreak();
             } else {
                 progress = StatTracker.get(def.key);
             }
@@ -1163,11 +1393,13 @@ const Badges = {
             card.className = 'badge-card' + (isUnlocked ? ' unlocked' : '');
             card.style.animationDelay = (i * 0.04) + 's';
             card.innerHTML = `
-                <div class="badge-emoji">${def.emoji}</div>
+                <div class="badge-icon-wrap">${this._getBadgeSVG(def.id)}</div>
                 <div class="badge-name">${def.name}</div>
                 <div class="badge-desc">${isUnlocked ? dateStr : def.desc}</div>
-                <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
-                <div class="badge-progress-text">${Math.min(progress, def.thr)} / ${def.thr}</div>
+                <div class="badge-progress-bottom">
+                    <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:${pct}%"></div></div>
+                    <div class="badge-progress-text">${Math.min(progress, def.thr)} / ${def.thr}</div>
+                </div>
             `;
             grid.appendChild(card);
         });
@@ -1206,7 +1438,6 @@ const Gosha = {
         }, { once: true });
     }
 };
-
 // -------- AUDIO MANAGER --------
 // Keeps only one audio playing globally; persists across section changes
 const AudioMgr = {
@@ -1580,6 +1811,13 @@ const Words = {
         this._solved = false;
         this._current = this._getCurrent();
         document.activeElement?.blur();
+
+        // Сброс старых состояний (iOS tap/focus fix)
+        document.querySelectorAll('.words-slot, .words-tile').forEach(el => {
+            el.classList.remove('filled', 'correct', 'used');
+            el.blur();
+        });
+
         const word = this._current.word;
         const letters = word.split('');
 
@@ -1596,8 +1834,22 @@ const Words = {
         document.getElementById('words-msg').textContent = '';
         document.getElementById('words-msg').className = 'words-msg';
 
+        // Чистый рендер без анимаций
+        const slotsEl = document.getElementById('words-slots');
+        const tilesEl = document.getElementById('words-tiles');
+        slotsEl.innerHTML = '';
+        tilesEl.innerHTML = '';
+        slotsEl.classList.add('no-anim');
+        tilesEl.classList.add('no-anim');
+
         this._renderSlots();
         this._renderTiles(allTiles);
+
+        // Включаем анимации после первого кадра
+        requestAnimationFrame(() => {
+            slotsEl.classList.remove('no-anim');
+            tilesEl.classList.remove('no-anim');
+        });
     },
 
     _renderSlots() {
@@ -1647,7 +1899,7 @@ const Words = {
         // Обновляем UI
         this._renderSlots();
         const tileEl = document.querySelector(`.words-tile[data-tidx="${tileIdx}"]`);
-        if (tileEl) tileEl.classList.add('used');
+        if (tileEl) { tileEl.classList.add('used'); tileEl.blur(); }
 
         // Проверяем заполненность
         if (!this._slots.includes(null)) {
@@ -1700,6 +1952,8 @@ const Words = {
             if (window.confetti) {
                 confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } });
             }
+
+            // Гоша радуется
 
             // Перебивка после N слов
             const _interW = Interstitials.bump('words');
@@ -1889,8 +2143,13 @@ const Arithmetic = {
     show() {
         this._solved = false;
         this._current = this._generate();
-        // Снимаем фокус с предыдущих плиток
+        // Снимаем фокус и старые состояния (iOS tap/focus fix)
         document.activeElement?.blur();
+        document.querySelectorAll('#math-slots .words-slot, #math-tiles .words-tile').forEach(el => {
+            el.classList.remove('filled', 'correct', 'used');
+            el.blur();
+        });
+
         const ansDigits = this._current.answerStr.split('');
 
         this._slots = new Array(ansDigits.length).fill(null);
@@ -1908,8 +2167,22 @@ const Arithmetic = {
         document.getElementById('math-msg').textContent = '';
         document.getElementById('math-msg').className = 'words-msg';
 
+        // Чистый рендер без анимаций
+        const slotsEl = document.getElementById('math-slots');
+        const tilesEl = document.getElementById('math-tiles');
+        slotsEl.innerHTML = '';
+        tilesEl.innerHTML = '';
+        slotsEl.classList.add('no-anim');
+        tilesEl.classList.add('no-anim');
+
         this._renderSlots();
         this._renderTiles(allTiles);
+
+        // Включаем анимации после первого кадра
+        requestAnimationFrame(() => {
+            slotsEl.classList.remove('no-anim');
+            tilesEl.classList.remove('no-anim');
+        });
     },
 
     _renderSlots() {
@@ -1955,7 +2228,7 @@ const Arithmetic = {
 
         this._renderSlots();
         const tileEl = document.querySelector(`#math-tiles .words-tile[data-tidx="${tileIdx}"]`);
-        if (tileEl) tileEl.classList.add('used');
+        if (tileEl) { tileEl.classList.add('used'); tileEl.blur(); }
 
         if (!this._slots.includes(null)) {
             this._checkAnswer();
@@ -2005,6 +2278,8 @@ const Arithmetic = {
             if (window.confetti) {
                 confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 } });
             }
+
+            // Гоша радуется
 
             // Перебивка после N примеров
             const _interM = Interstitials.bump('math');
@@ -2109,6 +2384,10 @@ const Songs = {
         setupProgress(this.audio, 'song-progress-bar', 'song-time-cur', 'song-time-dur', 'song-prog-wrap');
         if (!this._timeTracked) { StatTracker.trackAudioTime(this.audio, 'songs'); this._timeTracked = true; }
         this.audio.onended = () => {
+            // Засчитываем только полное прослушивание без пауз
+            if (!this._wasPaused) {
+                StatTracker.inc('songs');
+            }
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('song-play-btn').textContent = '▶';
             setTimeout(() => this.nextSong(), 1000);
@@ -2192,8 +2471,7 @@ const Songs = {
             }
         }
         this.render();
-        // Track stat: зачитывается после 15 сек прослушивания
-        StatTracker.startTimer('songs_play', () => StatTracker.inc('songs'));
+        this._wasPaused = false; // полное прослушивание без пауз
     },
 
     toggle() {
@@ -2203,6 +2481,7 @@ const Songs = {
             document.getElementById('song-play-btn').textContent = '⏸';
         } else {
             this.audio.pause();
+            this._wasPaused = true;
             document.getElementById('song-play-btn').textContent = '▶';
         }
     },
@@ -2901,9 +3180,462 @@ const Info = {
 };
 
 const Stats = {
+    _showAnswers: true,
+    _showTime: true,
+    _chartPeriod: 'week',
+
     show() {
         App.navigate('stats', 'Статистика');
         this._render();
+        this._syncMetricTabs();
+        this._renderChart();
+    },
+
+    toggleMetric(metric) {
+        if (metric === 'answers') this._showAnswers = !this._showAnswers;
+        if (metric === 'time') this._showTime = !this._showTime;
+        // Хотя бы одна метрика должна быть включена
+        if (!this._showAnswers && !this._showTime) {
+            if (metric === 'answers') this._showTime = true;
+            else this._showAnswers = true;
+        }
+        this._syncMetricTabs();
+        this._renderChart();
+    },
+
+    _syncMetricTabs() {
+        const tabs = document.getElementById('chart-metric-tabs');
+        if (!tabs) return;
+        tabs.querySelector('[data-metric="answers"]')?.classList.toggle('active', this._showAnswers);
+        tabs.querySelector('[data-metric="time"]')?.classList.toggle('active', this._showTime);
+    },
+
+    setChartPeriod(period) {
+        this._chartPeriod = period;
+        document.querySelectorAll('#chart-period-tabs .chart-period').forEach(b => {
+            b.classList.toggle('active', b.dataset.period === period);
+        });
+        const metricTabs = document.getElementById('chart-metric-tabs');
+        if (metricTabs) metricTabs.style.display = '';
+        this._renderChart();
+    },
+
+    toggleInfo() {
+        const box = document.getElementById('chart-info-box');
+        if (box) box.classList.toggle('hidden');
+    },
+
+    // Время без единиц для графика (Day view value)
+    _fmtTimeShort(sec) {
+        sec = Math.round(sec);
+        if (sec >= 3600) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            return m > 0 ? h + ':' + String(m).padStart(2,'0') : h + ':00';
+        }
+        if (sec >= 60) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return m + ':' + String(s).padStart(2,'0');
+        }
+        return '0:' + String(sec).padStart(2,'0');
+    },
+
+    // Подсказка над столбиком — компактная, без единиц
+    _fmtTimeTip(sec) {
+        sec = Math.round(sec);
+        if (sec >= 3600) return Math.floor(sec / 3600) + ':' + String(Math.floor((sec%3600)/60)).padStart(2,'0');
+        if (sec >= 60) return Math.floor(sec / 60) + ':' + String(sec%60).padStart(2,'0');
+        return '0:' + String(sec).padStart(2,'0');
+    },
+
+    // Полный формат с единицами (для карточек статистики)
+    _fmtTimeLabel(sec) {
+        sec = Math.round(sec);
+        if (sec >= 3600) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            return m > 0 ? h + ' ч ' + m + ' мин' : h + ' ч';
+        }
+        if (sec >= 60) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return s > 0 ? m + ' мин ' + s + ' сек' : m + ' мин';
+        }
+        return sec + ' сек';
+    },
+
+    // Форматирование подписи периода
+    _getPeriodLabel(period, data) {
+        const MONTH_FULL = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+        const MONTH_NOM = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        const pad = n => String(n).padStart(2, '0');
+
+        if (period === 'day') {
+            const d = (data[0] && data[0].date) || new Date();
+            return pad(d.getDate()) + ' ' + MONTH_FULL[d.getMonth()] + ' ' + d.getFullYear();
+        }
+        if (period === 'week') {
+            const first = data[0]?.date || new Date();
+            const last = data[data.length - 1]?.date || new Date();
+            if (first.getMonth() === last.getMonth()) {
+                return pad(first.getDate()) + '–' + pad(last.getDate()) + ' ' + MONTH_FULL[first.getMonth()] + ' ' + first.getFullYear();
+            }
+            return pad(first.getDate()) + ' ' + MONTH_FULL[first.getMonth()] + ' – ' + pad(last.getDate()) + ' ' + MONTH_FULL[last.getMonth()] + ' ' + last.getFullYear();
+        }
+        if (period === 'month') {
+            const d = new Date();
+            return MONTH_NOM[d.getMonth()] + ' ' + d.getFullYear();
+        }
+        // all
+        const first = data[0]?.date || new Date();
+        const last = data[data.length - 1]?.date || data[data.length - 1]?.dateEnd || new Date();
+        return pad(first.getDate()) + ' ' + MONTH_FULL[first.getMonth()] + ' ' + first.getFullYear() + ' – ' + pad(last.getDate()) + ' ' + MONTH_FULL[last.getMonth()] + ' ' + last.getFullYear();
+    },
+
+    _renderChart() {
+        const barsEl = document.getElementById('chart-bars');
+        const labelsEl = document.getElementById('chart-labels');
+        if (!barsEl || !labelsEl) return;
+
+        const data = StatTracker.getDailyData(this._chartPeriod);
+        const DAY_NAMES = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+        const MONTH_NAMES = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+        const areaEl = barsEl.parentElement;
+
+        // Убираем старый day footer если был
+        const dayFooter2 = areaEl.querySelector('.chart-day-footer');
+        if (dayFooter2) dayFooter2.remove();
+
+        labelsEl.style.display = '';
+
+        const answersVals = data.map(d => d.answers || 0);
+        const timeVals = data.map(d => Math.round(d.time || 0));
+
+        const maxAnswers = Math.max(...answersVals, 1);
+        const maxTime = Math.max(...timeVals, 1);
+
+        const isDay = this._chartPeriod === 'day';
+        const isMonth = this._chartPeriod === 'month';
+        const showA = this._showAnswers;
+        const showT = this._showTime;
+        const dualMode = showA && showT;
+
+        const labelStep = isMonth ? Math.ceil(data.length / 7) : 1;
+        const isDense = isMonth;
+        const isWide = (data.length <= 10 && this._chartPeriod === 'all') || isDay;
+
+        let barsHTML = '';
+        let labelsHTML = '';
+
+        data.forEach((d, i) => {
+            const isToday = d.isToday;
+            const a = answersVals[i];
+            const t = timeVals[i];
+
+            // В месяце скрываем подписи данных
+            const hideTips = isMonth;
+
+            if (dualMode) {
+                const pctA = maxAnswers > 0 ? Math.max((a / maxAnswers) * 100, a > 0 ? 4 : 0) : 0;
+                const pctT = maxTime > 0 ? Math.max((t / maxTime) * 100, t > 0 ? 4 : 0) : 0;
+                const tipA = !hideTips && (!isDense || isToday) && a > 0 ? a : '';
+                const tipT = !hideTips && (!isDense || isToday) && t > 0 ? this._fmtTimeTip(t) : '';
+
+                barsHTML += `<div class="chart-bar-wrap ${isToday ? 'today' : ''}">
+                    <div class="chart-dual-slot">
+                        <div class="chart-dual-col">
+                            <div class="chart-bar-tip">${tipA}</div>
+                            <div class="chart-bar chart-bar-a" style="height:${pctA}%"></div>
+                        </div>
+                        <div class="chart-dual-col">
+                            <div class="chart-bar-tip">${tipT}</div>
+                            <div class="chart-bar chart-bar-t" style="height:${pctT}%"></div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (showA) {
+                const pct = maxAnswers > 0 ? Math.max((a / maxAnswers) * 100, a > 0 ? 4 : 0) : 0;
+                const tip = !hideTips && (!isDense || isToday) && a > 0 ? a : '';
+                barsHTML += `<div class="chart-bar-wrap ${isToday ? 'today' : ''}">
+                    <div class="chart-bar-tip">${tip}</div>
+                    <div class="chart-bar chart-bar-a" style="height:${pct}%"></div>
+                </div>`;
+            } else {
+                const pct = maxTime > 0 ? Math.max((t / maxTime) * 100, t > 0 ? 4 : 0) : 0;
+                const tip = !hideTips && (!isDense || isToday) && t > 0 ? this._fmtTimeTip(t) : '';
+                barsHTML += `<div class="chart-bar-wrap ${isToday ? 'today' : ''}">
+                    <div class="chart-bar-tip">${tip}</div>
+                    <div class="chart-bar chart-bar-t" style="height:${pct}%"></div>
+                </div>`;
+            }
+
+            // Метки оси X
+            let label = '';
+            if (isDay) {
+                label = DAY_NAMES[d.date.getDay()];
+            } else if (this._chartPeriod === 'week') {
+                label = DAY_NAMES[d.date.getDay()];
+            } else if (isMonth) {
+                if (i % labelStep === 0 || i === data.length - 1) label = d.date.getDate();
+            } else {
+                if (d.dateEnd) {
+                    const s = d.date.getDate() + ' ' + MONTH_NAMES[d.date.getMonth()];
+                    label = data.length <= 12 ? s : (i % 2 === 0 ? s : '');
+                } else {
+                    if (i === 0 || i === data.length - 1 || i % 7 === 0) {
+                        label = d.date.getDate() + '.' + String(d.date.getMonth() + 1).padStart(2, '0');
+                    }
+                }
+            }
+            labelsHTML += `<div class="chart-label ${isToday ? 'today' : ''}">${label}</div>`;
+        });
+
+        barsEl.innerHTML = barsHTML;
+        labelsEl.innerHTML = labelsHTML;
+
+        // Широкие столбики
+        barsEl.classList.toggle('chart-bars-wide', isWide);
+        labelsEl.classList.toggle('chart-bars-wide', isWide);
+
+        // ═══ Единый footer: легенда (лево) + период (право) ═══
+        let footer = areaEl.querySelector('.chart-footer');
+        if (!footer) {
+            footer = document.createElement('div');
+            footer.className = 'chart-footer';
+            areaEl.appendChild(footer);
+        }
+
+        const periodLabel = this._getPeriodLabel(this._chartPeriod, data);
+        const legendHTML = dualMode
+            ? '<span class="chart-legend-dot chart-legend-a"></span>ответы<span class="chart-legend-dot chart-legend-t" style="margin-left:8px"></span>время'
+            : '';
+        footer.innerHTML = `<div class="chart-footer-legend">${legendHTML}</div><div class="chart-footer-period">${periodLabel}</div>`;
+        footer.style.display = '';
+
+        // Убираем старую легенду если была
+        const existingLegend = areaEl.querySelector('.chart-legend');
+        if (existingLegend) existingLegend.remove();
+
+        requestAnimationFrame(() => {
+            barsEl.querySelectorAll('.chart-bar').forEach(bar => {
+                const h = bar.style.height;
+                bar.style.height = '0%';
+                requestAnimationFrame(() => { bar.style.height = h; });
+            });
+        });
+    },
+
+    shareMonth() {
+        const name = localStorage.getItem('child_name') || '';
+        const now = new Date();
+        const monthNames = ['января','февраля','марта','апреля','мая','июня',
+                            'июля','августа','сентября','октября','ноября','декабря'];
+        const monthTitle = monthNames[now.getMonth()] + ' ' + now.getFullYear();
+
+        // Собираем статистику
+        const puzzles = StatTracker.get('puzzles');
+        const riddles = StatTracker.get('riddles');
+        const words = StatTracker.get('words');
+        const math = StatTracker.get('math');
+        const songs = StatTracker.get('songs');
+        const songsTime = StatTracker.getTime('songs');
+        const podTime = StatTracker.getTime('podcasts');
+        const interstitials = StatTracker.get('interstitials');
+        const letters = StatTracker.get('letters');
+        const numbers = StatTracker.get('numbers');
+        const colors = StatTracker.get('colors');
+
+        // Ежедневные данные за текущий месяц
+        const log = StatTracker._getDailyLog();
+        const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        let activeDays = 0, monthAnswers = 0, monthTime = 0;
+        for (let d = new Date(firstOfMonth); d <= now; d.setDate(d.getDate()+1)) {
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const entry = log[k];
+            if (entry && (entry.answers > 0 || entry.time > 0)) {
+                activeDays++;
+                monthAnswers += entry.answers || 0;
+                monthTime += entry.time || 0;
+            }
+        }
+
+        const totalAnswers = puzzles + riddles + words + math + interstitials;
+        const totalLearn = letters + numbers + colors;
+
+        // Создаём canvas для картинки
+        const W = 720, H = 1080;
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        // Фон — градиент
+        const grad = ctx.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, '#011C40');
+        grad.addColorStop(0.5, '#023859');
+        grad.addColorStop(1, '#011C40');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Декоративные круги
+        ctx.globalAlpha = 0.06;
+        ctx.fillStyle = '#A7EBF2';
+        ctx.beginPath(); ctx.arc(600, 100, 200, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(100, 900, 180, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Заголовок
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#A7EBF2';
+        ctx.font = 'bold 36px system-ui, sans-serif';
+        ctx.fillText('Итоги ' + monthTitle, W/2, 70);
+
+        if (name) {
+            ctx.fillStyle = '#d4f0f5';
+            ctx.font = '24px system-ui, sans-serif';
+            ctx.fillText(name, W/2, 110);
+        }
+
+        // Линия-разделитель
+        ctx.strokeStyle = 'rgba(167,235,242,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(60, 140); ctx.lineTo(W-60, 140); ctx.stroke();
+
+        // Статы — строки
+        const rows = [];
+        if (activeDays > 0) rows.push({ icon: '📅', label: 'Активных дней', value: activeDays });
+        if (totalAnswers > 0) rows.push({ icon: '✅', label: 'Правильных ответов', value: totalAnswers });
+        if (puzzles > 0) rows.push({ icon: '🧩', label: 'Ребусов решено', value: puzzles });
+        if (riddles > 0) rows.push({ icon: '❓', label: 'Загадок угадано', value: riddles });
+        if (words > 0) rows.push({ icon: '🔤', label: 'Слов собрано', value: words });
+        if (math > 0) rows.push({ icon: '➕', label: 'Примеров решено', value: math });
+        if (interstitials > 0) rows.push({ icon: '⚡', label: 'Перебивок пройдено', value: interstitials });
+        if (songs > 0) rows.push({ icon: '🎵', label: 'Песенок прослушано', value: songs });
+        if (songsTime > 0) rows.push({ icon: '🎧', label: 'Время песенок', value: StatTracker.fmtDuration(songsTime) });
+        if (podTime > 0) rows.push({ icon: '🎙️', label: 'Время подкастов', value: StatTracker.fmtDuration(podTime) });
+        if (totalLearn > 0) rows.push({ icon: '📚', label: 'Просмотров обучения', value: totalLearn });
+
+        if (rows.length === 0) {
+            rows.push({ icon: '🌟', label: 'Начни заниматься', value: 'и тут появится статистика!' });
+        }
+
+        let y = 180;
+        const rowH = 64;
+        rows.forEach(r => {
+            // Карточка-строка
+            ctx.fillStyle = 'rgba(10,45,84,0.6)';
+            this._roundRect(ctx, 50, y - 8, W - 100, rowH - 6, 16);
+            ctx.fill();
+
+            ctx.font = '28px system-ui, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#fff';
+            ctx.fillText(r.icon, 72, y + 30);
+
+            ctx.fillStyle = '#d4f0f5';
+            ctx.font = '18px system-ui, sans-serif';
+            ctx.fillText(r.label, 120, y + 28);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#A7EBF2';
+            ctx.font = 'bold 22px system-ui, sans-serif';
+            ctx.fillText(String(r.value), W - 72, y + 30);
+
+            y += rowH;
+        });
+
+        // Подпись внизу
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(167,235,242,0.3)';
+        ctx.font = '16px system-ui, sans-serif';
+        ctx.fillText('Гоша — обучение и развитие', W/2, H - 30);
+
+        // Показываем превью
+        const dataURL = canvas.toDataURL('image/png');
+        this._showMonthOverlay(dataURL);
+    },
+
+    _roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    },
+
+    _showMonthOverlay(dataURL) {
+        let overlay = document.getElementById('month-overlay');
+        if (overlay) overlay.remove();
+
+        overlay = document.createElement('div');
+        overlay.id = 'month-overlay';
+        overlay.innerHTML = `
+            <div class="month-card" id="month-card">
+                <div class="month-card-header">
+                    <span class="month-card-title">Итоги месяца</span>
+                    <button class="month-close-btn" onclick="Stats._closeMonth()">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="month-preview-wrap">
+                    <img class="month-preview-img" src="${dataURL}" alt="Итоги месяца">
+                </div>
+                <div class="month-card-btns">
+                    <button class="month-share-btn" onclick="Stats._doShareMonth()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        Поделиться
+                    </button>
+                    <button class="month-download-btn" onclick="Stats._downloadMonth()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Скачать
+                    </button>
+                </div>
+            </div>
+        `;
+        overlay.addEventListener('click', e => { if (e.target === overlay) Stats._closeMonth(); });
+        document.body.appendChild(overlay);
+        this._monthDataURL = dataURL;
+        requestAnimationFrame(() => {
+            overlay.classList.add('visible');
+            document.getElementById('month-card').classList.add('in');
+        });
+    },
+
+    _closeMonth() {
+        const overlay = document.getElementById('month-overlay');
+        if (!overlay) return;
+        const card = document.getElementById('month-card');
+        if (card) card.classList.remove('in');
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.remove(), 350);
+    },
+
+    _doShareMonth() {
+        if (!this._monthDataURL) return;
+        // Конвертируем в blob
+        fetch(this._monthDataURL).then(r => r.blob()).then(blob => {
+            const file = new File([blob], 'gosha-itogi.png', { type: 'image/png' });
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: 'Итоги месяца — Гоша' }).catch(() => {});
+            } else {
+                // Fallback — скачиваем
+                this._downloadMonth();
+            }
+        });
+    },
+
+    _downloadMonth() {
+        if (!this._monthDataURL) return;
+        const a = document.createElement('a');
+        a.href = this._monthDataURL;
+        a.download = 'gosha-itogi.png';
+        a.click();
     },
 
     _render() {
@@ -3931,6 +4663,8 @@ const Interstitials = {
             confetti({ particleCount: 50, spread: 50, origin: { y: 0.5 }, zIndex: 100001 });
         }
 
+        // Танцующий Гоша
+
         // Достижения (каждые 5 подряд)
         if (this._streak % 5 === 0 && !this._shownMilestones.has(this._streak)) {
             this._shownMilestones.add(this._streak);
@@ -4030,5 +4764,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Обычный запуск — ждём данных
         await App.init();
         App.navigate('main');
+        // Гоша приветствует при запуске
     }
 });

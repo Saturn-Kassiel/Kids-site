@@ -29,6 +29,7 @@
     --fw-medium: 500;
     --fw-semi:   600;
     --tr: 0.22s cubic-bezier(.4,0,.2,1);
+    --accent: #60a5fa;
 }
 
 /* ══ ПАЛИТРА LUNA для тёмной темы ══
@@ -63,6 +64,7 @@
     --grad-orange: linear-gradient(135deg, #26658C, #54ACBF);
     --grad-red:    linear-gradient(135deg, #023859, #26658C);
     --grad-teal:   linear-gradient(135deg, #A7EBF2, #54ACBF);
+    --accent: #54ACBF;
 }
 
 /* ===== RESET ===== */
@@ -195,7 +197,7 @@ section.stats-layout {
 }
 .stats-fixed {
     flex-shrink: 0;
-    padding: 14px 18px 0;
+    padding: 14px 18px 14px;
     background: var(--bg);
     /* Лёгкая тень отделяет от скролла */
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -209,8 +211,7 @@ section.stats-layout {
     padding: 14px 18px 32px;
 }
 /* Убираем лишний margin у chart-card в закрепе */
-.stats-fixed .chart-card  { margin-bottom: 10px; }
-.stats-fixed .month-summary-btn { margin-bottom: 14px; }
+.stats-fixed .chart-card  { margin-bottom: 0; }
 section.hidden { display: none !important; }
 .hidden { display: none !important; }
 @keyframes fadeInUp {
@@ -689,6 +690,33 @@ section.hidden { display: none !important; }
 }
 
 /* ===== RIDDLES / PUZZLES ===== */
+.riddle-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+.riddle-text-area {
+    padding: 28px 22px 24px;
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.7;
+    text-align: center;
+    white-space: pre-line;
+    color: var(--text);
+}
+.riddle-answer-area {
+    padding: 0 16px 16px;
+}
+.riddle-answer-area input[type=text] {
+    margin-bottom: 6px;
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 15px;
+}
+/* Reusable box for other sections using riddle-box */
 .riddle-box {
     background: var(--card);
     border: 1.5px solid var(--border);
@@ -713,24 +741,45 @@ section.hidden { display: none !important; }
     color: var(--text);
 }
 .hint-box .icon-svg { color: #eab308; vertical-align: -0.15em; }
-.puzzle-img-wrap {
-    width: 100%; aspect-ratio: 1/1;
-    border-radius: 18px;
+.puzzle-card {
     background: var(--card);
     border: 1.5px solid var(--border);
+    border-radius: 22px;
     box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.puzzle-img-area {
+    width: 100%; aspect-ratio: 1/1;
     display: flex; align-items: center; justify-content: center;
     font-size: 64px;
     overflow: hidden;
-    margin-bottom: 10px;
+    background: var(--card2);
+}
+.puzzle-img-area img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+}
+.puzzle-answer-area {
+    padding: 12px 16px 16px;
+}
+.puzzle-answer-area .hint-box {
+    margin-bottom: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+}
+.puzzle-answer-area input[type=text] {
+    margin-bottom: 6px;
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 15px;
 }
 .answer-img {
     display: none;
     width: 100%;
     text-align: center;
     font-size: 80px;
-    border-radius: 18px;
-    margin-top: 10px;
+    border-radius: 22px;
+    margin-top: 0;
     animation: fadeInUp 0.4s ease;
 }
 .answer-img.show {
@@ -739,6 +788,7 @@ section.hidden { display: none !important; }
     border: 1.5px solid var(--border);
     padding: 20px;
     box-shadow: var(--shadow);
+    border-radius: 22px;
 }
 
 input[type=text], input[type=password] {
@@ -777,13 +827,15 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
 .action-btn:active, .submit-btn:active { transform: scale(0.97); }
 /* Строка кнопок загадки */
 .riddle-btns-row {
-    display: flex; gap: 8px; margin-top: 6px;
+    display: flex; gap: 8px; margin-top: 4px;
 }
 .riddle-btns-row .submit-btn {
-    flex: 1.4; margin-top: 0; font-size: 15px; padding: 13px 10px;
+    flex: 1.4; margin-top: 0; font-size: 14px; padding: 11px 10px;
+    border-radius: 12px;
 }
 .riddle-btns-row .next-btn {
-    flex: 1; margin-top: 0; font-size: 15px; padding: 13px 10px;
+    flex: 1; margin-top: 0; font-size: 14px; padding: 11px 10px;
+    border-radius: 12px;
 }
 .next-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -812,12 +864,13 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
 #riddle-msg, #puzzle-msg {
     text-align: center;
     font-family: var(--font-display);
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 500 !important;
-    padding: 10px;
-    border-radius: 14px;
-    min-height: 42px;
-    margin-top: 6px;
+    padding: 8px;
+    border-radius: 10px;
+    min-height: 0;
+    margin-top: 4px;
+    margin-bottom: 2px;
 }
 #riddle-msg.ok, #puzzle-msg.ok { color: #10b981; background: rgba(16,185,129,0.08); }
 #riddle-msg.err, #puzzle-msg.err { color: #ef4444; background: rgba(239,68,68,0.08); }
@@ -956,6 +1009,7 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
 .stat-val-time { font-family: var(--font-display); font-size: 20px; line-height: 1; font-weight: 500 !important; }
 .stat-lbl      { font-size: 13px; color: var(--text2); font-weight: 500 !important; margin-top: 3px; }
 .stat-sub      { font-size: 12px; color: var(--text2); margin-top: 2px; min-height: 16px; }
+.stat-hint     { font-size: 11px; color: var(--text2); margin-top: 5px; opacity: 0.6; line-height: 1.35; }
 .stat-track    { width: 100%; height: 6px; background: var(--bg2); border-radius: 99px; margin-top: 7px; overflow: hidden; }
 .stat-fill     { height: 100%; border-radius: 99px; width: 0%; transition: width 1s ease; }
 
@@ -1433,12 +1487,13 @@ input[type=file] { display: none; }
     justify-content: center;
     background: var(--card);
     border: 1.5px solid var(--border);
-    border-radius: 18px;
+    border-radius: 22px;
     padding: 0;
     overflow: hidden;
-    width: 100%;
+    width: 75%;
+    max-width: 280px;
     aspect-ratio: 1/1;
-    margin-bottom: 10px;
+    margin: 0 auto 10px;
     box-shadow: var(--shadow);
 }
 /* !important нужен чтобы перебить .answer-img.show { display: block } */
@@ -1580,7 +1635,9 @@ input[type=file] { display: none; }
 
 /* Загадки и ребусы */
 [data-theme="dark"] .riddle-box { background: var(--card); }
-[data-theme="dark"] .puzzle-img-wrap { background: var(--card); }
+[data-theme="dark"] .riddle-card { background: var(--card); }
+[data-theme="dark"] .puzzle-card { background: var(--card); }
+[data-theme="dark"] .puzzle-img-area { background: var(--card2); }
 
 /* Кнопки */
 [data-theme="dark"] .submit-btn {
@@ -1941,85 +1998,214 @@ input[type=file] { display: none; }
 }
 
 /* ══════════════════════════════════════════
-   CHART — активность 7 дней
+   CHART — Активность
    ══════════════════════════════════════════ */
 .chart-card {
     background: var(--card);
-    border: 1.5px solid var(--border);
+    border: 1px solid var(--border);
     border-radius: 18px;
     padding: 16px 16px 12px;
     box-shadow: var(--shadow);
     margin-bottom: 10px;
 }
 .chart-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
+    display: flex; align-items: center;
+    margin-bottom: 12px; gap: 6px;
 }
 .chart-title {
     font-family: var(--font-display);
-    font-size: 15px; font-weight: 700 !important;
-    color: var(--text);
-}
-.chart-tabs {
-    display: flex; gap: 4px;
-}
-.chart-tab {
-    background: var(--card2); border: none; cursor: pointer;
-    font-family: var(--font-display);
-    font-size: 12px; font-weight: 600 !important;
-    color: var(--text2);
-    padding: 5px 10px; border-radius: 99px;
-    transition: all var(--tr);
-}
-.chart-tab.active {
-    background: var(--grad); color: #fff;
+    font-size: 14px; font-weight: var(--fw-medium);
+    color: var(--text); letter-spacing: 0.01em;
 }
 
-.chart-area {
-    width: 100%;
+/* ── Info button ── */
+.chart-info-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); padding: 2px;
+    border-radius: 50%; transition: all var(--tr);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; opacity: 0.5;
 }
+.chart-info-btn:hover { opacity: 1; color: var(--text); }
+.chart-info-box {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 12px; font-weight: var(--fw-normal);
+    line-height: 1.7;
+    color: var(--text2);
+    border-left: 2px solid var(--accent);
+    animation: chart-info-in 0.2s ease;
+}
+.chart-info-box b { color: var(--text); font-weight: var(--fw-medium); }
+@keyframes chart-info-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Metric tabs (Ответы / Время) ── */
+.chart-tabs {
+    display: flex; gap: 3px; margin-left: auto;
+}
+.chart-tab {
+    background: transparent; border: 1px solid var(--border); cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 11px; font-weight: var(--fw-normal);
+    color: var(--text2);
+    padding: 4px 10px; border-radius: 99px;
+    transition: all var(--tr);
+    letter-spacing: 0.02em;
+}
+.chart-tab.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+    font-weight: var(--fw-medium);
+}
+.chart-tab.active[data-metric="time"] {
+    background: linear-gradient(135deg, #fcd34d, #f59e0b, #ea580c);
+    border-color: #f59e0b;
+}
+
+/* ── Period tabs ── */
+.chart-period-tabs {
+    display: flex; gap: 0; margin-bottom: 10px;
+    background: var(--card2);
+    border-radius: 8px;
+    padding: 2px;
+}
+.chart-period {
+    flex: 1; background: none; border: none; cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 11px; font-weight: var(--fw-normal);
+    color: var(--text2);
+    padding: 5px 4px; border-radius: 6px;
+    transition: all var(--tr);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+.chart-period.active {
+    background: var(--card);
+    color: var(--text);
+    font-weight: var(--fw-medium);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ── Chart area ── */
+.chart-area { width: 100%; }
 .chart-bars {
-    display: flex; align-items: flex-end; gap: 6px;
-    height: 90px;
+    display: flex; align-items: flex-end; gap: 2px;
+    height: 84px;
     padding: 0 2px;
 }
 .chart-bar-wrap {
     flex: 1;
     display: flex; flex-direction: column;
     align-items: center; justify-content: flex-end;
-    height: 100%; gap: 3px;
+    height: 100%; gap: 2px;
+    min-width: 0;
 }
 .chart-bar-tip {
-    font-size: 10px; font-weight: 700 !important;
+    font-size: 9px; font-weight: var(--fw-normal);
     color: var(--text2); line-height: 1;
-    min-height: 12px; text-align: center;
+    min-height: 11px; text-align: center;
+    white-space: nowrap; opacity: 0.7;
 }
 .chart-bar {
     width: 100%;
-    background: var(--accent);
-    border-radius: 5px 5px 3px 3px;
-    min-height: 3px;
-    opacity: 0.55;
-    transition: height 0.5s ease;
+    border-radius: 3px 3px 1px 1px;
+    min-height: 0;
+    transition: height 0.5s cubic-bezier(.4,0,.2,1);
 }
-.chart-bar-wrap.today .chart-bar {
-    background: linear-gradient(180deg, #A7EBF2, var(--accent));
-    opacity: 1;
-    box-shadow: 0 0 10px rgba(84,172,191,0.4);
+.chart-bar-a {
+    background: var(--accent);
+    opacity: 0.4;
+}
+.chart-bar-t {
+    background: linear-gradient(180deg, #fcd34d, #f59e0b, #ea580c);
+    opacity: 0.4;
+}
+.chart-bar-wrap.today .chart-bar-a {
+    background: linear-gradient(180deg, #c8f0f5, var(--accent));
+    opacity: 0.85;
+}
+.chart-bar-wrap.today .chart-bar-t {
+    background: linear-gradient(180deg, #fcd34d, #f59e0b, #ea580c);
+    opacity: 0.85;
+}
+/* Ограничение ширины в режиме «Всё время» с малым кол-вом столбиков */
+.chart-bars.chart-bars-wide .chart-bar-wrap {
+    max-width: 90px;
+}
+.chart-bars.chart-bars-wide {
+    justify-content: center;
+}
+.chart-dual-slot {
+    display: flex; gap: 2px;
+    width: 100%; height: 100%;
+    align-items: flex-end;
+}
+.chart-dual-col {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    height: 100%; gap: 2px;
+}
+.chart-dual-col .chart-bar {
+    width: 100%; border-radius: 3px 3px 1px 1px;
+}
+.chart-dual-col .chart-bar-tip {
+    font-size: 9px;
 }
 .chart-labels {
-    display: flex; gap: 6px;
-    padding: 6px 2px 0;
+    display: flex; gap: 2px;
+    padding: 5px 2px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
 }
 .chart-label {
     flex: 1; text-align: center;
-    font-size: 10px; color: var(--text2);
-    white-space: nowrap; overflow: hidden;
-    text-overflow: clip;
+    font-size: 10px; font-weight: var(--fw-normal);
+    color: var(--text2);
+    white-space: nowrap; overflow: visible;
+    min-width: 0; opacity: 0.55;
 }
 .chart-label.today {
-    color: var(--accent); font-weight: 700 !important;
+    color: var(--accent); font-weight: var(--fw-medium); opacity: 1;
 }
+
+/* ── Legend + Period footer (unified) ── */
+.chart-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 2px 2px;
+    font-size: 10px; font-weight: var(--fw-normal);
+    color: var(--text2);
+    letter-spacing: 0.01em;
+}
+.chart-footer-legend {
+    display: flex; align-items: center; gap: 4px;
+    white-space: nowrap;
+}
+.chart-footer-period {
+    white-space: nowrap;
+    opacity: 0.6;
+    color: var(--accent);
+}
+.chart-legend-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; margin-right: 4px;
+}
+.chart-legend-a { background: var(--accent); }
+.chart-legend-t { background: #f59e0b; }
+/* wide mode for labels too */
+.chart-labels.chart-bars-wide {
+    justify-content: center;
+}
+.chart-labels.chart-bars-wide .chart-label {
+    max-width: 90px;
+}
+
+/* day pair styles removed — Day now uses unified bar layout */
 
 /* ══ Кнопка итогов месяца ══ */
 .month-summary-btn {
@@ -2033,7 +2219,7 @@ input[type=file] { display: none; }
     font-size: 15px; font-weight: 500 !important;
     color: var(--text);
     box-shadow: var(--shadow);
-    margin-bottom: 18px;
+    margin: 18px 0;
     transition: all var(--tr);
 }
 .month-summary-btn .icon-svg { color: var(--text2); }
@@ -2162,6 +2348,10 @@ input[type=file] { display: none; }
     cursor: default;
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+.words-slot:focus {
+    outline: none;
 }
 .words-slot.filled {
     border-style: solid;
@@ -2169,6 +2359,12 @@ input[type=file] { display: none; }
     background: rgba(167,139,250,0.1);
     cursor: pointer;
     animation: words-slot-pop 0.25s ease;
+}
+/* Подавляем анимации при загрузке нового задания */
+.no-anim .words-slot,
+.no-anim .words-tile {
+    animation: none !important;
+    transition: none !important;
 }
 .words-slot.correct {
     border-color: #22c55e;
@@ -2217,7 +2413,12 @@ input[type=file] { display: none; }
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
     outline: none;
+}
+.words-tile:focus {
+    outline: none;
+    border-color: var(--border);
 }
 .words-tile:focus-visible {
     border-color: #a78bfa;
@@ -2355,20 +2556,51 @@ input[type=file] { display: none; }
     border-radius: 20px;
     background: var(--card);
     box-shadow: var(--shadow);
-    overflow: hidden;
-    animation: mascotBounce 2s ease infinite;
+    overflow: visible;
+    position: relative;
 }
-.badges-mascot-wrap.gosha-happy {
-    animation: gosha-happy-anim 1s ease infinite;
+.badges-mascot-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 22px;
+    background: conic-gradient(
+        from var(--mascot-angle, 0deg),
+        rgba(251,191,36,0.15) 0%,
+        rgba(251,191,36,0.15) 30%,
+        rgba(255,230,150,0.8) 45%,
+        rgba(251,191,36,1) 50%,
+        rgba(255,230,150,0.8) 55%,
+        rgba(251,191,36,0.15) 70%,
+        rgba(251,191,36,0.15) 100%
+    );
+    animation: mascot-shimmer 10s linear infinite;
+    z-index: -1;
+    mask:
+        linear-gradient(#000, #000) content-box,
+        linear-gradient(#000, #000);
+    mask-composite: exclude;
+    -webkit-mask:
+        linear-gradient(#000, #000) content-box,
+        linear-gradient(#000, #000);
+    -webkit-mask-composite: destination-out;
+    padding: 3px;
 }
-.badges-mascot-wrap.gosha-dance {
-    animation: gosha-dance-anim 1.2s ease infinite;
+@keyframes mascot-shimmer {
+    from { --mascot-angle: 0deg; }
+    to   { --mascot-angle: 360deg; }
+}
+@property --mascot-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
 }
 .badges-mascot {
     width: 64px;
     height: 64px;
     object-fit: cover;
     display: block;
+    border-radius: 20px;
 }
 .badges-summary {
     flex: 1;
@@ -2418,34 +2650,106 @@ input[type=file] { display: none; }
     box-shadow: var(--shadow);
     transition: all 0.35s ease;
     animation: fadeInUp 0.4s ease both;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .badge-card:not(.unlocked) {
+    opacity: 0.55;
+}
+.badge-card:not(.unlocked) .badge-icon-wrap {
+    opacity: 0.35;
+}
+.badge-card:not(.unlocked) .badge-icon-wrap svg {
+    stroke: var(--text2);
+}
+.badge-card:not(.unlocked) .badge-name {
+    color: var(--text2);
     opacity: 0.5;
 }
-.badge-card:not(.unlocked) .badge-emoji {
-    filter: grayscale(1) brightness(0.6);
+.badge-card:not(.unlocked) .badge-progress-fill {
+    background: var(--text2);
+    opacity: 0.25;
+}
+.badge-card:not(.unlocked) .badge-desc {
+    color: var(--text2);
+    opacity: 0.5;
 }
 .badge-card.unlocked {
     opacity: 1;
-    border-color: rgba(245,158,11,0.35);
+    border-color: transparent;
     background: linear-gradient(145deg, var(--card), rgba(251,191,36,0.08));
     box-shadow: var(--shadow), 0 0 20px rgba(251,191,36,0.12);
+    position: relative;
+    overflow: visible;
+    z-index: 0;
 }
 .badge-card.unlocked:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg), 0 0 28px rgba(251,191,36,0.2);
 }
 
-.badge-emoji {
-    font-size: 36px;
-    line-height: 1;
+.badge-icon-wrap {
+    width: 44px; height: 44px;
     margin-bottom: 6px;
     transition: transform 0.3s ease, filter 0.3s ease;
+    position: relative;
+    z-index: 0;
 }
-.badge-card.unlocked .badge-emoji {
-    font-size: 42px;
+.badge-icon-wrap svg {
+    width: 100%; height: 100%;
+    stroke: var(--text2);
+    position: relative;
+    z-index: 1;
+}
+.badge-card.unlocked .badge-icon-wrap {
+    width: 50px; height: 50px;
     filter: drop-shadow(0 2px 8px rgba(251,191,36,0.4));
     animation: badge-emoji-pop 0.6s ease both;
+    position: relative;
+}
+.badge-card.unlocked .badge-icon-wrap svg {
+    stroke: #fbbf24;
+    filter: drop-shadow(0 0 3px rgba(251,191,36,0.3));
+}
+
+/* ── Золотой блик на карточке (как на маскоте) ── */
+.badge-card.unlocked::before {
+    content: '';
+    position: absolute;
+    inset: -2.5px;
+    border-radius: 18px;
+    background: conic-gradient(
+        from var(--card-shimmer-angle, 0deg),
+        rgba(251,191,36,0.15) 0%,
+        rgba(251,191,36,0.15) 30%,
+        rgba(255,230,150,0.8) 45%,
+        rgba(251,191,36,1) 50%,
+        rgba(255,230,150,0.8) 55%,
+        rgba(251,191,36,0.15) 70%,
+        rgba(251,191,36,0.15) 100%
+    );
+    animation: card-shimmer 10s linear infinite;
+    z-index: -1;
+    /* Вырезаем внутреннюю часть — оставляем только обводку 2.5px */
+    mask:
+        linear-gradient(#000, #000) content-box,
+        linear-gradient(#000, #000);
+    mask-composite: exclude;
+    -webkit-mask:
+        linear-gradient(#000, #000) content-box,
+        linear-gradient(#000, #000);
+    -webkit-mask-composite: destination-out;
+    padding: 2.5px;
+}
+@keyframes card-shimmer {
+    from { --card-shimmer-angle: 0deg; }
+    to   { --card-shimmer-angle: 360deg; }
+}
+@property --card-shimmer-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
 }
 @keyframes badge-emoji-pop {
     0%   { transform: scale(0); }
@@ -2478,6 +2782,10 @@ input[type=file] { display: none; }
     font-weight: 600;
 }
 
+.badge-progress-bottom {
+    margin-top: auto;
+    width: 100%;
+}
 .badge-progress-bar {
     height: 4px;
     border-radius: 2px;
@@ -2507,8 +2815,21 @@ input[type=file] { display: none; }
     background: linear-gradient(145deg, var(--card), rgba(251,191,36,0.1));
     box-shadow: var(--shadow), 0 0 24px rgba(251,191,36,0.15);
 }
-[data-theme="dark"] .badge-card:not(.unlocked) .badge-emoji {
-    filter: grayscale(1) brightness(0.35);
+[data-theme="dark"] .badge-card:not(.unlocked) .badge-icon-wrap svg {
+    stroke: var(--luna-mid);
+    opacity: 0.4;
+}
+[data-theme="dark"] .badge-card:not(.unlocked) .badge-name {
+    color: var(--luna-mid);
+    opacity: 0.4;
+}
+[data-theme="dark"] .badge-card:not(.unlocked) .badge-progress-fill {
+    background: var(--luna-mid);
+    opacity: 0.2;
+}
+[data-theme="dark"] .badge-card:not(.unlocked) .badge-desc {
+    color: var(--luna-mid);
+    opacity: 0.4;
 }
 [data-theme="dark"] .badges-mascot-wrap {
     box-shadow: 0 4px 24px rgba(84,172,191,0.2), var(--shadow);
