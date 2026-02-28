@@ -14,7 +14,9 @@ const App = {
 
         const isMain = id === 'main';
         document.getElementById('back-btn').classList.toggle('hidden', isMain);
-        document.getElementById('settings-icon-btn').classList.toggle('hidden', id === 'settings' || id === 'admin');
+        document.getElementById('settings-icon-btn').classList.toggle('hidden', id === 'settings' || id === 'admin' || id === 'notifications');
+        document.getElementById('notif-bell-btn').classList.toggle('hidden', id === 'settings' || id === 'admin' || id === 'notifications');
+        if (id !== 'notifications') Notif._open = false;
 
         // Для ребусов и загадок — скрываем текст «Назад» и заголовок
         const backText = document.getElementById('back-text');
@@ -30,6 +32,7 @@ const App = {
 
         if (!isMain) this._history.push(id);
         else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
+        if (isMain) CardBadges.updateAll();
         window.scrollTo(0, 0);
         // Управляем кнопками топ-бара
         if (id === 'puzzles') {
@@ -114,6 +117,12 @@ const App = {
                     localStorage.setItem('admin_' + k, JSON.stringify(data[k]));
                 }
             });
+            // Загружаем уведомления из data.json
+            if (Array.isArray(data.notifications)) {
+                localStorage.setItem('admin_notif_remote', JSON.stringify(data.notifications));
+            }
+            // Проверяем новый контент
+            Notif.checkNewContent(data);
             localStorage.removeItem('gh_data_updated');
             console.log('✅ data.json загружен с GitHub');
         } catch(e) {
@@ -274,6 +283,154 @@ function showToast(msg, dur = 2400) {
     clearTimeout(_toastT);
     _toastT = setTimeout(() => t.classList.remove('show'), dur);
 }
+
+// -------- CHILD NAME --------
+function saveChildName(val) {
+    const name = (val || '').trim().slice(0, 20);
+    if (name) {
+        localStorage.setItem('child_name', name);
+    } else {
+        localStorage.removeItem('child_name');
+    }
+}
+function getChildName() {
+    return localStorage.getItem('child_name') || '';
+}
+function updateHomeGreeting() {
+    const el = document.getElementById('home-greeting');
+    if (!el) return;
+    const name = getChildName();
+    if (name) {
+        const hour = new Date().getHours();
+        const timeGreet = hour < 6 ? 'Доброй ночи' : hour < 12 ? 'Доброе утро' : hour < 18 ? 'Добрый день' : 'Добрый вечер';
+        el.textContent = `${timeGreet}, ${name}!`;
+    } else {
+        el.textContent = 'Давай учиться играя!';
+    }
+}
+function getPersonalPraise() {
+    const name = getChildName();
+    const base = ['Молодец', 'Правильно', 'Отлично', 'Супер', 'Ура', 'Верно', 'Браво', 'Здорово'];
+    const emojis = ['🎉', '⭐', '🏆', '🌟', '🎈', '👏', '✨', '💫'];
+    const i = Math.floor(Math.random() * base.length);
+    if (name) {
+        return `${base[i]}, ${name}! ${emojis[i]}`;
+    }
+    return `${base[i]}! ${emojis[i]}`;
+}
+
+// ──── Registration card ────
+function regUpdateCard() {
+    const name = getChildName();
+    const card = document.getElementById('reg-card');
+    const avatar = document.getElementById('reg-avatar');
+    const nameDisplay = document.getElementById('reg-name-display');
+    const inputWrap = document.getElementById('reg-input-wrap');
+    const hint = document.getElementById('reg-hint');
+    const editBtn = document.getElementById('reg-edit-btn');
+    const inp = document.getElementById('child-name-input');
+    if (!card) return;
+
+    if (name) {
+        card.classList.add('has-name');
+        // Показываем первую букву в аватаре
+        avatar.innerHTML = name.charAt(0).toUpperCase();
+        nameDisplay.textContent = name;
+        nameDisplay.style.display = '';
+        inputWrap.style.display = 'none';
+        hint.style.display = 'none';
+        editBtn.style.display = '';
+    } else {
+        card.classList.remove('has-name');
+        avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+        nameDisplay.style.display = 'none';
+        inputWrap.style.display = '';
+        hint.style.display = '';
+        editBtn.style.display = 'none';
+        if (inp) inp.value = '';
+    }
+}
+function regSaveName() {
+    const inp = document.getElementById('child-name-input');
+    const val = (inp?.value || '').trim();
+    if (!val) { showToast('✏️ Введи имя'); inp?.focus(); return; }
+    saveChildName(val);
+    updateHomeGreeting();
+    regUpdateCard();
+    showToast(`👋 Привет, ${val}!`);
+}
+function regEditName() {
+    const name = getChildName();
+    const inputWrap = document.getElementById('reg-input-wrap');
+    const nameDisplay = document.getElementById('reg-name-display');
+    const hint = document.getElementById('reg-hint');
+    const editBtn = document.getElementById('reg-edit-btn');
+    const inp = document.getElementById('child-name-input');
+    if (inputWrap) inputWrap.style.display = '';
+    if (nameDisplay) nameDisplay.style.display = 'none';
+    if (hint) hint.style.display = '';
+    if (editBtn) editBtn.style.display = 'none';
+    if (inp) { inp.value = name; inp.focus(); inp.select(); }
+}
+
+// ──── Card Badges — total & new counts on home cards ────
+const CardBadges = {
+    _getTriedSet(key) {
+        try { return new Set(JSON.parse(localStorage.getItem('tried_' + key) || '[]')); }
+        catch { return new Set(); }
+    },
+    _saveTriedSet(key, set) {
+        localStorage.setItem('tried_' + key, JSON.stringify([...set]));
+    },
+    markTried(key, identifier) {
+        if (!identifier) return;
+        const set = this._getTriedSet(key);
+        const id = String(identifier).toLowerCase().trim();
+        if (set.has(id)) return;
+        set.add(id);
+        this._saveTriedSet(key, set);
+        this.updateAll();
+    },
+    _getAllIds(key) {
+        try {
+            const data = JSON.parse(localStorage.getItem('admin_' + key) || '[]');
+            if (key === 'songs' || key === 'podcasts') {
+                return data.map(item => String(item.id));
+            } else {
+                // riddles / puzzles — use answer as identifier
+                return data.map(item => (item.answer || item.name || '').toLowerCase().trim()).filter(Boolean);
+            }
+        } catch { return []; }
+    },
+    updateAll() {
+        ['songs', 'podcasts', 'puzzles', 'riddles'].forEach(key => {
+            const allIds = this._getAllIds(key);
+            const tried = this._getTriedSet(key);
+            const total = allIds.length;
+            const newCount = allIds.filter(id => !tried.has(id)).length;
+
+            const totalEl = document.getElementById('mc-' + key + '-total');
+            const newEl = document.getElementById('mc-' + key + '-new');
+
+            if (totalEl) {
+                if (total > 0) {
+                    totalEl.textContent = total;
+                    totalEl.style.display = 'flex';
+                } else {
+                    totalEl.style.display = 'none';
+                }
+            }
+            if (newEl) {
+                if (newCount > 0 && total > 0) {
+                    newEl.textContent = newCount;
+                    newEl.style.display = 'flex';
+                } else {
+                    newEl.style.display = 'none';
+                }
+            }
+        });
+    }
+};
 
 // -------- STARS --------
 function showStars(cx, cy) {
@@ -579,7 +736,7 @@ const Achievements = {
                     <canvas id="ach-canvas" width="220" height="220"></canvas>
                     <div class="ach-count-badge">${count}</div>
                 </div>
-                <div class="ach-label">${count} правильных ответов подряд!</div>
+                <div class="ach-label">${getChildName() ? getChildName() + ' — ' : ''}${count} правильных ответов подряд!</div>
                 <div class="ach-sub">${theme.label}</div>
                 <div class="ach-progress-bar"><div class="ach-progress-fill" id="ach-progress"></div></div>
                 <div class="ach-btns">
@@ -628,8 +785,11 @@ const Achievements = {
     },
 
     async _share(count, section) {
-        const name = section === 'riddles' ? 'загадках' : 'ребусах';
-        const text = `🎉 ${count} правильных ответов подряд в ${name}! Попробуй сам: https://saturn-kassiel.github.io/Kids-site/`;
+        const sectionName = section === 'riddles' ? 'загадках' : 'ребусах';
+        const childN = getChildName();
+        const text = childN
+            ? `🎉 ${childN}: ${count} правильных ответов подряд в ${sectionName}! Попробуй сам: https://saturn-kassiel.github.io/Kids-site/`
+            : `🎉 ${count} правильных ответов подряд в ${sectionName}! Попробуй сам: https://saturn-kassiel.github.io/Kids-site/`;
 
         // Пробуем поделиться вместе с картинкой
         const canvas = document.getElementById('ach-canvas');
@@ -656,21 +816,29 @@ const Achievements = {
                 sc.roundRect(40, 430, 520, 130, 20);
                 sc.fill();
 
+                // Имя ребёнка (если есть)
+                if (childN) {
+                    sc.font = '500 30px system-ui, sans-serif';
+                    sc.textAlign = 'center';
+                    sc.fillStyle = isDark ? '#fbbf24' : '#d97706';
+                    sc.fillText(childN, 300, 470);
+                }
+
                 // Число
                 sc.font = 'bold 72px system-ui, sans-serif';
                 sc.textAlign = 'center';
                 sc.fillStyle = isDark ? '#A7EBF2' : '#0369a1';
-                sc.fillText(count, 300, 500);
+                sc.fillText(count, 300, childN ? 540 : 500);
 
                 // Текст
                 sc.font = '500 28px system-ui, sans-serif';
                 sc.fillStyle = isDark ? '#e2e8f0' : '#1e293b';
-                sc.fillText(`правильных ответов подряд в ${name}`, 300, 542);
+                sc.fillText(`правильных ответов подряд в ${sectionName}`, 300, childN ? 576 : 542);
 
                 // Бренд
                 sc.font = '400 20px system-ui, sans-serif';
                 sc.fillStyle = isDark ? '#94a3b8' : '#64748b';
-                sc.fillText('Говоруша · saturn-kassiel.github.io/Kids-site', 300, 576);
+                sc.fillText('Гоша · saturn-kassiel.github.io/Kids-site', 300, childN ? 600 : 576);
 
                 // Конвертируем в blob и шарим
                 shareCanvas.toBlob(async (blob) => {
@@ -960,8 +1128,13 @@ const StatTracker = {
     _logDailyAnswer() {
         const log = this._getDailyLog();
         const key = this._todayKey();
-        if (!log[key]) log[key] = { answers: 0, time: 0 };
+        if (!log[key]) log[key] = { answers: 0, time: 0, hours: {} };
         log[key].answers++;
+        // Почасовой лог
+        const h = String(new Date().getHours());
+        if (!log[key].hours) log[key].hours = {};
+        if (!log[key].hours[h]) log[key].hours[h] = { a: 0, t: 0 };
+        log[key].hours[h].a++;
         this._saveDailyLog(log);
     },
 
@@ -972,9 +1145,28 @@ const StatTracker = {
         if (seconds <= 0) return;
         const log = this._getDailyLog();
         const key = this._todayKey();
-        if (!log[key]) log[key] = { answers: 0, time: 0 };
+        if (!log[key]) log[key] = { answers: 0, time: 0, hours: {} };
         log[key].time += seconds;
+        // Почасовой лог
+        const h = String(new Date().getHours());
+        if (!log[key].hours) log[key].hours = {};
+        if (!log[key].hours[h]) log[key].hours[h] = { a: 0, t: 0 };
+        log[key].hours[h].t += seconds;
         this._saveDailyLog(log);
+    },
+
+    // Получить почасовые данные за сегодня
+    getHourlyData() {
+        const log = this._getDailyLog();
+        const key = this._todayKey();
+        const entry = log[key] || {};
+        const hours = entry.hours || {};
+        const result = [];
+        for (let h = 0; h < 24; h++) {
+            const d = hours[String(h)] || { a: 0, t: 0 };
+            result.push({ hour: h, answers: d.a || 0, time: d.t || 0 });
+        }
+        return result;
     },
 
     // Получить данные за период
@@ -1165,7 +1357,8 @@ const StatTracker = {
             'badges_unlocked',
             'viewed_letters','viewed_numbers','viewed_colors',
             'stat_interstitials','inter_best_streak',
-            'stat_daily_log','stat_daily_migrated'
+            'stat_daily_log','stat_daily_migrated',
+            'tried_songs','tried_podcasts','tried_puzzles','tried_riddles'
         ];
         keys.forEach(k => localStorage.removeItem(k));
     },
@@ -1332,7 +1525,9 @@ const Badges = {
     },
 
     _notify(def) {
-        showToast(`🏅 Новый значок: ${def.name}!`, 3200);
+        const childN = getChildName();
+        const badgeMsg = childN ? `🏅 ${childN}, новый значок: ${def.name}!` : `🏅 Новый значок: ${def.name}!`;
+        showToast(badgeMsg, 3200);
         // Мини-конфетти
         if (window.confetti) {
             confetti({ particleCount: 50, spread: 50, origin: { y: 0.8 }, colors: ['#fbbf24','#a78bfa','#34d399','#f472b6'] });
@@ -1979,8 +2174,7 @@ const Words = {
     },
 
     _getSuccessPhrase() {
-        const phrases = ['Молодец! 🎉', 'Правильно! ⭐', 'Отлично! 🏆', 'Супер! 🌟', 'Ура! 🎈', 'Верно! 👏'];
-        return phrases[Math.floor(Math.random() * phrases.length)];
+        return getPersonalPraise();
     },
 
     hint() {
@@ -2269,8 +2463,8 @@ const Arithmetic = {
 
             playCorrectSound('math');
 
-            const phrases = ['Молодец! 🎉', 'Правильно! ⭐', 'Верно! 🏆', 'Супер! 🌟', 'Ура! 🎈', 'Отлично! 👏'];
-            msgEl.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+            const mathPraise = getPersonalPraise();
+            msgEl.textContent = mathPraise;
             msgEl.className = 'words-msg words-msg-ok';
 
             document.querySelectorAll('#math-slots .words-slot').forEach(s => s.classList.add('correct'));
@@ -2388,6 +2582,9 @@ const Songs = {
             if (!this._wasPaused) {
                 StatTracker.inc('songs');
             }
+            // Отмечаем как прослушанную
+            const song = this._allSongs[this.index];
+            if (song) CardBadges.markTried('songs', song.id);
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('song-play-btn').textContent = '▶';
             setTimeout(() => this.nextSong(), 1000);
@@ -2396,12 +2593,26 @@ const Songs = {
         this._loadDurations();
     },
 
+    _resolveAudioSrc(src) {
+        if (!src) return '';
+        // Если base64 data URL — используем как есть
+        if (src.startsWith('data:')) return src;
+        // Проверяем pending аудио (ещё не опубликовано)
+        try {
+            const pending = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+            if (pending[src]) return pending[src]; // возвращаем base64 data URL
+        } catch (_) {}
+        return src;
+    },
+
     _loadDurations() {
         this._allSongs.forEach((song, i) => {
             if (song.duration) return; // already set
+            const resolvedSrc = this._resolveAudioSrc(song.src);
+            if (!resolvedSrc) return;
             const a = new Audio();
             a.preload = 'metadata';
-            a.src = song.src;
+            a.src = resolvedSrc;
             a.addEventListener('loadedmetadata', () => {
                 const d = a.duration;
                 if (d && !isNaN(d)) {
@@ -2446,7 +2657,7 @@ const Songs = {
     play(i) {
         this.index = i;
         const song = this._allSongs[i];
-        this.audio.src = song.src || '';
+        this.audio.src = this._resolveAudioSrc(song.src) || '';
         AudioMgr.play(this.audio, 'songs');
         document.getElementById('song-play-btn').textContent = '⏸';
         document.getElementById('song-name').textContent = song.name;
@@ -2541,6 +2752,9 @@ const Podcasts = {
         setupProgress(this.audio, 'podcast-progress-bar', 'podcast-time-cur', 'podcast-time-dur', 'podcast-prog-wrap');
         if (!this._timeTracked) { StatTracker.trackAudioTime(this.audio, 'podcasts'); this._timeTracked = true; }
         this.audio.onended = () => {
+            // Отмечаем как прослушанный
+            const pod = this._allPodcasts[this.index];
+            if (pod) CardBadges.markTried('podcasts', pod.id);
             if (this.isRepeat) { this.play(this.index); return; }
             document.getElementById('podcast-play-btn').textContent = '▶';
             setTimeout(() => this.nextPodcast(), 1000);
@@ -2552,12 +2766,24 @@ const Podcasts = {
         try { return JSON.parse(localStorage.getItem('admin_podcasts')) || []; } catch { return []; }
     },
 
+    _resolveAudioSrc(src) {
+        if (!src) return '';
+        if (src.startsWith('data:')) return src;
+        try {
+            const pending = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+            if (pending[src]) return pending[src];
+        } catch (_) {}
+        return src;
+    },
+
     _loadDurations() {
         this._allPodcasts.forEach((p, i) => {
             if (p.duration) return;
+            const resolvedSrc = this._resolveAudioSrc(p.src);
+            if (!resolvedSrc) return;
             const a = new Audio();
             a.preload = 'metadata';
-            a.src = p.src;
+            a.src = resolvedSrc;
             a.addEventListener('loadedmetadata', () => {
                 const d = a.duration;
                 if (d && !isNaN(d)) {
@@ -2598,7 +2824,7 @@ const Podcasts = {
     play(i) {
         this.index = i;
         const pod = this._allPodcasts[i];
-        this.audio.src = pod.src || '';
+        this.audio.src = this._resolveAudioSrc(pod.src) || '';
         AudioMgr.play(this.audio, 'podcasts');
         document.getElementById('podcast-play-btn').textContent = '⏸';
         document.getElementById('podcast-name').textContent = pod.name;
@@ -2835,17 +3061,15 @@ const Puzzles = {
         const result = AnswerChecker.check(val, this._current().answer);
         if (result === 'exact' || result === 'fuzzy') {
             inp.className = 'correct';
-            msg.innerHTML = result === 'fuzzy'
-                ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${this._current().answer}</b>`
-                : `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Верно! Ответ: <b>${this._current().answer}</b>`;
+            const praise = getPersonalPraise();
+            msg.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> ${praise} Ответ: <b>${this._current().answer}</b>`;
             msg.className = 'ok';
             this._solved = true;
             starsBurst();
             playCorrectSound('puzzles');
             Achievements.correct('puzzles');
-            const cur = parseInt(localStorage.getItem('stat_puzzles') || 0);
-            localStorage.setItem('stat_puzzles', cur + 1);
-            Badges.checkAll();
+            CardBadges.markTried('puzzles', this._current().answer);
+            StatTracker.inc('puzzles');
         } else {
             inp.className = 'wrong';
             msg.textContent = '❌ Не угадал, попробуй ещё!';
@@ -3043,9 +3267,8 @@ const Riddles = {
         const result = AnswerChecker.check(val, item.a || item.answer || '');
         if (result === 'exact' || result === 'fuzzy') {
             inp.className = 'correct';
-            msg.innerHTML = result === 'fuzzy'
-                ? `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${item.a || item.answer}</b>`
-                : `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Правильно! Ответ: <b>${item.a || item.answer}</b>`;
+            const praise = getPersonalPraise();
+            msg.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> ${praise} Ответ: <b>${item.a || item.answer}</b>`;
             msg.className = 'ok';
             const imgEl2 = document.getElementById('riddle-img');
             imgEl2.innerHTML = '';
@@ -3070,9 +3293,8 @@ const Riddles = {
             starsBurst();
             playCorrectSound('riddles');
             Achievements.correct('riddles');
-            const cur = parseInt(localStorage.getItem('stat_riddles') || 0);
-            localStorage.setItem('stat_riddles', cur + 1);
-            Badges.checkAll();
+            CardBadges.markTried('riddles', item.a || item.answer);
+            StatTracker.inc('riddles');
         } else {
             inp.className = 'wrong';
             msg.textContent = '❌ Не угадал, попробуй ещё!';
@@ -3182,13 +3404,17 @@ const Info = {
 const Stats = {
     _showAnswers: true,
     _showTime: true,
+    _showHourlyA: true,
+    _showHourlyT: true,
     _chartPeriod: 'week',
 
     show() {
         App.navigate('stats', 'Статистика');
         this._render();
         this._syncMetricTabs();
+        this._syncHourlyMetricTabs();
         this._renderChart();
+        this._renderHourlyChart();
     },
 
     toggleMetric(metric) {
@@ -3218,6 +3444,24 @@ const Stats = {
         const metricTabs = document.getElementById('chart-metric-tabs');
         if (metricTabs) metricTabs.style.display = '';
         this._renderChart();
+    },
+
+    toggleHourlyMetric(metric) {
+        if (metric === 'answers') this._showHourlyA = !this._showHourlyA;
+        if (metric === 'time') this._showHourlyT = !this._showHourlyT;
+        if (!this._showHourlyA && !this._showHourlyT) {
+            if (metric === 'answers') this._showHourlyT = true;
+            else this._showHourlyA = true;
+        }
+        this._syncHourlyMetricTabs();
+        this._renderHourlyChart();
+    },
+
+    _syncHourlyMetricTabs() {
+        const tabs = document.getElementById('hourly-metric-tabs');
+        if (!tabs) return;
+        tabs.querySelector('[data-metric="answers"]')?.classList.toggle('active', this._showHourlyA);
+        tabs.querySelector('[data-metric="time"]')?.classList.toggle('active', this._showHourlyT);
     },
 
     toggleInfo() {
@@ -3319,7 +3563,16 @@ const Stats = {
         const isMonth = this._chartPeriod === 'month';
         const showA = this._showAnswers;
         const showT = this._showTime;
-        const dualMode = showA && showT;
+
+        // Если время включено, но данных нет — показываем только ответы
+        const hasAnyTime = timeVals.some(v => v > 0);
+        const hasAnyAnswers = answersVals.some(v => v > 0);
+        // Всегда уважаем выбор пользователя — если таб включён, показываем столбик
+        let effectiveShowT = showT;
+        let effectiveShowA = showA;
+        // Если оба выключены — показываем ответы
+        if (!effectiveShowA && !effectiveShowT) effectiveShowA = true;
+        const dualMode = effectiveShowA && effectiveShowT;
 
         const labelStep = isMonth ? Math.ceil(data.length / 7) : 1;
         const isDense = isMonth;
@@ -3327,6 +3580,8 @@ const Stats = {
 
         let barsHTML = '';
         let labelsHTML = '';
+
+        const chartHeight = 84; // px — matches .chart-bars height
 
         data.forEach((d, i) => {
             const isToday = d.isToday;
@@ -3337,8 +3592,11 @@ const Stats = {
             const hideTips = isMonth;
 
             if (dualMode) {
-                const pctA = maxAnswers > 0 ? Math.max((a / maxAnswers) * 100, a > 0 ? 4 : 0) : 0;
-                const pctT = maxTime > 0 ? Math.max((t / maxTime) * 100, t > 0 ? 4 : 0) : 0;
+                const hA = maxAnswers > 0 ? Math.max(Math.round((a / maxAnswers) * chartHeight), a > 0 ? 5 : 0) : 0;
+                const hT = maxTime > 0 ? Math.max(Math.round((t / maxTime) * chartHeight), t > 0 ? 5 : 0) : 0;
+                // Минимальная видимая высота placeholder когда данных нет
+                const hAvis = hA > 0 ? hA : (a > 0 ? 5 : (hasAnyAnswers ? 0 : 2));
+                const hTvis = hT > 0 ? hT : (t > 0 ? 5 : (hasAnyTime ? 0 : 2));
                 const tipA = !hideTips && (!isDense || isToday) && a > 0 ? a : '';
                 const tipT = !hideTips && (!isDense || isToday) && t > 0 ? this._fmtTimeTip(t) : '';
 
@@ -3346,27 +3604,28 @@ const Stats = {
                     <div class="chart-dual-slot">
                         <div class="chart-dual-col">
                             <div class="chart-bar-tip">${tipA}</div>
-                            <div class="chart-bar chart-bar-a" style="height:${pctA}%"></div>
+                            <div class="chart-bar chart-bar-a" style="height:${hAvis}px"></div>
                         </div>
                         <div class="chart-dual-col">
                             <div class="chart-bar-tip">${tipT}</div>
-                            <div class="chart-bar chart-bar-t" style="height:${pctT}%"></div>
+                            <div class="chart-bar chart-bar-t" style="height:${hTvis}px"></div>
                         </div>
                     </div>
                 </div>`;
-            } else if (showA) {
-                const pct = maxAnswers > 0 ? Math.max((a / maxAnswers) * 100, a > 0 ? 4 : 0) : 0;
+            } else if (effectiveShowA) {
+                const h = maxAnswers > 0 ? Math.max(Math.round((a / maxAnswers) * chartHeight), a > 0 ? 5 : 0) : 0;
                 const tip = !hideTips && (!isDense || isToday) && a > 0 ? a : '';
                 barsHTML += `<div class="chart-bar-wrap ${isToday ? 'today' : ''}">
                     <div class="chart-bar-tip">${tip}</div>
-                    <div class="chart-bar chart-bar-a" style="height:${pct}%"></div>
+                    <div class="chart-bar chart-bar-a" style="height:${h}px"></div>
                 </div>`;
             } else {
-                const pct = maxTime > 0 ? Math.max((t / maxTime) * 100, t > 0 ? 4 : 0) : 0;
+                const h = maxTime > 0 ? Math.max(Math.round((t / maxTime) * chartHeight), t > 0 ? 5 : 0) : 0;
+                const hVis = h === 0 && !hasAnyTime && isToday ? 2 : h;
                 const tip = !hideTips && (!isDense || isToday) && t > 0 ? this._fmtTimeTip(t) : '';
                 barsHTML += `<div class="chart-bar-wrap ${isToday ? 'today' : ''}">
                     <div class="chart-bar-tip">${tip}</div>
-                    <div class="chart-bar chart-bar-t" style="height:${pct}%"></div>
+                    <div class="chart-bar chart-bar-t" style="height:${hVis}px"></div>
                 </div>`;
             }
 
@@ -3407,9 +3666,18 @@ const Stats = {
         }
 
         const periodLabel = this._getPeriodLabel(this._chartPeriod, data);
-        const legendHTML = dualMode
-            ? '<span class="chart-legend-dot chart-legend-a"></span>ответы<span class="chart-legend-dot chart-legend-t" style="margin-left:8px"></span>время'
-            : '';
+        let legendHTML = '';
+        if (dualMode) {
+            const timeDim = !hasAnyTime ? ' style="opacity:0.4"' : '';
+            const dotDim = !hasAnyTime ? ';opacity:0.4' : '';
+            legendHTML = `<span class="chart-legend-dot chart-legend-a"></span>ответы<span class="chart-legend-dot chart-legend-t" style="margin-left:8px${dotDim}"></span><span${timeDim}>время</span>`;
+        } else if (effectiveShowA) {
+            legendHTML = '<span class="chart-legend-dot chart-legend-a"></span>ответы';
+        } else if (effectiveShowT) {
+            const timeDim = !hasAnyTime ? ' style="opacity:0.4"' : '';
+            const dotDim = !hasAnyTime ? ';opacity:0.4' : '';
+            legendHTML = `<span class="chart-legend-dot chart-legend-t" style="margin-left:0${dotDim}"></span><span${timeDim}>время</span>`;
+        }
         footer.innerHTML = `<div class="chart-footer-legend">${legendHTML}</div><div class="chart-footer-period">${periodLabel}</div>`;
         footer.style.display = '';
 
@@ -3420,14 +3688,144 @@ const Stats = {
         requestAnimationFrame(() => {
             barsEl.querySelectorAll('.chart-bar').forEach(bar => {
                 const h = bar.style.height;
-                bar.style.height = '0%';
+                bar.style.height = '0px';
                 requestAnimationFrame(() => { bar.style.height = h; });
             });
         });
     },
 
+    _renderHourlyChart() {
+        const barsEl = document.getElementById('hourly-bars');
+        const labelsEl = document.getElementById('hourly-labels');
+        const card = document.getElementById('hourly-chart-card');
+        if (!barsEl || !labelsEl) return;
+
+        const data = StatTracker.getHourlyData();
+        const nowHour = new Date().getHours();
+
+        // Подсвечиваем текущее время суток
+        const timeRange = nowHour < 6 ? 'night' : nowHour < 12 ? 'morning' : nowHour < 18 ? 'day' : 'evening';
+        document.querySelectorAll('#hourly-period-tabs .hourly-period').forEach(el => {
+            el.classList.toggle('active', el.dataset.range === timeRange);
+        });
+
+        const answersVals = data.map(d => d.answers);
+        const timeVals = data.map(d => d.time);
+        const hasAnyAnswers = answersVals.some(v => v > 0);
+        const hasAnyTime = timeVals.some(v => v > 0);
+        const hasAny = hasAnyAnswers || hasAnyTime;
+
+        // Скрываем карточку если нет данных за сегодня
+        if (card) card.style.display = hasAny ? '' : 'none';
+        if (!hasAny) return;
+
+        const showA = this._showHourlyA;
+        const showT = this._showHourlyT;
+        const dualMode = showA && showT;
+        const maxA = Math.max(...answersVals, 1);
+        const maxT = Math.max(...timeVals, 1);
+        const chartH = 84;
+
+        // Определяем активный диапазон (первый час с данными ... последний + 1)
+        let firstActive = 24, lastActive = 0;
+        data.forEach((d, i) => {
+            if (d.answers > 0 || d.time > 0) {
+                if (i < firstActive) firstActive = i;
+                if (i > lastActive) lastActive = i;
+            }
+        });
+        // Показываем ± 1 час от активного диапазона, минимум до текущего часа
+        const rangeStart = Math.max(0, firstActive - 1);
+        const rangeEnd = Math.min(23, Math.max(lastActive + 1, nowHour));
+        const sliced = data.slice(rangeStart, rangeEnd + 1);
+
+        let barsHTML = '';
+        let labelsHTML = '';
+
+        const labelStep = sliced.length > 12 ? 3 : sliced.length > 8 ? 2 : 1;
+
+        sliced.forEach((d, i) => {
+            const isCurrent = d.hour === nowHour;
+            const a = d.answers;
+            const t = d.time;
+
+            if (dualMode) {
+                const hA = maxA > 0 ? Math.max(Math.round((a / maxA) * chartH), a > 0 ? 4 : 0) : 0;
+                const hT = maxT > 0 ? Math.max(Math.round((t / maxT) * chartH), t > 0 ? 4 : 0) : 0;
+                const tipA = a > 0 ? a : '';
+                const tipT = t > 0 ? this._fmtTimeTip(t) : '';
+                barsHTML += `<div class="chart-bar-wrap today">
+                    <div class="chart-dual-slot">
+                        <div class="chart-dual-col">
+                            <div class="chart-bar-tip">${tipA}</div>
+                            <div class="chart-bar chart-bar-a" style="height:${hA}px"></div>
+                        </div>
+                        <div class="chart-dual-col">
+                            <div class="chart-bar-tip">${tipT}</div>
+                            <div class="chart-bar chart-bar-t" style="height:${hT}px"></div>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (showA) {
+                const h = maxA > 0 ? Math.max(Math.round((a / maxA) * chartH), a > 0 ? 4 : 0) : 0;
+                barsHTML += `<div class="chart-bar-wrap today">
+                    <div class="chart-bar-tip">${a > 0 ? a : ''}</div>
+                    <div class="chart-bar chart-bar-a" style="height:${h}px"></div>
+                </div>`;
+            } else {
+                const h = maxT > 0 ? Math.max(Math.round((t / maxT) * chartH), t > 0 ? 4 : 0) : 0;
+                barsHTML += `<div class="chart-bar-wrap today">
+                    <div class="chart-bar-tip">${t > 0 ? this._fmtTimeTip(t) : ''}</div>
+                    <div class="chart-bar chart-bar-t" style="height:${h}px"></div>
+                </div>`;
+            }
+
+            labelsHTML += `<div class="chart-label ${isCurrent ? 'today' : ''}">${(i % labelStep === 0 || isCurrent) ? d.hour + ':00' : ''}</div>`;
+        });
+
+        barsEl.innerHTML = barsHTML;
+        labelsEl.innerHTML = labelsHTML;
+
+        // Footer
+        const areaEl = barsEl.parentElement;
+        let footer = areaEl.querySelector('.chart-footer');
+        if (!footer) {
+            footer = document.createElement('div');
+            footer.className = 'chart-footer';
+            areaEl.appendChild(footer);
+        }
+        let legendHTML = '';
+        if (dualMode) {
+            const timeDim = !hasAnyTime ? ';opacity:0.4' : '';
+            legendHTML = `<span class="chart-legend-dot chart-legend-a"></span>ответы<span class="chart-legend-dot chart-legend-t" style="margin-left:8px${timeDim}"></span>время`;
+        } else if (showA) {
+            legendHTML = '<span class="chart-legend-dot chart-legend-a"></span>ответы';
+        } else {
+            legendHTML = '<span class="chart-legend-dot chart-legend-t"></span>время';
+        }
+        const d = new Date();
+        const dayNames = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+        const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+        const dateLabel = `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}`;
+        footer.innerHTML = `<div class="chart-footer-legend">${legendHTML}</div><div class="chart-footer-period">${dateLabel}</div>`;
+
+        // Animate
+        requestAnimationFrame(() => {
+            barsEl.querySelectorAll('.chart-bar').forEach(bar => {
+                const h = bar.style.height;
+                bar.style.height = '0px';
+                requestAnimationFrame(() => { bar.style.height = h; });
+            });
+            // Sync height with top chart card
+            const topCard = document.querySelector('.stats-fixed .chart-card');
+            if (topCard && card) {
+                card.style.minHeight = topCard.offsetHeight + 'px';
+            }
+        });
+    },
+
     shareMonth() {
-        const name = localStorage.getItem('child_name') || '';
+        const name = getChildName();
         const now = new Date();
         const monthNames = ['января','февраля','марта','апреля','мая','июня',
                             'июля','августа','сентября','октября','ноября','декабря'];
@@ -3881,6 +4279,18 @@ const Admin = {
     },
 
     render() {
+        const isNotif = this._tab === 'notif';
+        // Toggle add/batch buttons visibility
+        const addBtn = document.querySelector('.admin-add-btn');
+        const batchBtn = document.getElementById('admin-batch-btn');
+        if (addBtn) addBtn.style.display = isNotif ? 'none' : '';
+        if (batchBtn && !isNotif) batchBtn.classList.toggle('hidden', this._tab !== 'puzzles');
+
+        if (isNotif) {
+            this._renderNotifTab();
+            return;
+        }
+
         const items = this._getData(this._tab);
         const list = document.getElementById('admin-list');
         list.innerHTML = '';
@@ -3925,6 +4335,67 @@ const Admin = {
     // Stores current src/pic while editing
     _editSrc: '',
     _editPic: '',
+
+    _renderNotifTab() {
+        const list = document.getElementById('admin-list');
+        const notifs = this._getData('notif').sort((a, b) => b.id - a.id);
+
+        let html = `
+            <div class="notif-compose">
+                <div style="font-weight:600;font-size:15px;margin-bottom:8px;font-family:var(--font-display);">Новое сообщение</div>
+                <input type="text" id="notif-compose-title" placeholder="Заголовок" style="width:100%;padding:10px 14px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text);outline:none;margin-bottom:6px;">
+                <textarea id="notif-compose-body" rows="3" placeholder="Текст сообщения..." style="width:100%;padding:10px 14px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text);outline:none;resize:none;line-height:1.5;margin-bottom:8px;"></textarea>
+                <button class="admin-add-btn" style="width:100%" onclick="Admin._sendNotif()">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+                    Отправить
+                </button>
+            </div>`;
+
+        if (notifs.length) {
+            html += '<div style="margin-top:14px;font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:0 4px;">История</div>';
+            notifs.forEach(n => {
+                const date = n.date ? Notif._fmtDate(n.date) : '';
+                const typeTag = n.auto ? '<span style="font-size:11px;color:#10b981;font-weight:500;">авто</span>' : '<span style="font-size:11px;color:#60a5fa;font-weight:500;">вручную</span>';
+                html += `<div class="admin-item" style="margin-top:6px;">
+                    <div class="admin-item-info">
+                        <div class="admin-item-title">${n.title || '—'} ${typeTag}</div>
+                        <div class="admin-item-sub">${n.body || ''} · ${date}</div>
+                    </div>
+                    <button class="admin-del" data-id="${n.id}"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+                </div>`;
+            });
+        }
+
+        list.innerHTML = html;
+
+        list.querySelectorAll('.admin-del').forEach(btn => btn.addEventListener('click', () => {
+            const id = parseInt(btn.dataset.id);
+            showConfirm('Удалить уведомление?', () => {
+                this._setData('notif', this._getData('notif').filter(n => n.id !== id));
+                this._renderNotifTab();
+                showToast('🗑️ Удалено');
+            });
+        }));
+    },
+
+    _sendNotif() {
+        const title = document.getElementById('notif-compose-title')?.value.trim();
+        const body = document.getElementById('notif-compose-body')?.value.trim();
+        if (!title && !body) { showToast('✏️ Введите заголовок или текст'); return; }
+        const notifs = this._getData('notif');
+        notifs.push({
+            id: Date.now(),
+            type: 'message',
+            title: title || 'Сообщение',
+            body: body || '',
+            date: new Date().toISOString(),
+            auto: false
+        });
+        this._setData('notif', notifs);
+        this._renderNotifTab();
+        Notif.updateBadge();
+        showToast('✅ Уведомление добавлено');
+    },
 
     _onFileChange(input) {
         const file = input.files[0];
@@ -4068,6 +4539,35 @@ const Admin = {
 
         // ── Сохраняем картинку локально как base64 (загрузка на GitHub — при публикации) ──
         const isQA = this._tab === 'riddles' || this._tab === 'puzzles';
+        const isAudio = this._tab === 'songs' || this._tab === 'podcasts';
+
+        // Обработка файлов для аудио (песенки/подкасты)
+        if (isAudio) {
+            const fileInput = document.getElementById('m-file');
+            const file = fileInput?.files[0];
+            if (file) {
+                const folder = this._tab === 'songs'
+                    ? 'assets/audio/songs'
+                    : 'assets/audio/podcasts';
+                const ext  = file.name.split('.').pop().toLowerCase();
+                const base = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-zа-яё0-9_-]/gi, '_');
+                const fileName = base + '.' + ext;
+                const filePath = folder + '/' + fileName;
+                // Читаем как base64
+                const base64 = await new Promise((res, rej) => {
+                    const fr = new FileReader();
+                    fr.onload  = () => res(fr.result);
+                    fr.onerror = rej;
+                    fr.readAsDataURL(file);
+                });
+                // Сохраняем base64 в очередь на загрузку
+                const pending = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+                pending[filePath] = base64;
+                localStorage.setItem('admin_pending_audio', JSON.stringify(pending));
+                this._editSrc = filePath;
+            }
+        }
+
         if (isQA) {
             const fileInput = document.getElementById('m-file');
             const file = fileInput?.files[0];
@@ -4101,7 +4601,7 @@ const Admin = {
                 id, name,
                 desc:     isPodcast ? descVal : '',
                 duration: existing ? (existing.duration || '') : '',
-                src:      existing ? (existing.src      || '') : ''
+                src:      this._editSrc || (existing ? (existing.src || '') : '')
             };
         } else if (this._tab === 'riddles') {
             newItem = {
@@ -4159,8 +4659,9 @@ const Admin = {
 
     // ── Обновить счётчик pending картинок на кнопке публикации ──
     _updatePendingBadge() {
-        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
-        const count = Object.keys(pending).length;
+        const pendingPics = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+        const pendingAudio = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+        const count = Object.keys(pendingPics).length + Object.keys(pendingAudio).length;
         const btn = document.getElementById('publish-btn');
         if (!btn) return;
         btn.innerHTML = count > 0
@@ -4241,6 +4742,36 @@ const Admin = {
             }
         }
 
+        // ── Загружаем pending аудио файлы ──
+        const pendingAudio = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+        const audioPaths = Object.keys(pendingAudio);
+        if (audioPaths.length > 0) {
+            const btn2 = document.getElementById('publish-btn');
+            if (btn2) btn2.textContent = `⏳ Аудио: 0/${audioPaths.length}...`;
+            let uploaded = 0;
+            for (const filePath of audioPaths) {
+                const dataUrl = pendingAudio[filePath];
+                const base64  = dataUrl.split(',')[1];
+                const apiUrl  = `https://api.github.com/repos/${REPO}/contents/${filePath}`;
+                let sha = null;
+                try {
+                    const gr = await fetch(apiUrl + `?ref=${BRANCH}`, { headers });
+                    if (gr.ok) { const gj = await gr.json(); sha = gj.sha; }
+                } catch (_) {}
+                const pb = { message: `🎵 ${filePath.split('/').pop()}`, content: base64, branch: BRANCH, ...(sha ? { sha } : {}) };
+                const pr = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(pb) });
+                if (pr.ok) {
+                    uploaded++;
+                    delete pendingAudio[filePath];
+                    localStorage.setItem('admin_pending_audio', JSON.stringify(pendingAudio));
+                    if (btn2) btn2.textContent = `⏳ Аудио: ${uploaded}/${audioPaths.length}...`;
+                } else {
+                    const pe = await pr.json();
+                    showToast('❌ Ошибка аудио: ' + (pe.message || pr.status));
+                }
+            }
+        }
+
         // Собираем все данные Админки
         const data = {
             songs:    this._getData('songs'),
@@ -4248,6 +4779,7 @@ const Admin = {
             puzzles:  this._getData('puzzles'),
             riddles:  this._getData('riddles'),
             info:     this._getData('info'),
+            notifications: this._getData('notif').filter(n => !n.auto),
             exportedAt: new Date().toISOString()
         };
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
@@ -4287,6 +4819,7 @@ const Admin = {
                 const result = await putResp.json();
                 localStorage.setItem('gh_token', token); // сохраняем токен
                 localStorage.removeItem('admin_pending_pics');
+                localStorage.removeItem('admin_pending_audio');
                 const stillPending = Object.keys(JSON.parse(localStorage.getItem('admin_pending_pics') || '{}')).length;
                 showToast('✅ Данные опубликованы на GitHub!');
                 console.log('Published:', result.content?.html_url);
@@ -4668,7 +5201,8 @@ const Interstitials = {
         // Достижения (каждые 5 подряд)
         if (this._streak % 5 === 0 && !this._shownMilestones.has(this._streak)) {
             this._shownMilestones.add(this._streak);
-            showToast(`🏆 ${this._streak} перебивок подряд!`, 3000);
+            const cn = getChildName();
+            showToast(cn ? `🏆 ${cn}, ${this._streak} перебивок подряд!` : `🏆 ${this._streak} перебивок подряд!`, 3000);
         }
 
         setTimeout(() => this._close(), 1200);
@@ -4713,6 +5247,166 @@ const Interstitials = {
 // =============================================
 // INIT
 // =============================================
+// =============================================
+// NOTIFICATIONS — Уведомления
+// =============================================
+const Notif = {
+    _open: false,
+
+    _getAll() {
+        try { return JSON.parse(localStorage.getItem('admin_notif') || '[]'); } catch { return []; }
+    },
+    _getReadIds() {
+        try { return JSON.parse(localStorage.getItem('notif_read_ids') || '[]'); } catch { return []; }
+    },
+    _saveReadIds(ids) { localStorage.setItem('notif_read_ids', JSON.stringify(ids)); },
+
+    getUnreadCount() {
+        const all = this._getAll();
+        const read = new Set(this._getReadIds());
+        return all.filter(n => !read.has(n.id)).length;
+    },
+
+    updateBadge() {
+        const count = this.getUnreadCount();
+        const badge = document.getElementById('notif-badge');
+        const bell = document.getElementById('notif-bell-btn');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? '' : 'none';
+        }
+        if (bell) bell.style.display = '';
+    },
+
+    toggle() {
+        if (this._open) {
+            App.back();
+            this._open = false;
+        } else {
+            App.navigate('notifications', 'Уведомления');
+            this._open = true;
+            this._markAllRead();
+            this._render();
+        }
+    },
+
+    _markAllRead() {
+        const all = this._getAll();
+        const ids = all.map(n => n.id);
+        this._saveReadIds(ids);
+        this.updateBadge();
+    },
+
+    _render() {
+        const list = document.getElementById('notif-list');
+        const empty = document.getElementById('notif-empty');
+        const all = this._getAll().sort((a, b) => b.id - a.id);
+
+        if (!all.length) {
+            if (list) list.innerHTML = '';
+            if (empty) empty.style.display = '';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        const icons = {
+            songs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+            podcasts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+            riddles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            puzzles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877L1.998 12"/></svg>',
+            message: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+        };
+        const typeLabels = { songs:'Новая песенка', podcasts:'Новый подкаст', riddles:'Новая загадка', puzzles:'Новый ребус', message:'Сообщение' };
+
+        list.innerHTML = all.map(n => {
+            const icon = icons[n.type] || icons.message;
+            const date = n.date ? this._fmtDate(n.date) : '';
+            const label = typeLabels[n.type] || 'Уведомление';
+            return `<div class="notif-item">
+                <div class="notif-icon notif-icon-${n.type || 'message'}">${icon}</div>
+                <div class="notif-body">
+                    <div class="notif-title">${n.title || label}</div>
+                    ${n.body ? `<div class="notif-text">${n.body}</div>` : ''}
+                    <div class="notif-date">${date}</div>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    _fmtDate(iso) {
+        try {
+            const d = new Date(iso);
+            const now = new Date();
+            const diff = now - d;
+            if (diff < 60000) return 'Только что';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+            const day = d.getDate();
+            const months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+            return day + ' ' + months[d.getMonth()];
+        } catch { return ''; }
+    },
+
+    // ── Auto-detect new content ──
+    checkNewContent(data) {
+        if (!data) return;
+        const prevCounts = JSON.parse(localStorage.getItem('notif_content_counts') || '{}');
+        const currentCounts = {};
+        const newNotifs = [];
+        const existing = this._getAll();
+        const existingIds = new Set(existing.map(n => n.id));
+
+        const sections = {
+            songs: { label: 'песенка', key: 'songs' },
+            podcasts: { label: 'подкаст', key: 'podcasts' },
+            riddles: { label: 'загадка', key: 'riddles' },
+            puzzles: { label: 'ребус', key: 'puzzles' }
+        };
+
+        Object.entries(sections).forEach(([key, cfg]) => {
+            const items = data[key] || [];
+            currentCounts[key] = items.length;
+            const prev = prevCounts[key] || 0;
+            if (prev > 0 && items.length > prev) {
+                // New items added
+                const diff = items.length - prev;
+                const newest = items.slice(-diff);
+                newest.forEach(item => {
+                    const name = item.name || item.text || '—';
+                    const nid = Date.now() + Math.floor(Math.random() * 1000);
+                    if (!existingIds.has(nid)) {
+                        newNotifs.push({
+                            id: nid,
+                            type: key,
+                            title: cfg.label === 'песенка' ? 'Новая ' + cfg.label : cfg.label === 'подкаст' ? 'Новый ' + cfg.label : cfg.label === 'загадка' ? 'Новая ' + cfg.label : 'Новый ' + cfg.label,
+                            body: name,
+                            date: new Date().toISOString(),
+                            auto: true
+                        });
+                    }
+                });
+            }
+        });
+
+        // Handle admin_notif from data.json (manual messages)
+        if (Array.isArray(data.notifications)) {
+            data.notifications.forEach(n => {
+                if (!existingIds.has(n.id)) {
+                    newNotifs.push(n);
+                }
+            });
+        }
+
+        if (newNotifs.length) {
+            const all = [...existing, ...newNotifs];
+            localStorage.setItem('admin_notif', JSON.stringify(all));
+            this.updateBadge();
+        }
+
+        localStorage.setItem('notif_content_counts', JSON.stringify(currentCounts));
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;
@@ -4764,6 +5458,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Обычный запуск — ждём данных
         await App.init();
         App.navigate('main');
+        // Загружаем имя ребёнка
+        regUpdateCard();
+        updateHomeGreeting();
+        Notif.updateBadge();
+        CardBadges.updateAll();
+        // Enter в поле имени = сохранить
+        document.getElementById('child-name-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') regSaveName(); });
         // Гоша приветствует при запуске
     }
 });

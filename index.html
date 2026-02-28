@@ -40,6 +40,10 @@
         </button>
         <span id="page-title-bar" class="hidden"></span>
         <span style="flex:1"></span>
+        <button id="notif-bell-btn" onclick="Notif.toggle()" title="Уведомления" style="display:none;position:relative;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+        </button>
         <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
@@ -78,18 +82,26 @@
             <button class="menu-card mc-songs" onclick="Songs.init()">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
                 <span class="mc-label">Песенки</span>
+                <span class="mc-count mc-count-total" id="mc-songs-total"></span>
+                <span class="mc-count mc-count-new" id="mc-songs-new"></span>
             </button>
             <button class="menu-card mc-podcasts" onclick="Podcasts.init()">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>
                 <span class="mc-label">Подкасты</span>
+                <span class="mc-count mc-count-total" id="mc-podcasts-total"></span>
+                <span class="mc-count mc-count-new" id="mc-podcasts-new"></span>
             </button>
             <button class="menu-card mc-puzzles" onclick="Puzzles.init()">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></span>
                 <span class="mc-label">Ребусы</span>
+                <span class="mc-count mc-count-total" id="mc-puzzles-total"></span>
+                <span class="mc-count mc-count-new" id="mc-puzzles-new"></span>
             </button>
             <button class="menu-card mc-riddles" onclick="Riddles.init()">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                 <span class="mc-label">Загадки</span>
+                <span class="mc-count mc-count-total" id="mc-riddles-total"></span>
+                <span class="mc-count mc-count-new" id="mc-riddles-new"></span>
             </button>
             <button class="menu-card mc-finger" onclick="App.navigate('finger')">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v1"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></span>
@@ -338,7 +350,7 @@
         <div class="stats-fixed">
         <div class="chart-card">
             <div class="chart-header">
-                <span class="chart-title">Активность</span>
+                <span class="chart-title">Активность по периодам</span>
                 <button class="chart-info-btn" onclick="Stats.toggleInfo()" title="Подробнее">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 </button>
@@ -367,6 +379,28 @@
         </div>
         <!-- ══ СКРОЛЛ: детальная статистика ══ -->
         <div class="stats-scroll">
+            <!-- Почасовая активность -->
+            <div class="chart-card" id="hourly-chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Активность по суткам</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <div class="chart-tabs" id="hourly-metric-tabs">
+                        <button class="chart-tab active" data-metric="answers" onclick="Stats.toggleHourlyMetric('answers')">Ответы</button>
+                        <button class="chart-tab active" data-metric="time" onclick="Stats.toggleHourlyMetric('time')">Время</button>
+                    </div>
+                </div>
+                <div class="chart-period-tabs" id="hourly-period-tabs">
+                    <span class="chart-period hourly-period" data-range="night">Ночь</span>
+                    <span class="chart-period hourly-period" data-range="morning">Утро</span>
+                    <span class="chart-period hourly-period" data-range="day">День</span>
+                    <span class="chart-period hourly-period" data-range="evening">Вечер</span>
+                </div>
+                <div class="chart-area">
+                    <div class="chart-bars hourly-bars" id="hourly-bars"></div>
+                    <div class="chart-labels hourly-labels" id="hourly-labels"></div>
+                </div>
+            </div>
+
             <div class="stat-section-hdr">Правильные ответы</div>
         <div class="stat-card">
             <div class="stat-icon si-puzzles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></div>
@@ -521,23 +555,35 @@
         <div class="badges-grid" id="badges-grid"></div>
     </section>
 
+    <!-- ========== NOTIFICATIONS ========== -->
+    <section id="notifications" class="hidden">
+        <div id="notif-list"></div>
+        <div id="notif-empty" class="notif-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.2;margin-bottom:8px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <div>Пока нет уведомлений</div>
+        </div>
+    </section>
+
     <!-- ========== SETTINGS ========== -->
     <section id="settings" class="hidden">
-        <div class="settings-group">
-            <div class="settings-row">
-                <span class="s-icon si-profile"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-                <div style="flex:1">
-                    <div class="s-label">Имя ребёнка</div>
-                    <div class="s-sub">Для персонализации похвалы и итогов</div>
-                </div>
+        <div class="reg-card" id="reg-card">
+            <div class="reg-avatar" id="reg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="reg-name-display" id="reg-name-display" style="display:none"></div>
+            <div class="reg-input-wrap" id="reg-input-wrap">
                 <input type="text" id="child-name-input"
-                    placeholder="Как зовут?"
+                    placeholder="Как зовут малыша?"
                     maxlength="20"
                     autocomplete="off"
-                    spellcheck="false"
-                    oninput="saveChildName(this.value);updateHomeGreeting()"
-                    style="width:120px;padding:8px 12px;background:var(--card2);border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;color:var(--text);outline:none;text-align:center;">
+                    spellcheck="false">
+                <button class="reg-save-btn" id="reg-save-btn" onclick="regSaveName()">Сохранить</button>
             </div>
+            <div class="reg-hint" id="reg-hint">Имя используется в приветствии, похвале за правильные ответы, достижениях и итогах месяца</div>
+            <button class="reg-edit-btn" id="reg-edit-btn" style="display:none" onclick="regEditName()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+                Изменить имя
+            </button>
         </div>
 
         <div class="settings-group">
@@ -648,6 +694,7 @@
             <button class="admin-tab" onclick="Admin.setTab('puzzles',this)">Ребусы</button>
             <button class="admin-tab" onclick="Admin.setTab('riddles',this)">Загадки</button>
             <button class="admin-tab" onclick="Admin.setTab('info',this)">Информация</button>
+            <button class="admin-tab" onclick="Admin.setTab('notif',this)">Рассылка</button>
         </div>
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
