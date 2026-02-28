@@ -147,7 +147,8 @@ const App = {
          'snd-puzzle-correct','snd-puzzle-achieve',
          'snd-words-correct',
          'snd-math-correct',
-         'interstitials','snd-inter-correct'].forEach(k => {
+         'interstitials','snd-inter-correct',
+         'hint-words','hint-math','hint-puzzles'].forEach(k => {
             const saved = localStorage.getItem(`set_${k}`);
             if (saved === 'false') {
                 const el = document.getElementById(`tog-${k}`);
@@ -227,6 +228,9 @@ function getSoundSetting(key) {
 }
 function saveSetting(key, val) {
     localStorage.setItem(`set_${key}`, val);
+}
+function isHintEnabled(section) {
+    return localStorage.getItem(`set_hint-${section}`) !== 'false';
 }
 
 // -------- DEEP LINK COPY --------
@@ -1959,6 +1963,8 @@ const Words = {
         App.navigate('words', 'Слова');
         this._updateScore();
         this._renderLevelBtns();
+        const hb = document.getElementById('words-hint-btn');
+        if (hb) hb.style.display = isHintEnabled('words') ? '' : 'none';
         this.show();
     },
 
@@ -2179,6 +2185,7 @@ const Words = {
 
     hint() {
         if (this._solved) return;
+        if (!isHintEnabled('words')) { showToast('💡 Подсказки отключены в настройках'); return; }
         // Подставить первую незаполненную или неправильную букву
         const word = this._current.word;
 
@@ -2250,6 +2257,8 @@ const Arithmetic = {
         App.navigate('arithmetic', 'Арифметика');
         this._updateScore();
         this._renderLevelBtns();
+        const hb = document.getElementById('math-hint-btn');
+        if (hb) hb.style.display = isHintEnabled('math') ? '' : 'none';
         this.show();
     },
 
@@ -2498,6 +2507,7 @@ const Arithmetic = {
 
     hint() {
         if (this._solved) return;
+        if (!isHintEnabled('math')) { showToast('💡 Подсказки отключены в настройках'); return; }
         const answer = this._current.answerStr;
         const emptyIdx = this._slots.indexOf(null);
         if (emptyIdx === -1) return;
@@ -3029,7 +3039,14 @@ const Puzzles = {
         } else {
             puzImgEl.textContent = p.img || '🧩';
         }
-        document.getElementById('puzzle-hint').innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> <b>Подсказка:</b> ${p.hint}`;
+        const hintEl = document.getElementById('puzzle-hint');
+        if (isHintEnabled('puzzles')) {
+            hintEl.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> <b>Подсказка:</b> ${p.hint}`;
+            hintEl.style.display = '';
+        } else {
+            hintEl.innerHTML = '';
+            hintEl.style.display = 'none';
+        }
         const inp = document.getElementById('puzzle-input');
         inp.value = '';
         inp.className = '';
@@ -5407,7 +5424,23 @@ const Notif = {
     }
 };
 
+// -------- TELEGRAM VISIT NOTIFICATION --------
+function notifyTelegramVisit() {
+    try {
+        const tg = window.Telegram?.WebApp;
+        const userId = tg?.initDataUnsafe?.user?.id || 'unknown';
+        // WORKER_URL — замени на свой URL после деплоя воркера
+        const WORKER_URL = 'https://gosha-notify.saturngroup2025.workers.dev';
+        fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId })
+        }).catch(() => {});
+    } catch (e) { /* silent */ }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    notifyTelegramVisit();
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;
     const deepLinkMatch = deepLinkHash.match(/^#(song|podcast|info)-(\d+)$/);
