@@ -38,12 +38,12 @@ const App = {
         if (id === 'puzzles') {
             Puzzles._renderLevelDots();
         } else {
-            ['puzzle-level-dots','puzzle-share-topbar'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
+            const el = document.getElementById('puzzle-level-dots'); if (el) el.remove();
         }
         if (id === 'riddles') {
             Riddles._renderTopBar();
         } else {
-            ['riddle-share-topbar','riddle-level-dots'].forEach(eid => { const e = document.getElementById(eid); if (e) e.remove(); });
+            const el = document.getElementById('riddle-level-dots'); if (el) el.remove();
         }
         // Рендерим динамические разделы
         if (id === 'info') Info.render();
@@ -2946,17 +2946,10 @@ const Puzzles = {
         return this._data.easy.length + this._data.medium.length + this._data.hard.length;
     },
     _renderLevelDots() {
-        ['puzzle-level-dots','puzzle-share-topbar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
+        const el = document.getElementById('puzzle-level-dots'); if (el) el.remove();
         const topBar = document.getElementById('top-bar');
         const settingsBtn = document.getElementById('settings-icon-btn');
         if (!topBar || !settingsBtn) return;
-        // Кнопка шаринга картинки
-        const shareBtn = document.createElement('button');
-        shareBtn.id = 'puzzle-share-topbar';
-        shareBtn.title = 'Поделиться ребусом';
-        shareBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="17" height="17"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
-        shareBtn.addEventListener('click', () => Puzzles.share());
-        topBar.insertBefore(shareBtn, settingsBtn);
         // Кружки уровней
         const wrap = document.createElement('div');
         wrap.id = 'puzzle-level-dots';
@@ -2966,7 +2959,7 @@ const Puzzles = {
             <button class="lvl-dot medium ${this._level==='medium' ? 'active':''}" onclick="Puzzles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ? 'active':''}" onclick="Puzzles.setLevel('hard')"   title="Сложный"></button>
         `;
-        topBar.insertBefore(wrap, shareBtn);
+        topBar.insertBefore(wrap, settingsBtn);
     },
 
     async share() {
@@ -3230,17 +3223,10 @@ const Riddles = {
     },
 
     _renderTopBar() {
-        ['riddle-level-dots','riddle-share-topbar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
+        const el = document.getElementById('riddle-level-dots'); if (el) el.remove();
         const topBar = document.getElementById('top-bar');
         const settingsBtn = document.getElementById('settings-icon-btn');
         if (!topBar || !settingsBtn) return;
-        // Кнопка шаринга
-        const shareBtn = document.createElement('button');
-        shareBtn.id = 'riddle-share-topbar';
-        shareBtn.title = 'Поделиться загадкой';
-        shareBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="17" height="17"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
-        shareBtn.addEventListener('click', () => Riddles.share());
-        topBar.insertBefore(shareBtn, settingsBtn);
         // Кружки уровней
         const dots = document.createElement('div');
         dots.id = 'riddle-level-dots';
@@ -3250,7 +3236,7 @@ const Riddles = {
             <button class="lvl-dot medium ${this._level==='medium' ?'active':''}" onclick="Riddles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ?'active':''}" onclick="Riddles.setLevel('hard')"   title="Сложный"></button>
         `;
-        topBar.insertBefore(dots, shareBtn);
+        topBar.insertBefore(dots, settingsBtn);
     },
 
     _loadAdmin() {

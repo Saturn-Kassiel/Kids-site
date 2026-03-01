@@ -12,14 +12,21 @@
     <meta name="apple-mobile-web-app-title" content="Гоша">
     <link rel="apple-touch-icon" href="assets/favicon/icon-192.png">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="testing.css">
     <!-- Apply saved theme instantly to prevent flash -->
     <script>
         (function(){
             var t = localStorage.getItem('theme');
             if (t) document.documentElement.setAttribute('data-theme', t);
-            // PWA: синхронизируем theme-color с текущей темой
             var m = document.querySelector('meta[name="theme-color"]');
             if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
+            // Detect section deep links (before app.js reads hash)
+            var h = location.hash.replace('#', '');
+            var sections = ['puzzles','riddles','testing','songs','podcasts','alphabet','numbers','colors','words','arithmetic','finger','articul','breath'];
+            if (sections.indexOf(h) !== -1) {
+                window.__sectionDeepLink = h;
+                history.replaceState(null, '', location.pathname);
+            }
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -118,6 +125,10 @@
             <button class="menu-card mc-info" onclick="App.navigate('info', 'Информация')">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
                 <span class="mc-label">Информация</span>
+            </button>
+            <button class="menu-card mc-testing" onclick="Testing.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <span class="mc-label">Тестирование</span>
             </button>
             <button class="menu-card mc-badges" onclick="Badges.show()">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
@@ -734,6 +745,12 @@
         </div>
     </section>
 
+    <!-- ========== TESTING ========== -->
+    <section id="testing" class="hidden">
+        <div class="tst-progress" id="tst-progress-wrap" style="display:none"><div class="tst-progress-bar" id="tst-progress-bar"></div></div>
+        <div id="testing-content"></div>
+    </section>
+
 </div><!-- #app -->
 
 <!-- MODAL -->
@@ -771,6 +788,8 @@
 </div>
 
 <script src="app.js"></script>
+<script src="testing.js"></script>
+<script src="share.js"></script>
 
 <!-- BATCH UPLOAD MODAL -->
 <div class="modal-overlay hidden" id="batch-modal" onclick="Admin.closeBatch(event)">

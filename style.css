@@ -73,7 +73,7 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 400; /* Тонкий шрифт везде по умолчанию */
 }
-html { scroll-behavior: smooth; overflow: hidden; height: 100vh; touch-action: manipulation; }
+html { scroll-behavior: smooth; overflow: hidden; height: 100vh; height: 100dvh; touch-action: manipulation; }
 
 /* ── SVG Icons ── */
 .icon-svg {
@@ -103,6 +103,7 @@ body {
     transition: background var(--tr), color var(--tr);
     -webkit-tap-highlight-color: transparent;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
 }
@@ -126,6 +127,7 @@ input, select, textarea, button, label, option {
     max-width: 480px;
     margin: 0 auto;
     height: 100vh;
+    height: 100dvh;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -186,7 +188,7 @@ input, select, textarea, button, label, option {
 #settings-icon-btn:hover { transform: rotate(25deg) scale(1.1); }
 
 /* ===== SECTIONS ===== */
-section { flex: 1; min-height: 0; padding: 0 18px 28px; animation: fadeInUp 0.35s ease both; overflow-y: auto; }
+section { flex: 1; min-height: 0; padding: 0 18px 28px; padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); animation: fadeInUp 0.35s ease both; overflow-y: auto; }
 
 /* ══ Stats layout: fixed header + scrollable body ══ */
 section.stats-layout {
@@ -1529,6 +1531,7 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
     padding-bottom: 18px;
     /* Subtract top-bar height so list fills remaining space */
     max-height: calc(100vh - 70px);
+    max-height: calc(100dvh - 70px);
 }
 
 /* ===== ADMIN FOOTER (pinned buttons) ===== */
@@ -3115,6 +3118,7 @@ input[type=file] { display: none; }
     text-align: center;
     animation: inter-slide-in 0.4s cubic-bezier(.34,1.56,.64,1) both;
     max-height: calc(100vh - 120px);
+    max-height: calc(100dvh - 120px);
     overflow-y: auto;
 }
 @keyframes inter-slide-in {
