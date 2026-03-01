@@ -14,12 +14,18 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="testing.css">
     <!-- Apply saved theme instantly to prevent flash -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         (function(){
             var t = localStorage.getItem('theme');
             if (t) document.documentElement.setAttribute('data-theme', t);
             var m = document.querySelector('meta[name="theme-color"]');
             if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
+            // Detect Telegram Mini App
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                document.documentElement.classList.add('tg-webapp');
+                try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch(e) {}
+            }
             // Detect section deep links (before app.js reads hash)
             var h = location.hash.replace('#', '');
             var sections = ['puzzles','riddles','testing','songs','podcasts','alphabet','numbers','colors','words','arithmetic','finger','articul','breath'];

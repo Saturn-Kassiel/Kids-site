@@ -5425,7 +5425,32 @@ function notifyTelegramVisit() {
     } catch (e) { /* silent */ }
 }
 
+// ── Telegram Mini App viewport fix ──
+function initTelegramWebApp() {
+    const tg = window.Telegram?.WebApp;
+    if (!tg) return;
+    document.documentElement.classList.add('tg-webapp');
+    try {
+        tg.ready();
+        tg.expand();
+        // Telegram SDK may provide safe area insets
+        if (tg.safeAreaInset) {
+            const top = tg.safeAreaInset.top || 0;
+            const contentTop = tg.contentSafeAreaInset?.top || 0;
+            document.documentElement.style.setProperty('--tg-safe-top', (top + contentTop) + 'px');
+        }
+        // Listen for viewport changes
+        tg.onEvent?.('viewportChanged', () => {
+            const app = document.getElementById('app');
+            if (app && tg.viewportStableHeight) {
+                app.style.height = tg.viewportStableHeight + 'px';
+            }
+        });
+    } catch(e) { console.warn('TG WebApp init:', e); }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    initTelegramWebApp();
     notifyTelegramVisit();
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;

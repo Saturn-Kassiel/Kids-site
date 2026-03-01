@@ -132,7 +132,15 @@ input, select, textarea, button, label, option {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0px);
 }
+/* Telegram Mini App: account for TG header */
+html.tg-webapp #app {
+    padding-top: var(--tg-safe-top, 0px);
+    height: 100vh; height: 100dvh;
+}
+html.tg-webapp #top-bar { padding-top: 6px; }
+html.tg-webapp #main { padding-top: 0; }
 @media(min-width:600px) { #app { box-shadow: 0 0 60px rgba(0,0,0,0.12); } }
 
 /* ===== TOP BAR ===== */
