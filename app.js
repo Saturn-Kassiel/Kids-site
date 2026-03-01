@@ -1723,10 +1723,10 @@ const Media = {
             const AUDIO_MAP = {
                 'А':'bukva_a', 'Б':'bukva_b', 'В':'bukva_', 'Г':'bukva_g', 'Д':'bukva_d',
                 'Е':'bukva_e', 'Ё':'bukva_yo', 'Ж':'bukva_zh', 'З':'bukva_z', 'И':'bukva_i',
-                'Й':'bukva_', 'К':'bukva_k', 'Л':'bukva_l', 'М':'bukva_m', 'Н':'bukva_n',
+                'Й':'bukva_y', 'К':'bukva_k', 'Л':'bukva_l', 'М':'bukva_m', 'Н':'bukva_n',
                 'О':'bukva_o', 'П':'bukva_p', 'Р':'bukva_r', 'С':'bukva_s', 'Т':'bukva_t',
                 'У':'bukva_u', 'Ф':'bukva_f', 'Х':'bukva_kh', 'Ц':'bukva_ts', 'Ч':'bukva_ch',
-                'Ш':'bukva_sh', 'Щ':'bukva_shch', 'Ъ':'bukva_', 'Ы':'bukva_y', 'Ь':'bukva_',
+                'Ш':'bukva_sh', 'Щ':'bukva_shch', 'Ъ':'bukva_hf', 'Ы':'bukva_IIIIeeee', 'Ь':'bukva_',
                 'Э':'bukva_', 'Ю':'bukva_yu', 'Я':'bukva_ya'
             };
             // Видео: a.mp4 (для Ъ и Ь видео нет, для Й тоже нет)
@@ -1741,7 +1741,7 @@ const Media = {
                 'Э':'Э', 'Ю':'yu', 'Я':'ya'
             };
             // Специальные кириллические имена (Буква Б.mp3 и т.д.)
-            const AUDIO_CYR = { 'Б':'Буква Б', 'Ы':'Буква Ы', 'Ь':'Буква Ь', 'Э':'Буква Э' };
+            const AUDIO_CYR = { 'Б':'Буква Б', 'Ь':'Буква Ь', 'Э':'Буква Э' };
             const letters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
             items = letters.map(l => {
                 const audioFile = AUDIO_CYR[l]
