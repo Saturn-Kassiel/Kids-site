@@ -691,6 +691,13 @@
       "answer": "Зубная щётка",
       "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-56-15.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772360941877,
+      "text": "Любопытный очень зверь,\nЛапки мою целый день,\nНа мордашке два пятна,\nХвост весь в кольцах у меня!",
+      "answer": "Енот",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_wdoxx7wdoxx7wdox.png",
+      "level": "easy"
     }
   ],
   "info": [
@@ -706,5 +713,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-01T09:54:22.180Z"
+  "exportedAt": "2026-03-01T10:29:32.749Z"
 }
