@@ -1649,12 +1649,10 @@ const AudioMgr = {
         }
         this._current = audioEl;
         this._section = section;
-        audioEl.play().catch(e => console.warn('[AudioMgr] play failed:', e));
-        this._updateMediaSession(section);
+        audioEl.play().catch(() => {});
     },
 
     stop(section) {
-        // Only stop if section matches (or no section passed = force stop)
         if (!section || this._section === section) {
             if (this._current) this._current.pause();
             this._current = null;
@@ -1663,116 +1661,6 @@ const AudioMgr = {
 
     isCurrent(audioEl) {
         return this._current === audioEl;
-    },
-
-    _updatingSession: false,
-
-    _updateMediaSession(section) {
-        if (!('mediaSession' in navigator)) return;
-        if (this._updatingSession) return;
-        this._updatingSession = true;
-        const ms = navigator.mediaSession;
-
-        // ── Set metadata ──
-        let title = 'Гоша', artist = 'Мини школа Гоша';
-        if (section === 'songs' && Songs.index >= 0 && Songs._allSongs[Songs.index]) {
-            title = Songs._allSongs[Songs.index].name;
-            artist = 'Песенки — Гоша';
-        } else if (section === 'podcasts' && Podcasts.index >= 0 && Podcasts._allPodcasts[Podcasts.index]) {
-            title = Podcasts._allPodcasts[Podcasts.index].name;
-            artist = 'Подкасты — Гоша';
-        } else if (section === 'media') {
-            const tn = document.getElementById('track-name');
-            if (tn && tn.textContent !== '—') title = tn.textContent;
-            artist = 'Обучение — Гоша';
-        }
-        try {
-            ms.metadata = new MediaMetadata({
-                title: title,
-                artist: artist,
-                album: 'Гоша',
-                artwork: [
-                    { src: 'assets/favicon/icon-192.png', sizes: '192x192', type: 'image/png' },
-                    { src: 'assets/favicon/icon-512.png', sizes: '512x512', type: 'image/png' }
-                ]
-            });
-        } catch(e) {}
-
-        // ── Action handlers ──
-        const self = this;
-        const handlers = {
-            play:          () => {
-                if (!self._current) return;
-                self._current.play().catch(() => {});
-                self._updatePlayBtn('pause');
-            },
-            pause:         () => {
-                if (!self._current) return;
-                self._current.pause();
-                self._updatePlayBtn('play');
-            },
-            previoustrack: () => {
-                if (self._section === 'songs') Songs.prev();
-                else if (self._section === 'podcasts') Podcasts.prev();
-                else if (self._section === 'media') Media.prev();
-            },
-            nexttrack:     () => {
-                if (self._section === 'songs') Songs.nextSong();
-                else if (self._section === 'podcasts') Podcasts.nextPodcast();
-                else if (self._section === 'media') Media.next();
-            },
-            seekto:        (details) => {
-                if (self._current && details.seekTime != null) {
-                    self._current.currentTime = details.seekTime;
-                }
-            },
-            seekbackward:  (details) => {
-                if (self._current) {
-                    self._current.currentTime = Math.max(0, self._current.currentTime - (details.seekOffset || 10));
-                }
-            },
-            seekforward:   (details) => {
-                if (self._current) {
-                    self._current.currentTime = Math.min(self._current.duration || 0, self._current.currentTime + (details.seekOffset || 10));
-                }
-            }
-        };
-        for (const [action, handler] of Object.entries(handlers)) {
-            try { ms.setActionHandler(action, handler); } catch(e) {}
-        }
-        this._updatingSession = false;
-
-        // ── Update position state on timeupdate ──
-        if (this._current && !this._current._msListener) {
-            this._current._msListener = true;
-            this._current.addEventListener('timeupdate', () => {
-                if (!('mediaSession' in navigator) || !this._current) return;
-                try {
-                    navigator.mediaSession.setPositionState({
-                        duration: this._current.duration || 0,
-                        playbackRate: this._current.playbackRate || 1,
-                        position: Math.min(this._current.currentTime, this._current.duration || 0)
-                    });
-                } catch(e) {}
-            });
-        }
-    },
-
-    // Update in-app play/pause button
-    _updatePlayBtn(state) {
-        const isPause = state === 'pause'; // audio is playing → show pause icon
-        if (this._section === 'songs') {
-            const btn = document.getElementById('song-play-btn');
-            if (btn) btn.textContent = isPause ? '⏸' : '▶';
-        } else if (this._section === 'podcasts') {
-            const btn = document.getElementById('podcast-play-btn');
-            if (btn) btn.textContent = isPause ? '⏸' : '▶';
-        } else if (this._section === 'media') {
-            const btn = document.getElementById('play-btn');
-            if (btn) btn.innerHTML = isPause
-                ? '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
-                : '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
-        }
     }
 };
 
