@@ -148,7 +148,7 @@ html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 48px); }
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 10px;
+    padding: calc(max(env(safe-area-inset-top, 0px), 44px) + 6px) 18px 10px;
     position: absolute;
     top: 0;
     left: 0;
@@ -202,11 +202,11 @@ html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 48px); }
 #settings-icon-btn:hover { transform: rotate(25deg) scale(1.1); }
 
 /* ===== SECTIONS ===== */
-section { flex: 1; min-height: 0; padding: calc(env(safe-area-inset-top, 0px) + 56px) 18px 28px; padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); animation: fadeInUp 0.35s ease both; overflow-y: auto; }
+section { flex: 1; min-height: 0; padding: calc(max(env(safe-area-inset-top, 0px), 44px) + 52px) 18px 28px; padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); animation: fadeInUp 0.35s ease both; overflow-y: auto; }
 
 /* ══ Stats layout: fixed header + scrollable body ══ */
 section.stats-layout {
-    padding: calc(env(safe-area-inset-top, 0px) + 56px) 0 0;
+    padding: calc(max(env(safe-area-inset-top, 0px), 44px) + 52px) 0 0;
     display: flex;
     flex-direction: column;
     /* flex: 1 уже задан на section; min-height: 0 позволяет flex-item сжиматься */
@@ -238,7 +238,7 @@ section.hidden { display: none !important; }
 }
 
 /* ===== MAIN / HOME ===== */
-#main { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+#main { padding-top: calc(max(env(safe-area-inset-top, 0px), 44px) + 52px); }
 
 /* ── Home Hero: маскот + приветствие ── */
 .home-hero {
