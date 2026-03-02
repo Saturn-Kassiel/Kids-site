@@ -698,6 +698,13 @@
       "answer": "Енот",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_wdoxx7wdoxx7wdox.png",
       "level": "easy"
+    },
+    {
+      "id": 1772457824876,
+      "text": "На ветке висит он, обнявшись с листвой,\nЗамедленной жизнью доволен такой.\nДвижение каждое — будто во сне,\nОн самый спокойный в лесной тишине.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/lenivetc.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -713,5 +720,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-01T10:32:20.383Z"
+  "exportedAt": "2026-03-02T13:24:26.988Z"
 }
