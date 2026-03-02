@@ -1642,6 +1642,8 @@ const Gosha = {
 const AudioMgr = {
     _current: null,
     _section: null,
+    _audioCtx: null,
+    _connectedEls: new WeakSet(),
 
     play(audioEl, section) {
         if (this._current && this._current !== audioEl) {
@@ -1649,8 +1651,27 @@ const AudioMgr = {
         }
         this._current = audioEl;
         this._section = section;
+        // Connect to AudioContext (keeps iOS audio session alive)
+        this._ensureAudioContext(audioEl);
         audioEl.play().catch(e => console.warn('[AudioMgr] play failed:', e));
         this._updateMediaSession(section);
+    },
+
+    _ensureAudioContext(audioEl) {
+        if (!this._audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) this._audioCtx = new AC();
+        }
+        if (this._audioCtx && !this._connectedEls.has(audioEl)) {
+            try {
+                const source = this._audioCtx.createMediaElementSource(audioEl);
+                source.connect(this._audioCtx.destination);
+                this._connectedEls.add(audioEl);
+            } catch(e) {} // already connected
+        }
+        if (this._audioCtx && this._audioCtx.state === 'suspended') {
+            this._audioCtx.resume().catch(() => {});
+        }
     },
 
     stop(section) {
@@ -1703,8 +1724,12 @@ const AudioMgr = {
         const handlers = {
             play:          () => {
                 if (!self._current) return;
-                // iOS loses audio output after background pause — force reload src
-                self._forceReload(self._current);
+                // Resume WebKit audio context if suspended (iOS requirement)
+                if (self._audioCtx && self._audioCtx.state === 'suspended') {
+                    self._audioCtx.resume().catch(() => {});
+                }
+                self._current.play().catch(() => {});
+                self._updatePlayBtn('pause');
             },
             pause:         () => {
                 if (!self._current) return;
@@ -1758,29 +1783,6 @@ const AudioMgr = {
         }
     },
 
-    // Force reload audio at current position (iOS audio session fix)
-    _forceReload(audio) {
-        const t = audio.currentTime;
-        const src = audio.src;
-        let fired = false;
-        audio.pause();
-        audio.src = '';
-        audio.load();
-        audio.src = src;
-        const resume = () => {
-            if (fired) return;
-            fired = true;
-            audio.removeEventListener('canplay', resume);
-            try { audio.currentTime = t; } catch(e) {}
-            audio.play().catch(() => {});
-            this._updatePlayBtn('pause');
-        };
-        audio.addEventListener('canplay', resume, { once: true });
-        audio.load();
-        // Fallback if canplay doesn't fire within 3s
-        setTimeout(resume, 3000);
-    },
-
     // Update in-app play/pause button
     _updatePlayBtn(state) {
         const isPause = state === 'pause'; // audio is playing → show pause icon
@@ -1798,6 +1800,13 @@ const AudioMgr = {
         }
     }
 };
+
+// ── Resume audio context when app returns to foreground (iOS fix) ──
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && AudioMgr._audioCtx && AudioMgr._audioCtx.state === 'suspended') {
+        AudioMgr._audioCtx.resume().catch(() => {});
+    }
+});
 
 // -------- HELPERS --------
 function fmtTime(s) {
