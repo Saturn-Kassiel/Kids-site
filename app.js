@@ -1703,19 +1703,13 @@ const AudioMgr = {
         const handlers = {
             play:          () => {
                 if (!self._current) return;
-                // Direct play — do NOT go through AudioMgr.play() to avoid re-registering session
-                self._current.play().then(() => {
-                    if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '⏸';
-                    else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '⏸';
-                    else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-                }).catch(e => console.warn('[MediaSession] play failed:', e));
+                // iOS loses audio output after background pause — force reload src
+                self._forceReload(self._current);
             },
             pause:         () => {
                 if (!self._current) return;
                 self._current.pause();
-                if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '▶';
-                else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '▶';
-                else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
+                self._updatePlayBtn('play');
             },
             previoustrack: () => {
                 if (self._section === 'songs') Songs.prev();
@@ -1761,6 +1755,46 @@ const AudioMgr = {
                     });
                 } catch(e) {}
             });
+        }
+    },
+
+    // Force reload audio at current position (iOS audio session fix)
+    _forceReload(audio) {
+        const t = audio.currentTime;
+        const src = audio.src;
+        let fired = false;
+        audio.pause();
+        audio.src = '';
+        audio.load();
+        audio.src = src;
+        const resume = () => {
+            if (fired) return;
+            fired = true;
+            audio.removeEventListener('canplay', resume);
+            try { audio.currentTime = t; } catch(e) {}
+            audio.play().catch(() => {});
+            this._updatePlayBtn('pause');
+        };
+        audio.addEventListener('canplay', resume, { once: true });
+        audio.load();
+        // Fallback if canplay doesn't fire within 3s
+        setTimeout(resume, 3000);
+    },
+
+    // Update in-app play/pause button
+    _updatePlayBtn(state) {
+        const isPause = state === 'pause'; // audio is playing → show pause icon
+        if (this._section === 'songs') {
+            const btn = document.getElementById('song-play-btn');
+            if (btn) btn.textContent = isPause ? '⏸' : '▶';
+        } else if (this._section === 'podcasts') {
+            const btn = document.getElementById('podcast-play-btn');
+            if (btn) btn.textContent = isPause ? '⏸' : '▶';
+        } else if (this._section === 'media') {
+            const btn = document.getElementById('play-btn');
+            if (btn) btn.innerHTML = isPause
+                ? '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+                : '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
         }
     }
 };
