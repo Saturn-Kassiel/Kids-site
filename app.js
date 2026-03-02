@@ -1650,6 +1650,7 @@ const AudioMgr = {
         this._current = audioEl;
         this._section = section;
         audioEl.play().catch(() => {});
+        this._updateMediaSession(section);
     },
 
     stop(section) {
@@ -1662,6 +1663,70 @@ const AudioMgr = {
 
     isCurrent(audioEl) {
         return this._current === audioEl;
+    },
+
+    _updateMediaSession(section) {
+        if (!('mediaSession' in navigator)) return;
+        const ms = navigator.mediaSession;
+
+        // ── Set metadata ──
+        let title = 'Гоша', artist = 'Мини школа Гоша';
+        if (section === 'songs' && Songs.index >= 0 && Songs._allSongs[Songs.index]) {
+            title = Songs._allSongs[Songs.index].name;
+            artist = 'Песенки — Гоша';
+        } else if (section === 'podcasts' && Podcasts.index >= 0 && Podcasts._allPodcasts[Podcasts.index]) {
+            title = Podcasts._allPodcasts[Podcasts.index].name;
+            artist = 'Подкасты — Гоша';
+        } else if (section === 'media') {
+            const tn = document.getElementById('track-name');
+            if (tn && tn.textContent !== '—') title = tn.textContent;
+            artist = 'Обучение — Гоша';
+        }
+        try {
+            ms.metadata = new MediaMetadata({
+                title: title,
+                artist: artist,
+                album: 'Гоша',
+                artwork: [
+                    { src: 'assets/favicon/icon-192.png', sizes: '192x192', type: 'image/png' },
+                    { src: 'assets/favicon/icon-512.png', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+        } catch(e) {}
+
+        // ── Action handlers ──
+        const handlers = {
+            play:          () => { if (this._current) { this._current.play().catch(() => {}); } },
+            pause:         () => { if (this._current) this._current.pause(); },
+            previoustrack: () => {
+                if (this._section === 'songs') Songs.prev();
+                else if (this._section === 'podcasts') Podcasts.prev();
+                else if (this._section === 'media') Media.prev();
+            },
+            nexttrack:     () => {
+                if (this._section === 'songs') Songs.nextSong();
+                else if (this._section === 'podcasts') Podcasts.nextPodcast();
+                else if (this._section === 'media') Media.next();
+            },
+            seekto:        (details) => {
+                if (this._current && details.seekTime != null) {
+                    this._current.currentTime = details.seekTime;
+                }
+            },
+            seekbackward:  (details) => {
+                if (this._current) {
+                    this._current.currentTime = Math.max(0, this._current.currentTime - (details.seekOffset || 10));
+                }
+            },
+            seekforward:   (details) => {
+                if (this._current) {
+                    this._current.currentTime = Math.min(this._current.duration || 0, this._current.currentTime + (details.seekOffset || 10));
+                }
+            }
+        };
+        for (const [action, handler] of Object.entries(handlers)) {
+            try { ms.setActionHandler(action, handler); } catch(e) {}
+        }
     }
 };
 
@@ -5279,6 +5344,11 @@ const Notif = {
             badge.style.display = count > 0 ? '' : 'none';
         }
         if (bell) bell.style.display = '';
+        // PWA icon badge (iOS 16.4+, Chrome)
+        if ('setAppBadge' in navigator) {
+            if (count > 0) navigator.setAppBadge(count).catch(() => {});
+            else navigator.clearAppBadge().catch(() => {});
+        }
     },
 
     toggle() {

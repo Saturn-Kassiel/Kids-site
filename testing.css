@@ -6,7 +6,6 @@
 
 /* ── Section ── */
 #testing {
-    padding-top: 4px;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
 }
