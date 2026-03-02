@@ -1695,32 +1695,48 @@ const AudioMgr = {
         } catch(e) {}
 
         // ── Action handlers ──
+        const self = this;
         const handlers = {
-            play:          () => { if (this._current) { this._current.play().catch(() => {}); } },
-            pause:         () => { if (this._current) this._current.pause(); },
+            play:          () => {
+                if (self._current) {
+                    AudioMgr.play(self._current, self._section);
+                    // Update UI button to pause state
+                    if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '⏸';
+                    else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '⏸';
+                    else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+                }
+            },
+            pause:         () => {
+                if (self._current) {
+                    self._current.pause();
+                    if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '▶';
+                    else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '▶';
+                    else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
+                }
+            },
             previoustrack: () => {
-                if (this._section === 'songs') Songs.prev();
-                else if (this._section === 'podcasts') Podcasts.prev();
-                else if (this._section === 'media') Media.prev();
+                if (self._section === 'songs') Songs.prev();
+                else if (self._section === 'podcasts') Podcasts.prev();
+                else if (self._section === 'media') Media.prev();
             },
             nexttrack:     () => {
-                if (this._section === 'songs') Songs.nextSong();
-                else if (this._section === 'podcasts') Podcasts.nextPodcast();
-                else if (this._section === 'media') Media.next();
+                if (self._section === 'songs') Songs.nextSong();
+                else if (self._section === 'podcasts') Podcasts.nextPodcast();
+                else if (self._section === 'media') Media.next();
             },
             seekto:        (details) => {
-                if (this._current && details.seekTime != null) {
-                    this._current.currentTime = details.seekTime;
+                if (self._current && details.seekTime != null) {
+                    self._current.currentTime = details.seekTime;
                 }
             },
             seekbackward:  (details) => {
-                if (this._current) {
-                    this._current.currentTime = Math.max(0, this._current.currentTime - (details.seekOffset || 10));
+                if (self._current) {
+                    self._current.currentTime = Math.max(0, self._current.currentTime - (details.seekOffset || 10));
                 }
             },
             seekforward:   (details) => {
-                if (this._current) {
-                    this._current.currentTime = Math.min(this._current.duration || 0, this._current.currentTime + (details.seekOffset || 10));
+                if (self._current) {
+                    self._current.currentTime = Math.min(self._current.duration || 0, self._current.currentTime + (details.seekOffset || 10));
                 }
             }
         };
