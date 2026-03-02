@@ -21,6 +21,25 @@
             if (t) document.documentElement.setAttribute('data-theme', t);
             var m = document.querySelector('meta[name="theme-color"]');
             if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
+
+            // ── Safe Area: set --sat CSS variable ──
+            var probe = document.createElement('div');
+            probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);left:0;width:0;height:0;visibility:hidden;pointer-events:none;';
+            document.documentElement.appendChild(probe);
+            requestAnimationFrame(function(){
+                var sat = Math.round(probe.getBoundingClientRect().top);
+                probe.remove();
+                var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+                if (sat < 1 && isStandalone) {
+                    var h = screen.height;
+                    var dpr = window.devicePixelRatio || 1;
+                    if (h >= 852 && dpr >= 3) sat = 59;
+                    else if (h >= 812 && dpr >= 3) sat = 47;
+                    else sat = 20;
+                }
+                document.documentElement.style.setProperty('--sat', sat + 'px');
+            });
+
             // Detect Telegram Mini App
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
                 document.documentElement.classList.add('tg-webapp');
