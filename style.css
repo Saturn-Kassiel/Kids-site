@@ -141,6 +141,14 @@ html.tg-webapp #app {
 }
 html.tg-webapp #top-bar { top: var(--tg-safe-top, 0px); }
 html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
+html.tg-webapp section { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
+
+/* ── PWA standalone on iPhone: hardcoded safe area ── */
+html.pwa #top-bar { top: 54px; }
+html.pwa #main { padding-top: 112px; }
+html.pwa section { padding-top: 112px; }
+html.pwa section.stats-layout { padding-top: 112px; }
+
 @media(min-width:600px) { #app { box-shadow: 0 0 60px rgba(0,0,0,0.12); } }
 
 /* ===== TOP BAR (fully transparent) ===== */
@@ -150,7 +158,9 @@ html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
     gap: 10px;
     padding: 14px 18px 10px;
     position: absolute;
-    top: var(--sat, 0px);
+    top: 0;
+    top: constant(safe-area-inset-top);
+    top: env(safe-area-inset-top, 0px);
     left: 0;
     right: 0;
     z-index: 200;
@@ -202,11 +212,13 @@ html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
 #settings-icon-btn:hover { transform: rotate(25deg) scale(1.1); }
 
 /* ===== SECTIONS ===== */
-section { flex: 1; min-height: 0; padding: calc(var(--sat, 0px) + 58px) 18px 28px; padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); animation: fadeInUp 0.35s ease both; overflow-y: auto; }
+section { flex: 1; min-height: 0; padding: 58px 18px 28px; padding-top: calc(constant(safe-area-inset-top) + 58px); padding-top: calc(env(safe-area-inset-top, 0px) + 58px); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); animation: fadeInUp 0.35s ease both; overflow-y: auto; }
 
 /* ══ Stats layout: fixed header + scrollable body ══ */
 section.stats-layout {
-    padding: calc(var(--sat, 0px) + 58px) 0 0;
+    padding: 58px 0 0;
+    padding-top: calc(constant(safe-area-inset-top) + 58px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 58px);
     display: flex;
     flex-direction: column;
     /* flex: 1 уже задан на section; min-height: 0 позволяет flex-item сжиматься */
@@ -238,7 +250,7 @@ section.hidden { display: none !important; }
 }
 
 /* ===== MAIN / HOME ===== */
-#main { padding-top: calc(var(--sat, 0px) + 58px); }
+#main { padding-top: 58px; padding-top: calc(constant(safe-area-inset-top) + 58px); padding-top: calc(env(safe-area-inset-top, 0px) + 58px); }
 
 /* ── Home Hero: маскот + приветствие ── */
 .home-hero {
