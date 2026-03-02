@@ -1649,7 +1649,7 @@ const AudioMgr = {
         }
         this._current = audioEl;
         this._section = section;
-        audioEl.play().catch(() => {});
+        audioEl.play().catch(e => console.warn('[AudioMgr] play failed:', e));
         this._updateMediaSession(section);
     },
 
@@ -1665,8 +1665,12 @@ const AudioMgr = {
         return this._current === audioEl;
     },
 
+    _updatingSession: false,
+
     _updateMediaSession(section) {
         if (!('mediaSession' in navigator)) return;
+        if (this._updatingSession) return;
+        this._updatingSession = true;
         const ms = navigator.mediaSession;
 
         // ── Set metadata ──
@@ -1698,21 +1702,20 @@ const AudioMgr = {
         const self = this;
         const handlers = {
             play:          () => {
-                if (self._current) {
-                    AudioMgr.play(self._current, self._section);
-                    // Update UI button to pause state
+                if (!self._current) return;
+                // Direct play — do NOT go through AudioMgr.play() to avoid re-registering session
+                self._current.play().then(() => {
                     if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '⏸';
                     else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '⏸';
                     else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-                }
+                }).catch(e => console.warn('[MediaSession] play failed:', e));
             },
             pause:         () => {
-                if (self._current) {
-                    self._current.pause();
-                    if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '▶';
-                    else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '▶';
-                    else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
-                }
+                if (!self._current) return;
+                self._current.pause();
+                if (self._section === 'songs') document.getElementById('song-play-btn').textContent = '▶';
+                else if (self._section === 'podcasts') document.getElementById('podcast-play-btn').textContent = '▶';
+                else if (self._section === 'media') document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>';
             },
             previoustrack: () => {
                 if (self._section === 'songs') Songs.prev();
@@ -1742,6 +1745,22 @@ const AudioMgr = {
         };
         for (const [action, handler] of Object.entries(handlers)) {
             try { ms.setActionHandler(action, handler); } catch(e) {}
+        }
+        this._updatingSession = false;
+
+        // ── Update position state on timeupdate ──
+        if (this._current && !this._current._msListener) {
+            this._current._msListener = true;
+            this._current.addEventListener('timeupdate', () => {
+                if (!('mediaSession' in navigator) || !this._current) return;
+                try {
+                    navigator.mediaSession.setPositionState({
+                        duration: this._current.duration || 0,
+                        playbackRate: this._current.playbackRate || 1,
+                        position: Math.min(this._current.currentTime, this._current.duration || 0)
+                    });
+                } catch(e) {}
+            });
         }
     }
 };
