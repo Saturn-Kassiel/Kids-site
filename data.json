@@ -76,7 +76,11 @@
       "name": "Песенка про Умывание",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3"
+      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3",
+      "tags": [
+        "learning"
+      ],
+      "video": "assets\\video\\songs_video\\clean.mp4"
     },
     {
       "id": 11,
@@ -796,5 +800,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T15:06:57.820Z"
+  "exportedAt": "2026-03-03T15:44:38.532Z"
 }
