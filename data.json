@@ -44,7 +44,9 @@
       "name": "Песенка про Льва",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_lva.mp3"
+      "src": "assets/audio/songs/pesenka_pro_lva.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\lev.mp4"
     },
     {
       "id": 7,
@@ -782,5 +784,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T13:23:07.111Z"
+  "exportedAt": "2026-03-03T13:24:33.373Z"
 }
