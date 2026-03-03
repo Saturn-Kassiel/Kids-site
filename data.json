@@ -128,6 +128,13 @@
       "desc": "",
       "duration": "",
       "src": "assets/audio/songs/shakal.mp3"
+    },
+    {
+      "id": 1772521779387,
+      "name": "Песенка про Волка",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/volk.mp3"
     }
   ],
   "podcasts": [
@@ -742,6 +749,13 @@
       "answer": "Шакал",
       "pic": "assets/images/riddles_pictures_opt/shakal.webp",
       "level": "medium"
+    },
+    {
+      "id": 1772521854571,
+      "text": "В серой шубе, взгляд суров,\nСанитар густых лесов.\nНочью воет на луну,\nНарушая тишину.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/volk.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -757,5 +771,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T06:34:29.370Z"
+  "exportedAt": "2026-03-03T07:11:06.617Z"
 }
