@@ -353,17 +353,34 @@
 .tst-odd-btn:active { transform: scale(0.94); }
 
 /* ── Sequence ── */
+/* ── Sequence: numbered slots ── */
+.tst-seq-subtitle {
+    font-size: 14px; color: var(--text2); text-align: center;
+    margin: -4px 0 12px; opacity: 0.8;
+}
 .tst-seq-slots {
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-    min-height: 56px; padding: 10px;
+    min-height: 56px; padding: 12px;
     background: var(--card2); border-radius: 14px; margin-bottom: 14px;
 }
-.tst-seq-slot-filled {
-    font-size: 32px; padding: 6px 10px;
-    background: var(--card); border-radius: 12px;
-    box-shadow: var(--shadow); cursor: pointer; transition: all var(--tr);
+.tst-seq-slot-empty {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px dashed var(--border); border-radius: 12px;
+    background: transparent; transition: all var(--tr);
+    position: relative;
 }
-.tst-seq-slot-filled:hover { transform: scale(0.92); opacity: 0.7; }
+.tst-seq-slot-empty.filled {
+    border-style: solid; border-color: var(--accent, #3b82f6);
+    background: var(--card); box-shadow: var(--shadow);
+    font-size: 30px; cursor: pointer;
+}
+.tst-seq-slot-empty.filled:hover {
+    transform: scale(0.92); opacity: 0.7;
+}
+.tst-seq-slot-num {
+    font-size: 18px; font-weight: 700; color: var(--text2); opacity: 0.35;
+}
 .tst-seq-pool {
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
 }
@@ -373,8 +390,27 @@
     border-radius: 14px; cursor: pointer; transition: all var(--tr);
     box-shadow: var(--shadow);
 }
-.tst-seq-item:hover { transform: translateY(-2px); }
-.tst-seq-item.used { opacity: 0.3; pointer-events: none; transform: scale(0.9); }
+.tst-seq-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.tst-seq-item.used { opacity: 0.25; pointer-events: none; transform: scale(0.85); }
+
+/* ── Sequence: actions (hint + check) ── */
+.tst-seq-actions {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 16px; flex-wrap: wrap;
+}
+.tst-hint-btn {
+    padding: 10px 20px; border: 1.5px solid var(--border);
+    border-radius: 12px; background: var(--card);
+    color: var(--text2); font-size: 14px; font-family: var(--font);
+    cursor: pointer; transition: all var(--tr);
+    box-shadow: var(--shadow);
+}
+.tst-hint-btn:hover { background: var(--card2); transform: scale(1.03); }
+.tst-hint-btn:active { transform: scale(0.97); }
+.tst-hint-btn.tst-hint-used {
+    opacity: 0.45; cursor: default; border-style: dashed;
+}
+.tst-hint-btn.tst-hint-used:hover { transform: none; background: var(--card); }
 
 .tst-check-btn {
     display: block; margin: 16px auto 0;

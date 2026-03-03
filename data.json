@@ -3,201 +3,274 @@
     {
       "id": 1,
       "name": "Колыбельная",
+      "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/kolybelnaya.mp3"
+      "src": "assets/audio/songs/kolybelnaya.mp3",
+      "tags": [
+        "sleep"
+      ],
+      "video": ""
     },
     {
       "id": 2,
       "name": "Песенка для мамы",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_dlya_mamy.mp3"
+      "src": "assets/audio/songs/pesenka_dlya_mamy.mp3",
+      "tags": [
+        "family"
+      ]
     },
     {
       "id": 3,
       "name": "Песенка про Cлона",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_clona.mp3"
+      "src": "assets/audio/songs/pesenka_pro_clona.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets/video/songs_video/pesenka_pro_slona.mp4"
     },
     {
       "id": 4,
       "name": "Песенка про Деда Мороза",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_deda_moroza.mp3"
+      "src": "assets/audio/songs/pesenka_pro_deda_moroza.mp3",
+      "tags": [
+        "holiday"
+      ]
     },
     {
       "id": 5,
-      "name": "Песенка про Февраль",
-      "desc": "",
+      "name": "Песенка про февраль",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_fevral.mp3"
+      "src": "assets/audio/songs/pesenka_pro_fevral.mp3",
+      "tags": [
+        "months"
+      ]
     },
     {
       "id": 6,
-      "name": "Песенка про Льва",
-      "desc": "",
+      "name": "Песенка про льва",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_lva.mp3"
+      "src": "assets/audio/songs/pesenka_pro_lva.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets/video/songs_video/pesenka_pro_lva.mp4"
     },
     {
       "id": 7,
-      "name": "Песенка про Неделю",
-      "desc": "",
+      "name": "Песенка про неделю",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nedelyu.mp3"
+      "src": "assets/audio/songs/pesenka_pro_nedelyu.mp3",
+      "tags": [
+        "learning"
+      ]
     },
     {
       "id": 8,
-      "name": "Песенка про Носорога",
-      "desc": "",
+      "name": "Песенка про носорога",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3"
+      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets/video/songs_video/pesenka_pro_nosoroga.mp4"
     },
     {
       "id": 9,
-      "name": "Песенка про Папу",
-      "desc": "",
+      "name": "Песенка про папу",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_papu.mp3"
+      "src": "assets/audio/songs/pesenka_pro_papu.mp3",
+      "tags": [
+        "family"
+      ]
     },
     {
       "id": 10,
-      "name": "Песенка про Умывание",
-      "desc": "",
+      "name": "Песенка про умывание",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3"
+      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3",
+      "tags": [
+        "learning"
+      ]
     },
     {
       "id": 11,
-      "name": "Песенка про Январь",
-      "desc": "",
+      "name": "Песенка про январь",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_yanvar.mp3"
+      "src": "assets/audio/songs/pesenka_pro_yanvar.mp3",
+      "tags": [
+        "months"
+      ]
     },
     {
       "id": 12,
-      "name": "Песенка про Зебру",
-      "desc": "",
+      "name": "Песенка про зебру",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_zebru.mp3"
+      "src": "assets/audio/songs/pesenka_pro_zebru.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets/video/songs_video/pesenka_pro_zebru.mp4"
     },
     {
       "id": 13,
       "name": "В лесу родилась ёлочка",
       "duration": "",
-      "src": "assets/audio/songs/v_lesu_rodilas_yolochka.mp3"
+      "src": "assets/audio/songs/v_lesu_rodilas_yolochka.mp3",
+      "tags": [
+        "holiday"
+      ]
     },
     {
-      "id": 1772279431254,
+      "id": 14,
       "name": "Песенка про Рождество",
-      "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/рождество_.mp3"
+      "src": "assets/audio/songs/rodgestvo.mp3",
+      "tags": [
+        "holiday"
+      ]
     },
     {
-      "id": 1772345412199,
+      "id": 15,
       "name": "Песенка про Весну",
-      "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/песенка_про_весну.mp3"
+      "src": "assets/audio/songs/vesna.mp3",
+      "tags": [
+        "months"
+      ]
     },
     {
-      "id": 1772358832101,
+      "id": 16,
       "name": "Песенка про Енота",
-      "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/енот.mp3"
+      "src": "assets/audio/songs/енот.mp3",
+      "tags": [
+        "animals"
+      ]
     },
     {
-      "id": 1772458162146,
+      "id": 17,
       "name": "Песенка про Ленивца",
-      "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/ленивец.mp3"
+      "src": "assets/audio/songs/lenivetc.mp3",
+      "tags": [
+        "animals"
+      ]
     },
     {
-      "id": 1772462249957,
-      "name": "Песнка про Март",
-      "desc": "",
+      "id": 18,
+      "name": "Песенка про Март",
       "duration": "",
-      "src": ""
+      "src": "assets/audio/songs/mart.mp3",
+      "tags": [
+        "months"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Песенка про Шакала",
+      "duration": "",
+      "src": "assets/audio/songs/shakal.mp3",
+      "tags": [
+        "animals"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Песенка про Волка",
+      "duration": "",
+      "src": "assets/audio/songs/volk.mp3",
+      "tags": [
+        "animals"
+      ]
     }
   ],
   "podcasts": [
     {
       "id": 1,
       "name": "Благодарность",
-      "desc": "Ваш ребёнок принимает подарки как должное и забывает про «спасибо» не из-за плохого характера, а в силу естественного эгоцентризма.\n\nБлагодарность — это не врождённый инстинкт, а сложный навык, который созревает постепенно по мере развития мозга.\n\nМы расскажем о методике NOTICE-THINK-FEEL-DO, позволяющей превратить дежурную вежливость в глубокое внутреннее чувство.\n\nПрисоединяйтесь, чтобы ваш ребенок видел добро в мелочах и ценил нематериальные блага!",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/blagodarnost.mp3"
     },
     {
       "id": 2,
       "name": "Доверие ребёнка",
-      "desc": "Почему ребенок «отключается» именно тогда, когда вы пытаетесь объяснить ему что-то важное?\n\nВ этом материале разбираем феномен «эпистемической заморозки» — защитной реакции мозга, которая блокирует восприятие информации, если дошкольник не чувствует себя в безопасности.\n\nВы узнаете, в чем разница между верой в факты и глубоким межличностным доверием, а также как модель PACE (игривость, принятие, любопытство и эмпатия) помогает растопить лед и вернуть контакт с ребенком.\n\nНаучитесь восстанавливать безопасность раньше, чем начнете давать советы, чтобы ваши слова снова стали для него значимыми.",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/doverie_rebyonka.mp3"
     },
     {
       "id": 3,
       "name": "Мозг дошкольника",
-      "desc": "Мозг дошкольника — это строительная площадка, где эмоции уже работают, а «центр управления» и логика еще не сформированы. В разгар истерики его мозг биологически не способен на рациональность.\n\nЧтобы вырастить устойчивую личность, родителю важно стать «контейнером»: сохранять спокойствие самому, позволять ребенку выплакать «слезы тщетности» для принятия реальности и признавать его чувства.\n\nВаша готовность принимать ребенка «неудобным» и уязвимым — это не слабость, а фундамент его будущей психологической силы.\n\nПослушайте разговор об этом!",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/mozg_doshkolnika.mp3"
     },
     {
       "id": 4,
       "name": "Поколение Альфа",
-      "desc": "Познакомьтесь с Поколением Альфа — первой когортой в истории, полностью рожденной в XXI веке и не знающей мира без смартфонов и облачных технологий.",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/pokolenie_alfa.mp3"
     },
     {
       "id": 5,
-      "name": "Эмпатия",
-      "desc": "Родители часто переживают, когда ребенок не хочет делиться игрушками или не замечает расстройства окружающих.\n\nПедагоги утверждают, что эмпатия не является врожденным даром. Это навык, который можно и нужно тренировать.\n\nУмение понять чувства другого человека, будь то радость, обида или грусть, и способность «заглянуть в сердце» ближнему.\n\nПослушайте, разговор об эмпатии.",
+      "name": "Слушать сердцем",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/slushat_serdtsem.mp3"
     },
     {
       "id": 6,
       "name": "Сравнение",
-      "desc": "«А вот Петя уже сам...»: почему сравнение — это яд для развития ребенка.\n\nВ этом выпуске мы разбираем одну из самых разрушительных привычек в воспитании — социальное сравнение.\n\nРодители часто используют его как инструмент мотивации, но для ребенка 3–6 лет это превращается в «угрозу выживанию» и сообщение о том, что его ценят только за достижения.",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/podcasts/sravnenie.mp3"
     }
   ],
   "puzzles": [
     {
+      "id": 1,
+      "name": "Рыба",
+      "pic": "assets/images/rebuses_pictures_opt/ryba.webp",
+      "hint": "Присмотрись к картинке",
+      "answer": "рыба",
+      "level": "easy"
+    },
+    {
       "id": 2,
       "name": "Ложка",
       "pic": "assets/images/rebuses_pictures_opt/lozhka.webp",
-      "hint": "Для еды",
-      "answer": "Ложка",
+      "hint": "Присмотрись к картинке",
+      "answer": "ложка",
       "level": "easy"
     },
     {
       "id": 3,
       "name": "Вилка",
       "pic": "assets/images/rebuses_pictures_opt/vilka.webp",
-      "hint": "Для еды",
-      "answer": "Вилка",
+      "hint": "Присмотрись к картинке",
+      "answer": "вилка",
       "level": "easy"
     },
     {
       "id": 4,
       "name": "Море",
       "pic": "assets/images/rebuses_pictures_opt/more.webp",
-      "hint": "Вода",
-      "answer": "Море",
+      "hint": "Присмотрись к картинке",
+      "answer": "море",
       "level": "easy"
     },
     {
       "id": 5,
       "name": "Радуга",
       "pic": "assets/images/rebuses_pictures_opt/raduga.webp",
-      "hint": "В небе",
-      "answer": "Радуга",
+      "hint": "Присмотрись к картинке",
+      "answer": "радуга",
       "level": "easy"
     },
     {
@@ -212,72 +285,72 @@
       "id": 7,
       "name": "Бабочка",
       "pic": "assets/images/rebuses_pictures_opt/babochka.webp",
-      "hint": "Крылья",
-      "answer": "Бабочка",
-      "level": "easy"
+      "hint": "Присмотрись к картинке",
+      "answer": "бабочка",
+      "level": "medium"
     },
     {
       "id": 8,
       "name": "Коньки",
       "pic": "assets/images/rebuses_pictures_opt/konki.webp",
-      "hint": "Для ног",
-      "answer": "Коньки",
+      "hint": "Присмотрись к картинке",
+      "answer": "коньки",
       "level": "medium"
     },
     {
       "id": 9,
       "name": "Трактор",
       "pic": "assets/images/rebuses_pictures_opt/traktor.webp",
-      "hint": "Техника",
-      "answer": "Трактор",
+      "hint": "Присмотрись к картинке",
+      "answer": "трактор",
       "level": "medium"
     },
     {
       "id": 10,
       "name": "Туча",
       "pic": "assets/images/rebuses_pictures_opt/tucha.webp",
-      "hint": "Небо",
-      "answer": "Туча",
+      "hint": "Присмотрись к картинке",
+      "answer": "туча",
       "level": "medium"
     },
     {
       "id": 11,
       "name": "Туман",
       "pic": "assets/images/rebuses_pictures_opt/tuman.webp",
-      "hint": "Погода",
-      "answer": "Туман",
+      "hint": "Присмотрись к картинке",
+      "answer": "туман",
       "level": "medium"
     },
     {
       "id": 12,
       "name": "Зелень",
       "pic": "assets/images/rebuses_pictures_opt/zelen.webp",
-      "hint": "Польза",
-      "answer": "Зелень",
+      "hint": "Присмотрись к картинке",
+      "answer": "зелень",
       "level": "medium"
     },
     {
       "id": 13,
       "name": "Креветка",
       "pic": "assets/images/rebuses_pictures_opt/krevetka.webp",
-      "hint": "Море",
-      "answer": "Креветка",
+      "hint": "Присмотрись к картинке",
+      "answer": "креветка",
       "level": "hard"
     },
     {
       "id": 14,
       "name": "Забор",
       "pic": "assets/images/rebuses_pictures_opt/zabor.webp",
-      "hint": "Возле дома",
-      "answer": "Забор",
+      "hint": "Присмотрись к картинке",
+      "answer": "забор",
       "level": "hard"
     },
     {
       "id": 15,
       "name": "Токарь",
       "pic": "assets/images/rebuses_pictures_opt/tokar.webp",
-      "hint": "Профессия",
-      "answer": "Токарь",
+      "hint": "Присмотрись к картинке",
+      "answer": "токарь",
       "level": "hard"
     }
   ],
@@ -300,116 +373,134 @@
       "id": 3,
       "text": "По реке плывёт бревно, ох и злющее оно,  тем, кто в речку угодил, нос откусит ...",
       "answer": "Крокодил",
-      "pic": "assets/images/riddles_pictures_opt/krokodil.webp"
+      "pic": "assets/images/riddles_pictures_opt/krokodil.webp",
+      "level": "easy"
     },
     {
       "id": 7,
       "text": "Мимо улья проходил косолапый ...",
       "answer": "Медведь",
-      "pic": "assets/images/riddles_pictures_opt/medved.webp"
+      "pic": "assets/images/riddles_pictures_opt/medved.webp",
+      "level": "easy"
     },
     {
       "id": 8,
       "text": "Ночью каждое оконце слабо освещает ...",
       "answer": "Луна",
-      "pic": "assets/images/riddles_pictures_opt/luna.webp"
+      "pic": "assets/images/riddles_pictures_opt/luna.webp",
+      "level": "easy"
     },
     {
       "id": 9,
       "text": "Овощ это непростой,\nВызовет слезу порой,\nНо уж больно он полезный\nЗащищает от болезней!",
       "answer": "Лук",
-      "pic": "assets/images/riddles_pictures_opt/luk.webp"
+      "pic": "assets/images/riddles_pictures_opt/luk.webp",
+      "level": "easy"
     },
     {
       "id": 10,
       "text": "Кто мычит там на лугу,\nСочную жует траву,\nУгощает молоком\nИ полезным творожком.",
       "answer": "Корова",
-      "pic": "assets/images/riddles_pictures_opt/korova.webp"
+      "pic": "assets/images/riddles_pictures_opt/korova.webp",
+      "level": "easy"
     },
     {
       "id": 11,
       "text": "С ветки прыгает на ветку\nРыжая красавица.\nШишки, желуди, орехи\nЗапасает на зиму.",
       "answer": "белка",
-      "pic": "assets/images/riddles_pictures_opt/belka.webp"
+      "pic": "assets/images/riddles_pictures_opt/belka.webp",
+      "level": "easy"
     },
     {
       "id": 12,
       "text": "Он хвостастый и зубастый,\nНа луну он воет часто,\nВсе в лесу его боятся,\nА в особенности, зайцы.",
       "answer": "волк",
-      "pic": "assets/images/riddles_pictures_opt/volk.webp"
+      "pic": "assets/images/riddles_pictures_opt/volk.webp",
+      "level": "easy"
     },
     {
       "id": 13,
       "text": "В лесу живёт плутовка,\nХитры её глаза,\nА цветом, как морковка,\nПушистая...",
       "answer": "Лиса",
-      "pic": "assets/images/riddles_pictures_opt/lisa.webp"
+      "pic": "assets/images/riddles_pictures_opt/lisa.webp",
+      "level": "easy"
     },
     {
       "id": 14,
       "text": "Живет в берлоге он в лесу,\nПугает волка и лису,\nЛюбит ягоды и мед,\nКосолапо он идет.",
       "answer": "Медведь",
-      "pic": "assets/images/riddles_pictures_opt/medved.webp"
+      "pic": "assets/images/riddles_pictures_opt/medved.webp",
+      "level": "medium"
     },
     {
       "id": 16,
       "text": "Он пятнистый, с длинной шеей,\nГде-то в Африке живет.\nИ с огромных он деревьев\nЛегко листья достает.",
       "answer": "Жираф",
-      "pic": "assets/images/riddles_pictures_opt/zhiraf.webp"
+      "pic": "assets/images/riddles_pictures_opt/zhiraf.webp",
+      "level": "medium"
     },
     {
       "id": 17,
       "text": "Траву жуёт. Носит матроску\nВ чёрно - белую полоску.",
       "answer": "Зебра",
-      "pic": "assets/images/riddles_pictures_opt/zebra.webp"
+      "pic": "assets/images/riddles_pictures_opt/zebra.webp",
+      "level": "medium"
     },
     {
       "id": 18,
       "text": "В цирке трюки выполняет,\nБрёвна хоботом таскает.\nСерый и громадный он,\nКто же это? Это ...",
       "answer": "Слон",
-      "pic": "assets/images/riddles_pictures_opt/slon.webp"
+      "pic": "assets/images/riddles_pictures_opt/slon.webp",
+      "level": "medium"
     },
     {
       "id": 19,
       "text": "В зоопарке, в синей клетке\nЛовко прыгает по сетке,\nКорчит рожи, ест бананы.\nКто? Конечно",
       "answer": "Обезьяна",
-      "pic": "assets/images/riddles_pictures_opt/obezyana.webp"
+      "pic": "assets/images/riddles_pictures_opt/obezyana.webp",
+      "level": "medium"
     },
     {
       "id": 20,
       "text": "Нет того, кто не боится\nЭтой грозной хищной птицы.\nКто куда бы не забрёл,\nСверху видит всё…",
       "answer": "Орёл",
-      "pic": "assets/images/riddles_pictures_opt/orel.webp"
+      "pic": "assets/images/riddles_pictures_opt/orel.webp",
+      "level": "medium"
     },
     {
       "id": 21,
       "text": "Хвост веером, на голове корона, нет птицы краше чем ...",
       "answer": "Павлин",
-      "pic": "assets/images/riddles_pictures_opt/pavlin.webp"
+      "pic": "assets/images/riddles_pictures_opt/pavlin.webp",
+      "level": "medium"
     },
     {
       "id": 22,
       "text": "Рано он всегда встаёт,\nПо утрам всегда поёт,\nНосит гребень и серёжки,\nВ перьях все его одёжки.",
       "answer": "Петух",
-      "pic": "assets/images/riddles_pictures_opt/petukh.webp"
+      "pic": "assets/images/riddles_pictures_opt/petukh.webp",
+      "level": "medium"
     },
     {
       "id": 23,
       "text": "Маленькая птичка\nЧирикает отлично,\nПрыгает по веткам,\nЖить не станет в клетке.\nНе таится от людей\nРазвесёлый...",
       "answer": "воробей",
       "pic": "assets/images/riddles_pictures_opt/vorobey.webp",
-      "level": "hard"
+      "level": "medium"
     },
     {
       "id": 24,
       "text": "Перья черные летят,\nВсюду каркают, кричат,\nЧто за важная персона?\nЭто черная...",
       "answer": "Ворона",
-      "pic": "assets/images/riddles_pictures_opt/vorona.webp"
+      "pic": "assets/images/riddles_pictures_opt/vorona.webp",
+      "level": "medium"
     },
     {
       "id": 25,
       "text": "Я по травке не спешу.\nЕсли станет страшно вдруг,\nСпрячусь в домик, милый друг.",
       "answer": "Улитка",
-      "pic": "assets/images/riddles_pictures_opt/ulitka.webp"
+      "pic": "assets/images/riddles_pictures_opt/ulitka.webp",
+      "level": "hard"
     },
     {
       "id": 26,
@@ -422,46 +513,50 @@
       "id": 27,
       "text": "В пустыне живёт,\nПодолгу не пьёт,\nС жарой легко справляется,\nКолючками питается.",
       "answer": "Верблюд",
-      "pic": "assets/images/riddles_pictures_opt/verblyud.webp"
+      "pic": "assets/images/riddles_pictures_opt/verblyud.webp",
+      "level": "hard"
     },
     {
       "id": 29,
       "text": "Через море-океан\nПлывёт чудо-великан,\nПрячет ус во рту,\nРастянулся на версту.",
       "answer": "Кит",
-      "pic": "assets/images/riddles_pictures_opt/kit.webp"
+      "pic": "assets/images/riddles_pictures_opt/kit.webp",
+      "level": "hard"
     },
     {
       "id": 30,
       "text": "Ем я уголь, пью я воду,\nКак напьюсь — прибавлю ходу.\nВезу обоз на сто колес\nИ называюсь...",
       "answer": "Паровоз",
       "pic": "assets/images/riddles_pictures_opt/parovoz.webp",
-      "level": "medium"
+      "level": "hard"
     },
     {
       "id": 31,
       "text": "Она идет и зиму прогоняет.\nКогда придет, вокруг всё расцветает.\nОт солнышка прекрасного ясна.\nЗовут ее, конечно же ...",
       "answer": "Весна",
-      "pic": "assets/images/riddles_pictures_opt/vesna.webp"
+      "pic": "assets/images/riddles_pictures_opt/vesna.webp",
+      "level": "hard"
     },
     {
       "id": 32,
       "text": "Если крылья распахнет —\nКрасотой с ума сведет.\nНа лугу она летает,\nВсех собою удивляет.",
       "answer": "Бабочка",
-      "pic": "assets/images/riddles_pictures_opt/babochka.webp"
+      "pic": "assets/images/riddles_pictures_opt/babochka.webp",
+      "level": "hard"
     },
     {
       "id": 34,
       "text": "Живёт в норке, грызёт корки, боится кошки.",
       "answer": "Мышь",
       "pic": "assets/images/riddles_pictures_opt/mysh.webp",
-      "level": "medium"
+      "level": "hard"
     },
     {
       "id": 36,
       "text": "Лечит маленьких детей,\nЛечит птичек и зверей,\nСквозь очки свои глядит\nДобрый доктор...",
       "answer": "Айболит",
       "pic": "assets/images/riddles_pictures_opt/aybolit.webp",
-      "level": "medium"
+      "level": "hard"
     },
     {
       "id": 37,
@@ -469,279 +564,9 @@
       "answer": "Поле",
       "pic": "assets/images/riddles_pictures_opt/pshenitsa.webp",
       "level": "hard"
-    },
-    {
-      "id": 1772166709358,
-      "text": "Шумит он в поле и в саду, а в дом не попадет. И никуда я не иду, покуда он идет.",
-      "answer": "Дождь",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-45-57.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772166795403,
-      "text": "Из воды она родилась, к нам с небес она спустилась, не спеша, кружась, сверкая, Вся ажурная, резная. А согрей ее, укрой, станет вновь она водой.",
-      "answer": "Снежинка",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-46-08.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772166837832,
-      "text": "Её покупают, чтобы есть. А съесть её нельзя.",
-      "answer": "Посуда",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-46-25.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772166905959,
-      "text": "Я и туча, и туман, и ручей, и океан, и летаю, и бегу, и стеклянной быть могу.",
-      "answer": "Вода",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-46-41.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772166969624,
-      "text": "Что становится больше, если его поставить вверх ногами.",
-      "answer": "Число 6",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-46-53.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772167055842,
-      "text": "Много листочков, но не дерево. Что это?",
-      "answer": "Книга",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-00.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772167093863,
-      "text": "Пятеро братьев всегда находятся рядом. Стоят не по росту. У каждого свое имя.",
-      "answer": "Пальцы",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-07.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167139173,
-      "text": "По небу ходит маляр без кистей, краской коричневой красит людей.",
-      "answer": "Солнце",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-16.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167186515,
-      "text": "Может, с кремом быть, с вареньем\nИ со сливками порой.\nНо всегда ко дню рожденья\nГость он важный, дорогой.",
-      "answer": "Торт",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-27.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167231098,
-      "text": "На стене висит оно,\nКак прозрачное стекло.\nПодойду немного поближе\nИ себя я в нём увижу.",
-      "answer": "Зеркало",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-35.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167285874,
-      "text": "Спинка есть, четыре ножки,\nТолько он совсем не кошка.\nУ стола всегда стоит,\nКто-нибудь на нём сидит.",
-      "answer": "Стул",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-48.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167397075,
-      "text": "Зимы кусочек купим летом.\nХолодный, сладкий он, при этом\nСо вкусом сливок, шоколада —\nДля взрослых и детей отрада.",
-      "answer": "Мороженое",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-47-55.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167448888,
-      "text": "Во дворе они стоят\nИ катают всех ребят,\nНа них смело залезаю,\nБудто в небо подлетаю.",
-      "answer": "Качели",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-48-01.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167508307,
-      "text": "Его в дождик открывают,\nОн от капель защищает,\nКупол разноцветный мой,\nЕго держу над головой.",
-      "answer": "Зонт",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-48-09.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167585661,
-      "text": "Стрелка круг обрисовала,\nСколько время показала,\nМожно на руке носить,\nВремя чтоб определить.",
-      "answer": "Часы",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-48-36.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167632043,
-      "text": "Одной рукой всех встречает,\nДругой рукой - провожает.\nКто приходит, кто уходит -\nВсе её за руку водят.",
-      "answer": "Дверь",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-48-48.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167684171,
-      "text": "Этот пятый день недели\nВзрослым очень нравится.\nЗавтра будут выходные,\nЗначит, это...",
-      "answer": "Пятница",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-49-04.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167769198,
-      "text": "На кухне нужный атрибут,\nНо нельзя поесть ей суп,\nНаколоть можно котлету\nИ сосиску нам к обеду.",
-      "answer": "Вилка",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-49-15.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167835044,
-      "text": "От нее становится светлей\nИ весь мир покажется добрей.\nДаже сам Крошка Енот,\nО ней песенку поет.",
-      "answer": "Улыбка",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-49-26.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167929166,
-      "text": "Дети три комка скатали,\nЗакрепили их слегка,\nКрасную морковку взяли —\nСделали...",
-      "answer": "Снеговик",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_07-49-33.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772167967396,
-      "text": "Без него нельзя в кровати,\nОно всегда мне очень кстати,\nЧтоб теплее ночью стало,\nЗаботливо укроет...",
-      "answer": "Одеяло",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_08-17-02.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772180777299,
-      "text": "В огороде у дорожки\nСтоит солнышко на ножке.\nТолько жёлтые лучи\nУ него не горячи.",
-      "answer": "Подсонух",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_08-17-21.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772180839820,
-      "text": "Круглый, полосатый, с огорода взятый, сахарный и алый — кушайте, ребята!",
-      "answer": "Арбуз",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_08-17-29.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772180891917,
-      "text": "В поле лестница лежит, Дом по лестнице бежит.",
-      "answer": "Поезд",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_08-17-35.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772180992485,
-      "text": "Я есть у каждого из вас,\nНо не скажу ни слова.\nМолчу, пока я не в устах,\nА как скажу — всё снова!",
-      "answer": "Секрет",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_08-17-42.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772181072033,
-      "text": "Сварит бабушка из ягод,\nЧто-то вкусненькое на год.\nАх, какое объеденье — \nАроматное…",
-      "answer": "Варенье",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-49-46.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181130103,
-      "text": "Свет из глаз теплом искрится,\nМир с ней в сказку превратится.\nВот носочки, пирожки,\nА на лбу всегда очки.",
-      "answer": "Бабушка",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-50-35.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181242106,
-      "text": "Много маленьких деталей,\nВ кучу мы их все собрали.\nИх друг другу подбираем,\nИ картинку собираем.",
-      "answer": "Пазлы",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-50-51.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772181320773,
-      "text": "Я хорошая игрушка, - буду девочкам подружкой.\nЯ могу сидеть в коляске, закрывать умею глазки.\nЯ прошу меня любить, не ронять меня, не бить.",
-      "answer": "Кукла",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-51-02.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181409928,
-      "text": "Солёная, а не соль, Бежит, а не речка, Блестит, а не серебро.",
-      "answer": "Слеза",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-51-13.webp",
-      "level": "medium"
-    },
-    {
-      "id": 1772181651640,
-      "text": "Обезьяны обожают,\nЧасто, много поедают,\nЖелтый, сладкий, очень вкусный,\nЕшь его, коль ходишь грустный.",
-      "answer": "Банан",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-51-56.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181706595,
-      "text": "Не фломастер и не ручка, Но цветная эта штучка, Рисовать им надо точно, Он раскрасит все уж точно.",
-      "answer": "Карандаш",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-52-08.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181771062,
-      "text": "Я длинный и зеленый, вкусен я соленый, Вкусен и сырой. Кто же я такой?",
-      "answer": "Огурец",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-54-33.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772181831995,
-      "text": "Что нельзя съесть на завтрак?",
-      "answer": "Обед",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-55-29.webp",
-      "level": "hard"
-    },
-    {
-      "id": 1772181897595,
-      "text": "Худая девчонка – Жесткая чёлка, Днём прохлаждается. А по утрам да вечерам. Работать принимается.",
-      "answer": "Зубная щётка",
-      "pic": "assets/images/riddles_pictures_opt/photo_2026-02-27_11-56-15.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772360941877,
-      "text": "Любопытный очень зверь,\nЛапки мою целый день,\nНа мордашке два пятна,\nХвост весь в кольцах у меня!",
-      "answer": "Енот",
-      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_wdoxx7wdoxx7wdox.png",
-      "level": "easy"
-    },
-    {
-      "id": 1772457824876,
-      "text": "На ветке висит он, обнявшись с листвой,\nЗамедленной жизнью доволен такой.\nДвижение каждое — будто во сне,\nОн самый спокойный в лесной тишине.",
-      "answer": "",
-      "pic": "assets/images/riddles_pictures_opt/lenivetc.webp",
-      "level": "easy"
     }
   ],
-  "info": [
-    {
-      "id": 1772109583326,
-      "name": "Как проводить занятия успешно",
-      "body": "Создаем правильный настрой\n🔹Только на позитиве\nПриступайте к занятиям в хорошем настроении. Ваш настрой передается ребенку!\n\n🔹Искренний интерес\nДемонстрируйте свое желание заниматься — вовлеченность взрослого — лучшая мотивация.\n\n🔹Похвала — лучший стимул\nОбязательно отмечайте каждый успех и правильно выполненное движение.\n\nТактика при сложностях\n🔹Без давления\nНикогда не настаивайте силой и не повышайте голос. Занятие должно ассоциироваться с удовольствием, а не со стрессом.\n\n🔹Гибкий подход\nЕсли упражнение не поддается, мягко договоритесь попробовать еще раз. Если не выходит снова — переключитесь на другое задание, но обязательно вернитесь к сложному этапу позже.\n\n🔹Терпение\nДайте ребенку право на ошибку и время на освоение навыка.\n\nОрганизация процесса\n🔹 Регулярность\nЗанимайтесь ежедневно по 10–15 минут. Короткие, но частые тренировки гораздо эффективнее редких и долгих.\n\n🔹 Визуальный контроль\nВыполняйте все упражнения перед зеркалом, чтобы ребенок видел свою работу и мог корректировать движения.\n\n🔹 Осознанность\nСтремитесь к тому, чтобы ребенок запоминал названия упражнений и выполнял их четко и технично.\n\nГлавный секрет успеха: Сочетание дисциплины, игры и безусловной поддержки!"
-    },
-    {
-      "id": 1772351534148,
-      "name": "Как проходить тестирование в «Гоше»",
-      "body": "Для чего это нужно\nТестирование показывает, что ребёнок уже освоил, а что стоит подтянуть. Это не экзамен и не оценка — это карта развития. Результат помогает понять, на какие занятия сделать упор в ближайшие месяцы.\nТест проверяет четыре области: мышление, речь, моторику и понимание эмоций. Задания адаптируются под возраст: от 3 до 7 лет.\n\nПеред началом\nВыберите спокойное время. Ребёнок не должен быть голодным, уставшим или перевозбуждённым. Лучшее время — утро или после дневного сна.\nУберите отвлекающее. Выключите телевизор, уберите другие гаджеты. Тестирование занимает 10–15 минут, и важно, чтобы ребёнок не отвлекался.\nНастройтесь сами. Ваша задача — просто быть рядом и поддерживать. Не подсказывайте, не торопите, не расстраивайтесь из-за ошибок. Ребёнок считывает ваши эмоции.\n\nПервый запуск\n\nНа главном экране нажмите карточку «Тестирование»\nВыберите возрастную группу ребёнка: 3–4, 4–5, 5–6 или 6–7 лет\nПоявится приветствие — нажмите «Начинаем!»\n\nЕсли ребёнок между возрастами (например, 4 года и 10 месяцев) — выбирайте старшую группу. Лучше увидеть реальную картину, чем получить завышенный результат.\n\nКак проходит тест\nТест состоит из четырёх блоков. Между блоками — короткие паузы с похвалой.\n🧠 Блок 1: Мышление\n\nСчёт — на экране появляются предметы (яблоки, мячики), ребёнок считает и нажимает правильное число\nЦвета — найти шарик названного цвета\nФормы — найти названную фигуру среди нескольких\nЛишний — четыре картинки, одна не подходит к остальным\nПоследовательность — расставить картинки по порядку (что было сначала, что потом)\n\nКак помочь: Если ребёнок не понимает задание, прочитайте вслух инструкцию на экране. Но не показывайте на правильный ответ.\n💬 Блок 2: Речь\n\nСловарный запас — назвать предмет, подобрать обобщающее слово или антоним\nГрамматика (с 5 лет) — выбрать правильную форму слова\n\nКак помочь: Для младших детей (3–4) можно прочитать варианты ответов вслух. Ребёнок показывает пальцем или называет ответ, а вы нажимаете.\n✋ Блок 3: Моторика\n\nМонетки в копилку — перетащить пальцем все монетки в свинку-копилку\nУзор из точек — повторить рисунок точек по образцу\n\nКак помочь: Убедитесь, что ребёнок держит телефон удобно (или положите на стол). Для задания с точками покажите, как нажимать на клеточки, на одном примере.\n❤️ Блок 4: Эмоции и общение\n\nРаспознавание эмоций — что чувствует ребёнок на картинке?\nСитуации — как правильно поступить?\nСамообслуживание — чеклист «что я умею делать сам»\n\nКак помочь: Прочитайте ситуацию вслух. В чеклисте самообслуживания отмечайте вместе — спросите: «А ты умеешь мыть руки сам? А обувь надевать?»\n\nПосле теста\nНа экране результатов вы увидите:\n\nОбщий процент — насколько ребёнок справился с заданиями для своего возраста\nПаутинная диаграмма — наглядно видно сильные и слабые стороны\nОценка по каждому блоку с цветовой шкалой\n«Чем заняться» — конкретные упражнения для тех областей, которые стоит развивать\n\nЧто означают оценки\nРезультатЧто значит80–100%Уверенное владение — ребёнок освоил навыки для своего возраста60–79%Формируется — всё в рамках нормы, продолжайте заниматься40–59%Требует внимания — стоит уделить больше времени этой области0–39%Нужна практика — есть над чем поработать, но это не повод для тревоги\n\nПолный тест и мини-тесты\nПолный тест проходит все четыре блока подряд. Рекомендуем проходить раз в 2–3 месяца, чтобы видеть динамику.\nМини-тесты проверяют один блок. Удобно, если хотите быстро оценить прогресс в конкретной области — например, после месяца занятий речью.\nНа дашборде кнопки мини-тестов расположены под основной кнопкой: 🧠 Когниция, 💬 Речь, ✋ Моторика, ❤️ Социум.\n\nЧастые вопросы\nРебёнок не хочет продолжать.\nНе настаивайте. Закройте тест и вернитесь к нему позже. Результат не сохранится, но это лучше, чем слёзы и негативная ассоциация с заданиями.\nРебёнок нажимает наугад.\nЕсли видите, что ребёнок тычет не глядя — мягко остановите: «Давай посмотрим вместе, не торопись». Если не помогает — отложите тест.\nРезультат очень низкий.\nТест отражает один конкретный момент. Ребёнок мог устать, отвлечься, не понять формат задания. Попробуйте через пару дней. Если результат стабильно низкий в одной области — просто больше занимайтесь этим направлением, используя рекомендации из раздела «Чем заняться».\nМожно ли проходить несколько раз подряд?\nМожно, но неинформативно. Ребёнок запомнит ответы, и результат будет завышен. Оптимальный интервал между полными тестами — 2–3 месяца.\nНужно ли сидеть рядом?\nДля детей 3–5 лет — обязательно. Читайте задания вслух, помогайте с навигацией. Для 6–7 лет — ребёнок может справиться сам, но будьте рядом на случай вопросов.\n\nГлавное правило\nХвалите за старание, а не за результат. «Ты так внимательно считал!» лучше, чем «Молодец, всё правильно!». Ребёнок должен чувствовать, что тестирование — это игра, а не проверка."
-    }
-  ],
+  "info": [],
   "notifications": [],
-  "exportedAt": "2026-03-02T14:37:34.998Z"
+  "exportedAt": "2026-03-03T10:08:41.037Z"
 }

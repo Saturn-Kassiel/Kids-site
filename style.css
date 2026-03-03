@@ -755,6 +755,53 @@ section.hidden { display: none !important; }
     .deeplink-btn:active { opacity: 1; background: var(--card2); color: #54ACBF; border-color: #54ACBF; }
 }
 
+/* ── Song chips (tag filters) ── */
+.song-chips {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 10px;
+}
+#songs { overflow-x: hidden; }
+.song-chip {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--card);
+    font-size: 13px; font-family: var(--font); color: var(--text2);
+    cursor: pointer; transition: all var(--tr); white-space: nowrap;
+    box-shadow: var(--shadow);
+}
+.song-chip:hover { background: var(--card2); color: var(--text); }
+.song-chip:active { transform: scale(0.95); }
+.song-chip.active {
+    background: var(--grad, linear-gradient(135deg, #a78bfa, #7c3aed));
+    color: #fff; border-color: transparent;
+}
+.chip-badge {
+    display: inline-block; min-width: 16px; padding: 0 5px;
+    border-radius: 10px; background: rgba(255,255,255,0.25);
+    font-size: 11px; font-weight: 700; text-align: center;
+    margin-left: 3px; line-height: 16px;
+}
+
+/* ── Song favorite button ── */
+.song-fav-btn {
+    flex-shrink: 0; background: none; border: none;
+    font-size: 16px; cursor: pointer; padding: 2px 4px;
+    opacity: 0.4; transition: all 0.2s; line-height: 1;
+}
+.song-fav-btn:hover { opacity: 1; transform: scale(1.2); }
+.song-fav-btn:active { transform: scale(0.9); }
+.song-fav-btn.fav-active { opacity: 1; }
+.song-item:hover .song-fav-btn { opacity: 0.7; }
+.song-item:hover .song-fav-btn.fav-active { opacity: 1; }
+@media (hover: none) {
+    .song-fav-btn { opacity: 0.5; }
+    .song-fav-btn.fav-active { opacity: 1; }
+}
+
+/* ── Song empty state ── */
+.song-empty {
+    text-align: center; padding: 32px 20px; color: var(--text2);
+    font-size: 14px; line-height: 1.6;
+}
+
 /* ===== RIDDLES / PUZZLES ===== */
 .riddle-card {
     background: var(--card);

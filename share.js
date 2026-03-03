@@ -126,10 +126,7 @@ const ShareHelper = {
         if (!cfg) return;
 
         const url = this.BASE_URL + '#' + sectionId;
-        const childN = typeof getChildName === 'function' ? getChildName() : '';
-        const text = childN
-            ? `${cfg.cta} мини школе Гоша! 🎓\nПрисоединяйся: ${url}`
-            : `${cfg.cta} мини школе Гоша! 🎓\nПрисоединяйся: ${url}`;
+        const text = `${cfg.cta} мини школе Гоша! 🎓\nПрисоединяйся: ${url}`;
 
         try {
             const blob = await this._generateImage(sectionId);

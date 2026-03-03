@@ -4,7 +4,7 @@
 //  runtime), Data (Network First), Range Request support
 // ═══════════════════════════════════════════════════════
 
-const CACHE_VERSION = 6;
+const CACHE_VERSION = 16;
 const CACHE_SHELL = `gosha-shell-v${CACHE_VERSION}`;
 const CACHE_MEDIA = `gosha-media-v${CACHE_VERSION}`;
 const CACHE_DATA  = `gosha-data-v${CACHE_VERSION}`;
@@ -36,6 +36,7 @@ const SHELL_URLS = [
     '/Kids-site/js/init.js',
     '/Kids-site/testing.js',
     '/Kids-site/testing.css',
+    '/Kids-site/testing-data.json',
     '/Kids-site/share.js',
     '/Kids-site/style.css',
     '/Kids-site/manifest.json',
@@ -56,29 +57,33 @@ const isDataJSON = (url) =>
     url.href.includes('raw.githubusercontent.com') && url.pathname.endsWith('.json');
 
 const isShell = (url) =>
-    url.pathname.match(/\.(html|css|js)(\?|$)/i) ||
+    url.pathname.match(/\.(html|css|js|json)(\?|$)/i) ||
     url.pathname.endsWith('/Kids-site/') ||
     url.href.includes('cdn.jsdelivr.net');
 
 
 // ═══════════════════════════════════════════════════════
 //  INSTALL — предкэшируем App Shell
+//  Promise.allSettled: если одна URL недоступна, остальные
+//  всё равно кэшируются (CDN может тормозить)
 // ═══════════════════════════════════════════════════════
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_SHELL)
-            .then(cache => cache.addAll(SHELL_URLS))
-            .then(() => self.skipWaiting())
-            .catch(err => {
-                console.warn('[SW] Shell precache partial fail:', err);
-                return self.skipWaiting();
-            })
+        caches.open(CACHE_SHELL).then(cache =>
+            Promise.allSettled(
+                SHELL_URLS.map(url =>
+                    cache.add(url).catch(err => {
+                        console.warn('[SW] Failed to cache:', url, err);
+                    })
+                )
+            )
+        ).then(() => self.skipWaiting())
     );
 });
 
 
 // ═══════════════════════════════════════════════════════
-//  ACTIVATE — удаляем старые кэши
+//  ACTIVATE — удаляем старые кэши + чистим медиа
 // ═══════════════════════════════════════════════════════
 self.addEventListener('activate', (event) => {
     const currentCaches = [CACHE_SHELL, CACHE_MEDIA, CACHE_DATA];
@@ -88,6 +93,7 @@ self.addEventListener('activate', (event) => {
                 keys.filter(k => !currentCaches.includes(k))
                     .map(k => caches.delete(k))
             ))
+            .then(() => trimMediaCache())
             .then(() => self.clients.claim())
     );
 });
@@ -256,7 +262,6 @@ async function handleRangeRequest(request) {
 
 /**
  * Ограничиваем медиа-кэш (максимум 80 записей).
- * Вызывается периодически.
  */
 async function trimMediaCache(maxEntries = 80) {
     const cache = await caches.open(CACHE_MEDIA);
@@ -267,11 +272,6 @@ async function trimMediaCache(maxEntries = 80) {
         await Promise.all(toDelete.map(k => cache.delete(k)));
     }
 }
-
-// Периодическая очистка при activate
-self.addEventListener('activate', () => {
-    trimMediaCache();
-});
 
 
 // ═══════════════════════════════════════════════════════

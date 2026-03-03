@@ -3,7 +3,7 @@
 // =============================================
 document.addEventListener('DOMContentLoaded', async () => {
     initTelegramWebApp();
-    notifyTelegramVisit();
+    // notifyTelegramVisit(); // отключено — уведомления о входе через Telegram
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;
     const deepLinkMatch = deepLinkHash.match(/^#(song|podcast|info)-(\d+)$/);

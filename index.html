@@ -14,10 +14,10 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="testing.css">
     <!-- Apply saved theme instantly to prevent flash -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
     <script>
         (function(){
-            var t = localStorage.getItem('theme');
+            var t; try { t = localStorage.getItem('theme'); } catch(e) {}
             if (t) document.documentElement.setAttribute('data-theme', t);
             var m = document.querySelector('meta[name="theme-color"]');
             if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
@@ -41,7 +41,7 @@
             }
         })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" async></script>
 </head>
 <body>
 
@@ -785,6 +785,19 @@
             <option value="medium">Средний</option>
             <option value="hard">Сложный</option>
         </select>
+        <select id="m-tag" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;display:none;">
+            <option value="">Подборка (необязательно)</option>
+            <option value="animals">🐾 Животные</option>
+            <option value="months">📅 Месяцы и времена года</option>
+            <option value="holiday">🎄 Праздники</option>
+            <option value="family">👨‍👩‍👧 Семья</option>
+            <option value="learning">📚 Обучающие</option>
+            <option value="sleep">🌙 Колыбельные</option>
+        </select>
+        <div id="m-video-wrap" style="display:none;margin-bottom:8px;">
+            <input type="text" id="m-video" placeholder="Видео/фото (путь к файлу)" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-size:14px;color:var(--text);outline:none;">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;padding:0 4px;">Пример: assets/video/songs_video/name.mp4 · Пусто = видео по умолчанию</div>
+        </div>
         <div class="m-current-file" id="m-current-file"></div>
         <img id="m-pic-preview" src="" alt="Превью картинки">
         <label class="file-label">
@@ -800,37 +813,37 @@
 </div>
 
 <!-- ── Core & Utilities ── -->
-<script src="js/core.js"></script>
-<script src="js/answer-checker.js"></script>
-<script src="js/sounds.js"></script>
-<script src="js/gosha.js"></script>
-<script src="js/audio-mgr.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/answer-checker.js"></script>
+<script defer src="js/sounds.js"></script>
+<script defer src="js/gosha.js"></script>
+<script defer src="js/audio-mgr.js"></script>
 
 <!-- ── Data & Progress ── -->
-<script src="js/stat-tracker.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/badges.js"></script>
+<script defer src="js/stat-tracker.js"></script>
+<script defer src="js/achievements.js"></script>
+<script defer src="js/badges.js"></script>
 
 <!-- ── Sections ── -->
-<script src="js/media.js"></script>
-<script src="js/words.js"></script>
-<script src="js/arithmetic.js"></script>
-<script src="js/songs.js"></script>
-<script src="js/podcasts.js"></script>
-<script src="js/puzzles.js"></script>
-<script src="js/riddles.js"></script>
-<script src="js/info.js"></script>
-<script src="js/stats.js"></script>
+<script defer src="js/media.js"></script>
+<script defer src="js/words.js"></script>
+<script defer src="js/arithmetic.js"></script>
+<script defer src="js/songs.js"></script>
+<script defer src="js/podcasts.js"></script>
+<script defer src="js/puzzles.js"></script>
+<script defer src="js/riddles.js"></script>
+<script defer src="js/info.js"></script>
+<script defer src="js/stats.js"></script>
 
 <!-- ── Admin & Infrastructure ── -->
-<script src="js/admin.js"></script>
-<script src="js/interstitials.js"></script>
-<script src="js/notif.js"></script>
-<script src="js/init.js"></script>
+<script defer src="js/admin.js"></script>
+<script defer src="js/interstitials.js"></script>
+<script defer src="js/notif.js"></script>
+<script defer src="js/init.js"></script>
 
 <!-- ── Extra modules ── -->
-<script src="testing.js"></script>
-<script src="share.js"></script>
+<script defer src="testing.js"></script>
+<script defer src="share.js"></script>
 
 <!-- BATCH UPLOAD MODAL -->
 <div class="modal-overlay hidden" id="batch-modal" onclick="Admin.closeBatch(event)">

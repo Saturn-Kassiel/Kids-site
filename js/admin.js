@@ -9,19 +9,26 @@ const Admin = {
         // Seed defaults with full data
         const defaults = {
             songs: [
-                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3' },
-                { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3' },
-                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3' },
-                { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3' },
-                { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3' },
-                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3' },
-                { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3' },
-                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3' },
-                { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3' },
-                { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3' },
-                { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3' },
-                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3' },
-                { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3' },
+                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'],   video:'assets/video/songs_video/kolybelnaya.mp4' },
+                { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',      tags:['family'] },
+                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
+                { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',tags:['holiday'] },
+                { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3',     tags:['months'] },
+                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3',        tags:['animals'], video:'assets/video/songs_video/pesenka_pro_lva.mp4' },
+                { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3',    tags:['learning'] },
+                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3',   tags:['animals'], video:'assets/video/songs_video/pesenka_pro_nosoroga.mp4' },
+                { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3',       tags:['family'] },
+                { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3',   tags:['learning'] },
+                { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3',     tags:['months'] },
+                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_zebru.mp4' },
+                { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3',tags:['holiday'] },
+                { id:14, name:'Песенка про Рождество',    duration:'', src:'assets/audio/songs/rodgestvo.mp3',              tags:['holiday'] },
+                { id:15, name:'Песенка про Весну',        duration:'', src:'assets/audio/songs/vesna.mp3',                  tags:['months'] },
+                { id:16, name:'Песенка про Енота',        duration:'', src:'assets/audio/songs/енот.mp3',                   tags:['animals'] },
+                { id:17, name:'Песенка про Ленивца',      duration:'', src:'assets/audio/songs/lenivetc.mp3',               tags:['animals'] },
+                { id:18, name:'Песенка про Март',         duration:'', src:'assets/audio/songs/mart.mp3',                   tags:['months'] },
+                { id:19, name:'Песенка про Шакала',       duration:'', src:'assets/audio/songs/shakal.mp3',                 tags:['animals'] },
+                { id:20, name:'Песенка про Волка',        duration:'', src:'assets/audio/songs/volk.mp3',                   tags:['animals'] },
             ],
             podcasts: [
                 { id:1, name:'Благодарность',    desc:'', duration:'', src:'assets/audio/podcasts/blagodarnost.mp3' },
@@ -171,6 +178,7 @@ const Admin = {
                 this._setData(this._tab, this._getData(this._tab).filter(i => i.id !== parseInt(btn.dataset.id)));
                 this.render();
                 showToast('🗑️ Удалено');
+                this._autoSync();
             });
         }));
         list.querySelectorAll('.admin-edit').forEach(btn => btn.addEventListener('click', () => {
@@ -296,6 +304,19 @@ const Admin = {
         document.getElementById('m-hint').value   = item ? (item.hint  || item.img || '') : '';
         document.getElementById('m-level').value  = item ? (item.level || '') : '';
 
+        // Tag selector for songs
+        const tagSel = document.getElementById('m-tag');
+        if (tagSel) {
+            tagSel.style.display = this._tab === 'songs' ? 'block' : 'none';
+            tagSel.value = item && item.tags && item.tags.length ? item.tags[0] : '';
+        }
+
+        // Video/photo field for songs
+        const videoWrap = document.getElementById('m-video-wrap');
+        const videoInput = document.getElementById('m-video');
+        if (videoWrap) videoWrap.style.display = this._tab === 'songs' ? 'block' : 'none';
+        if (videoInput) videoInput.value = item ? (item.video || '') : '';
+
         // Reset file input
         const fileInput = document.getElementById('m-file');
         if (fileInput) fileInput.value = '';
@@ -368,6 +389,8 @@ const Admin = {
             const na = document.getElementById('m-name-area');  if (na) na.value = '';
             const nd = document.getElementById('m-desc');       if (nd) nd.value = '';
             const nb = document.getElementById('m-body');       if (nb) nb.value = '';
+            const nt = document.getElementById('m-tag');        if (nt) nt.value = '';
+            const nv = document.getElementById('m-video');      if (nv) nv.value = '';
         }
     },
 
@@ -448,7 +471,12 @@ const Admin = {
                 id, name,
                 desc:     isPodcast ? descVal : '',
                 duration: existing ? (existing.duration || '') : '',
-                src:      this._editSrc || (existing ? (existing.src || '') : '')
+                src:      this._editSrc || (existing ? (existing.src || '') : ''),
+                tags:     this._tab === 'songs' ? (function() {
+                    const v = document.getElementById('m-tag')?.value;
+                    return v ? [v] : (existing && existing.tags ? existing.tags : []);
+                })() : undefined,
+                video:    this._tab === 'songs' ? (document.getElementById('m-video')?.value.trim() || '') : undefined
             };
         } else if (this._tab === 'riddles') {
             newItem = {
@@ -485,7 +513,12 @@ const Admin = {
         this._setData(this._tab, items);
         this.closeModal();
         this.render();
-        if (this._tab === 'songs') Songs._allSongs = this._getData('songs').map(s => ({...s}));
+        if (this._tab === 'songs') {
+            Songs._allSongs = this._getData('songs').map(s => ({...s}));
+            Songs._allSongs.forEach(s => {
+                if (!s.tags || !s.tags.length) s.tags = Songs._getTagsForSong(s);
+            });
+        }
         if (this._tab === 'podcasts') Podcasts._allPodcasts = this._getData('podcasts').map(p => ({...p}));
         if (this._tab === 'puzzles') {
             const saved = this._getData('puzzles');
@@ -501,6 +534,81 @@ const Admin = {
         if (this._tab === 'info') Info.render();
         this._updatePendingBadge();
         showToast(this._editId ? '✅ Изменения сохранены' : '✅ Добавлено');
+
+        // Авто-синхронизация data.json
+        this._autoSync();
+    },
+
+    // ── Собрать актуальный data.json из localStorage ──
+    _buildDataJson() {
+        return {
+            songs:    this._getData('songs'),
+            podcasts: this._getData('podcasts'),
+            puzzles:  this._getData('puzzles'),
+            riddles:  this._getData('riddles'),
+            info:     this._getData('info'),
+            notifications: this._getData('notif').filter(n => !n.auto),
+            exportedAt: new Date().toISOString()
+        };
+    },
+
+    // ── Авто-синхронизация: GitHub (если токен) или скачивание ──
+    async _autoSync() {
+        const data = this._buildDataJson();
+        const jsonStr = JSON.stringify(data, null, 2);
+        const token = localStorage.getItem('gh_token');
+
+        if (token) {
+            // Пуш на GitHub
+            const REPO   = 'Saturn-Kassiel/Kids-site';
+            const FILE   = 'data.json';
+            const BRANCH = 'main';
+            const headers = {
+                'Authorization': `token ${token}`,
+                'Content-Type':  'application/json',
+                'Accept':        'application/vnd.github.v3+json'
+            };
+            try {
+                const content = btoa(unescape(encodeURIComponent(jsonStr)));
+                const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+                let sha = null;
+                try {
+                    const gr = await fetch(apiUrl + `?ref=${BRANCH}`, { headers });
+                    if (gr.ok) { const gj = await gr.json(); sha = gj.sha; }
+                } catch (_) {}
+                const body = {
+                    message: `📱 Авто: ${new Date().toLocaleString('ru')}`,
+                    content, branch: BRANCH, ...(sha ? { sha } : {})
+                };
+                const resp = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(body) });
+                if (resp.ok) {
+                    showToast('☁️ data.json → GitHub');
+                    localStorage.setItem('gh_data_updated', 'true');
+                } else {
+                    // GitHub не доступен — скачиваем как fallback
+                    this._downloadDataJson(jsonStr);
+                }
+            } catch (e) {
+                console.warn('Auto-push failed:', e);
+                this._downloadDataJson(jsonStr);
+            }
+        } else {
+            // Нет токена — скачиваем файл
+            this._downloadDataJson(jsonStr);
+        }
+    },
+
+    _downloadDataJson(jsonStr) {
+        try {
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('💾 data.json скачан');
+        } catch (e) { console.warn('Download failed:', e); }
     },
 
 
