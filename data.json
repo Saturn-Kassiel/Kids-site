@@ -77,9 +77,7 @@
       "desc": "",
       "duration": "",
       "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3",
-      "tags": [
-        "learning"
-      ],
+      "tags": [],
       "video": "assets\\video\\songs_video\\clean.mp4"
     },
     {
@@ -800,5 +798,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T15:44:38.532Z"
+  "exportedAt": "2026-03-03T15:49:18.366Z"
 }
