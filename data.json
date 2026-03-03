@@ -60,7 +60,9 @@
       "name": "Песенка про Носорога",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3"
+      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\nosorog.mp4"
     },
     {
       "id": 9,
@@ -88,7 +90,9 @@
       "name": "Песенка про Зебру",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_zebru.mp3"
+      "src": "assets/audio/songs/pesenka_pro_zebru.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\zebra.mp4"
     },
     {
       "id": 13,
@@ -784,5 +788,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T13:24:33.373Z"
+  "exportedAt": "2026-03-03T13:25:54.843Z"
 }
