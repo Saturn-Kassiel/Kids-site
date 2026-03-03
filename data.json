@@ -22,7 +22,9 @@
       "name": "Песенка про Cлона",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_clona.mp3"
+      "src": "assets/audio/songs/pesenka_pro_clona.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\slon.mp4"
     },
     {
       "id": 4,
@@ -780,5 +782,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T13:03:54.286Z"
+  "exportedAt": "2026-03-03T13:23:07.111Z"
 }
