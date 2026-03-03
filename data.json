@@ -121,6 +121,13 @@
       "desc": "",
       "duration": "",
       "src": ""
+    },
+    {
+      "id": 1772516817651,
+      "name": "Песенка про Шакала",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/шакал.mp3"
     }
   ],
   "podcasts": [
@@ -743,5 +750,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-02T14:37:34.998Z"
+  "exportedAt": "2026-03-03T05:47:11.710Z"
 }
