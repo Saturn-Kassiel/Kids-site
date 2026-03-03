@@ -121,7 +121,9 @@
       "name": "Песенка про Енота",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/енот.mp3"
+      "src": "assets/audio/songs/енот.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\enot.mp4"
     },
     {
       "id": 1772458162146,
@@ -790,5 +792,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T14:06:00.108Z"
+  "exportedAt": "2026-03-03T15:05:56.656Z"
 }
