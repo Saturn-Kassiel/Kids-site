@@ -132,7 +132,9 @@
       "name": "Песенка про Шакала",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/shakal.mp3"
+      "src": "assets/audio/songs/shakal.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\shakal.mp4"
     },
     {
       "id": 1772521779387,
@@ -778,5 +780,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T13:02:11.156Z"
+  "exportedAt": "2026-03-03T13:03:54.286Z"
 }
