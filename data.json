@@ -130,7 +130,11 @@
       "name": "Песенка про Ленивца",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/ленивец.mp3"
+      "src": "assets/audio/songs/ленивец.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets\\video\\songs_video\\leni.mp4"
     },
     {
       "id": 1772462249957,
@@ -792,5 +796,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T15:05:56.656Z"
+  "exportedAt": "2026-03-03T15:06:57.820Z"
 }
