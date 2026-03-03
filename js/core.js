@@ -34,6 +34,10 @@ const App = {
         else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
         if (isMain) CardBadges.updateAll();
         window.scrollTo(0, 0);
+        // Stop songs/video when leaving section
+        if (id !== 'songs' && typeof Songs !== 'undefined' && Songs.index !== -1) {
+            Songs.destroy();
+        }
         // Управляем кнопками топ-бара
         if (id === 'puzzles') {
             Puzzles._renderLevelDots();

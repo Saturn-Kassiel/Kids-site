@@ -11,6 +11,11 @@ const Songs = {
     _activeTag: 'all',
     _searchQ: '',
     _favorites: new Set(),
+    _videoLoadId: 0, // guard against race conditions (fix #7)
+
+    // ── SVG icons for play/pause button (fix #5) ──
+    SVG_PLAY:  '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>',
+    SVG_PAUSE: '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>',
 
     // ── Tag definitions ──
     TAG_DEFS: [
@@ -63,10 +68,8 @@ const Songs = {
 
     _getTagsForSong(song) {
         if (song.tags && song.tags.length) return song.tags;
-        // Try by filename
         const fname = (song.src || '').split('/').pop().replace(/\.[^.]+$/, '');
         if (fname && this._TAGS_BY_FILE[fname]) return this._TAGS_BY_FILE[fname];
-        // Fallback: match song name against keywords
         const nl = (song.name || '').toLowerCase();
         for (const [keywords, tag] of this._TAG_KEYWORDS) {
             if (keywords.some(k => nl.includes(k))) return [tag];
@@ -78,6 +81,41 @@ const Songs = {
     DEFAULT_POSTER: 'assets/images/links_pictures_opt/slushaet.webp',
     DEFAULT_VIDEO:  'assets/video/servis_video/slushaet.mp4',
 
+    // ── Per-song posters (fix #2) ──
+    // Unique poster for every song so the child always sees a relevant image
+    _POSTER_BY_FILE: {
+        'kolybelnaya':             'assets/images/songs_posters/kolybelnaya.webp',
+        'pesenka_dlya_mamy':       'assets/images/songs_posters/mama.webp',
+        'pesenka_pro_clona':       'assets/images/songs_posters/slon.webp',
+        'pesenka_pro_deda_moroza': 'assets/images/songs_posters/ded_moroz.webp',
+        'pesenka_pro_fevral':      'assets/images/songs_posters/fevral.webp',
+        'pesenka_pro_lva':         'assets/images/songs_posters/lev.webp',
+        'pesenka_pro_nedelyu':     'assets/images/songs_posters/nedelya.webp',
+        'pesenka_pro_nosoroga':    'assets/images/songs_posters/nosorog.webp',
+        'pesenka_pro_papu':        'assets/images/songs_posters/papa.webp',
+        'pesenka_pro_umyvanie':    'assets/images/songs_posters/umyvanie.webp',
+        'pesenka_pro_yanvar':      'assets/images/songs_posters/yanvar.webp',
+        'pesenka_pro_zebru':       'assets/images/songs_posters/zebra.webp',
+        'v_lesu_rodilas_yolochka': 'assets/images/songs_posters/yolochka.webp',
+        'rodgestvo':               'assets/images/songs_posters/rozhdestvo.webp',
+        'vesna':                   'assets/images/songs_posters/vesna.webp',
+        '\u0435\u043d\u043e\u0442': 'assets/images/songs_posters/enot.webp',
+        'lenivetc':                'assets/images/songs_posters/lenivec.webp',
+        'mart':                    'assets/images/songs_posters/mart.webp',
+        'shakal':                  'assets/images/songs_posters/shakal.webp',
+        'volk':                    'assets/images/songs_posters/volk.webp',
+    },
+
+    _getPosterForSong(song) {
+        // 1. Explicit poster in data
+        if (song.poster) return song.poster;
+        // 2. Lookup by audio filename
+        const fname = (song.src || '').split('/').pop().replace(/\.[^.]+$/, '');
+        if (fname && this._POSTER_BY_FILE[fname]) return this._POSTER_BY_FILE[fname];
+        // 3. Default
+        return this.DEFAULT_POSTER;
+    },
+
     _VIDEO_BY_FILE: {
         'kolybelnaya':          'assets/video/songs_video/kolybelnaya.mp4',
         'pesenka_pro_clona':    'assets/video/songs_video/pesenka_pro_slona.mp4',
@@ -87,27 +125,37 @@ const Songs = {
     },
 
     _getVideoForSong(song) {
-        // 1. Explicit video from data.json or admin
         if (song.video) {
-            let v = song.video.replace(/^["']+|["']+$/g, ''); // strip quotes
-            // Ignore absolute Windows paths
+            let v = song.video.replace(/^["']+|["']+$/g, '');
             if (v.match(/^[A-Z]:\\/i) || v.startsWith('file://')) return this.DEFAULT_VIDEO;
             return v;
         }
-        // 2. Lookup by audio filename
         const fname = (song.src || '').split('/').pop().replace(/\.[^.]+$/, '');
         if (fname && this._VIDEO_BY_FILE[fname]) return this._VIDEO_BY_FILE[fname];
-        // 3. Default video for all others
         return this.DEFAULT_VIDEO;
     },
 
+    // Inject CSS once (no external file needed)
+    _injectCSS() {
+        if (document.getElementById('songs-shimmer-css')) return;
+        const style = document.createElement('style');
+        style.id = 'songs-shimmer-css';
+        style.textContent =
+            '#song-poster{transition:opacity .3s ease}' +
+            '#song-poster.poster-loading{animation:poster-shimmer 1.8s ease-in-out infinite}' +
+            '@keyframes poster-shimmer{0%,100%{opacity:1}50%{opacity:.7}}' +
+            '#song-video{animation:fade-in-video .4s ease}' +
+            '@keyframes fade-in-video{from{opacity:0}to{opacity:1}}';
+        document.head.appendChild(style);
+    },
+
     init() {
+        this._injectCSS();
         App.navigate('songs', 'Песенки');
         AudioMgr.stop();
 
         this._loadFavorites();
 
-        // Load from admin data or defaults
         const saved = this._loadData();
         const defaults = [
             { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',             video:'assets/video/songs_video/kolibelnaya.mp4' },
@@ -133,32 +181,28 @@ const Songs = {
         ];
 
         if (saved.length) {
-            // Migrate: fix old Cyrillic filenames → new Latin filenames
             const SRC_MIGRATION = {
                 'рождество_.mp3':       'rodgestvo.mp3',
                 'песенка_про_весну.mp3': 'vesna.mp3',
                 'ленивец.mp3':          'lenivetc.mp3',
                 'март.mp3':             'mart.mp3',
-                'енот.mp3':             'енот.mp3',  // без изменений, но нормализуем поиск
+                'енот.mp3':             'енот.mp3',
             };
             const NAME_TO_SRC = {
                 'Песнка про Март':      'assets/audio/songs/mart.mp3',
                 'Песенка про Март':     'assets/audio/songs/mart.mp3',
             };
             saved.forEach(s => {
-                // Fix renamed files
                 const fname = (s.src || '').split('/').pop();
                 if (SRC_MIGRATION[fname]) {
                     s.src = 'assets/audio/songs/' + SRC_MIGRATION[fname];
                 }
-                // Fix songs with empty src
                 if (!s.src && NAME_TO_SRC[s.name]) {
                     s.src = NAME_TO_SRC[s.name];
                 }
             });
 
             this._allSongs = saved;
-            // Merge: add any default songs missing from localStorage (by src filename)
             const existingSrcs = new Set(saved.map(s => (s.src || '').split('/').pop()));
             defaults.forEach(def => {
                 const defFile = def.src.split('/').pop();
@@ -170,7 +214,6 @@ const Songs = {
             this._allSongs = defaults;
         }
 
-        // Ensure all songs have tags array
         this._allSongs.forEach(s => {
             if (!s.tags || !s.tags.length) s.tags = this._getTagsForSong(s);
         });
@@ -187,10 +230,45 @@ const Songs = {
             const song = this._allSongs[this.index];
             if (song) CardBadges.markTried('songs', song.id);
             if (this.isRepeat) { this.play(this.index); return; }
-            document.getElementById('song-play-btn').textContent = '▶';
+            this._setPlayBtn(false);
             setTimeout(() => this.nextSong(), 1000);
         };
         this._loadDurations();
+    },
+
+    // ── Cleanup when leaving the section (fix #6) ──
+    destroy() {
+        // Stop audio
+        this.audio.pause();
+        this.audio.currentTime = 0;
+
+        // Stop & reset video
+        const songVid = document.getElementById('song-video');
+        if (songVid) {
+            songVid.pause();
+            songVid.removeAttribute('src');
+            songVid.load(); // release resources
+            songVid.style.display = 'none';
+        }
+
+        // Show poster again
+        const songPoster = document.getElementById('song-poster');
+        if (songPoster) {
+            songPoster.style.display = 'block';
+            songPoster.classList.remove('poster-loading');
+        }
+
+        // Reset play button
+        this._setPlayBtn(false);
+        this.index = -1;
+        this._videoLoadId++; // cancel any pending video loads
+    },
+
+    // ── Play/Pause button helper (fix #5) ──
+    _setPlayBtn(isPlaying) {
+        const btn = document.getElementById('song-play-btn');
+        if (!btn) return;
+        btn.innerHTML = isPlaying ? this.SVG_PAUSE : this.SVG_PLAY;
     },
 
     // ── Favorites ──
@@ -216,17 +294,15 @@ const Songs = {
             this._favorites.add(songId);
         }
         this._saveFavorites();
-        // Re-filter in case we're viewing favorites
         if (this._activeTag === 'fav') this._applyFilter();
         this.render();
-        this._renderChips(); // update fav count
+        this._renderChips();
     },
 
     // ── Tag chips ──
     _renderChips() {
         let wrap = document.getElementById('song-chips');
         if (!wrap) {
-            // Create chips container and insert before search bar
             wrap = document.createElement('div');
             wrap.id = 'song-chips';
             wrap.className = 'song-chips';
@@ -242,12 +318,11 @@ const Songs = {
         const favCount = this._favorites.size;
         wrap.innerHTML = this.TAG_DEFS.map(t => {
             const active = this._activeTag === t.id ? ' active' : '';
-            // Count songs for this tag
             let count = 0;
             if (t.id === 'all') count = this._allSongs.length;
             else if (t.id === 'fav') count = favCount;
             else count = this._allSongs.filter(s => (s.tags || []).includes(t.id)).length;
-            if (count === 0 && t.id !== 'all' && t.id !== 'fav') return ''; // hide empty tags
+            if (count === 0 && t.id !== 'all' && t.id !== 'fav') return '';
             const badge = t.id === 'fav' && favCount > 0 ? ` <span class="chip-badge">${favCount}</span>` : '';
             return `<button class="song-chip${active}" onclick="Songs.setTag('${t.id}')">${t.emoji} ${t.label}${badge}</button>`;
         }).join('');
@@ -264,14 +339,12 @@ const Songs = {
     _applyFilter() {
         let list = this._allSongs;
 
-        // Tag filter
         if (this._activeTag === 'fav') {
             list = list.filter(s => this._favorites.has(s.id));
         } else if (this._activeTag !== 'all') {
             list = list.filter(s => (s.tags || []).includes(this._activeTag));
         }
 
-        // Search filter
         if (this._searchQ) {
             const q = this._searchQ.toLowerCase();
             list = list.filter(s => s.name.toLowerCase().includes(q));
@@ -331,44 +404,66 @@ const Songs = {
         });
     },
 
-    // ── Playback ──
+    // ── Playback (fixes #1, #3, #4, #7) ──
     play(i) {
         this.index = i;
         const song = this._allSongs[i];
         this.audio.src = this._resolveAudioSrc(song.src) || '';
         AudioMgr.play(this.audio, 'songs');
-        document.getElementById('song-play-btn').textContent = '⏸';
+        this._setPlayBtn(true);
         document.getElementById('song-name').textContent = song.name;
         document.getElementById('song-sub').textContent  = song.duration || '';
         document.getElementById('song-progress-bar').style.width = '0%';
-        // Visual: poster first, video loads in background
+
+        // ── Video / poster visual (fixes #1 #2 #3 #4 #7) ──
         const songVid = document.getElementById('song-video');
         const songPoster = document.getElementById('song-poster');
         if (songVid && songPoster) {
-            // Always show poster immediately
+            // Increment load ID to invalidate any pending callbacks (fix #7)
+            const loadId = ++this._videoLoadId;
+
+            // Immediately show the correct poster for this song (fix #2)
+            songPoster.src = this._getPosterForSong(song);
             songPoster.style.display = 'block';
+            songPoster.classList.add('poster-loading'); // shimmer effect (fix #4)
+
+            // Hide & reset video element
             songVid.style.display = 'none';
             songVid.pause();
-            songVid.oncanplay = null;
-            songVid.onerror = null;
+            songVid.removeAttribute('src');
+            songVid.load(); // detach old source cleanly
 
             const videoSrc = this._getVideoForSong(song);
             console.log('[Songs] video for', song.name, '→', videoSrc);
 
-            // Set up video load — poster stays until video is ready
-            songVid.oncanplay = () => {
+            // Use onloadeddata instead of oncanplay (fix #3)
+            // Also guard with loadId against rapid switching (fix #7)
+            const onReady = () => {
+                if (this._videoLoadId !== loadId) return; // stale callback — ignore
                 console.log('[Songs] video ready:', videoSrc);
+                songPoster.classList.remove('poster-loading');
                 songPoster.style.display = 'none';
                 songVid.style.display = 'block';
+                songVid.currentTime = 0; // always start from beginning (fix #1)
                 songVid.play().catch(() => {});
-                songVid.oncanplay = null;
             };
-            songVid.onerror = (e) => {
+
+            const onError = (e) => {
+                if (this._videoLoadId !== loadId) return;
                 console.warn('[Songs] video error:', videoSrc, e);
+                songPoster.classList.remove('poster-loading');
                 songVid.style.display = 'none';
                 songPoster.style.display = 'block';
             };
+
+            songVid.onloadeddata = onReady;
+            songVid.onerror = onError;
+
+            // Set source — if already cached, readyState may jump immediately (fix #3)
             songVid.src = videoSrc;
+            if (songVid.readyState >= 2) { // HAVE_CURRENT_DATA
+                onReady();
+            }
         }
         this.render();
         this._wasPaused = false;
@@ -376,27 +471,24 @@ const Songs = {
 
     toggle() {
         if (this.index === -1) {
-            // Play first from filtered list
             if (this._filtered.length > 0) {
                 this.play(this._allSongs.indexOf(this._filtered[0]));
             }
             return;
         }
+        const vid = document.getElementById('song-video');
         if (this.audio.paused) {
             AudioMgr.play(this.audio, 'songs');
-            document.getElementById('song-play-btn').textContent = '⏸';
-            const vid = document.getElementById('song-video');
-            if (vid && vid.src) vid.play().catch(() => {});
+            this._setPlayBtn(true);
+            if (vid && vid.src && vid.style.display !== 'none') vid.play().catch(() => {});
         } else {
             this.audio.pause();
             this._wasPaused = true;
-            document.getElementById('song-play-btn').textContent = '▶';
-            const vid = document.getElementById('song-video');
+            this._setPlayBtn(false);
             if (vid) vid.pause();
         }
     },
 
-    // Navigate within _filtered list
     prev() {
         if (this._filtered.length === 0) return;
         const curSong = this._allSongs[this.index];
