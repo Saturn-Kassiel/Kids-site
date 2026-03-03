@@ -735,6 +735,13 @@
       "answer": "",
       "pic": "assets/images/riddles_pictures_opt/lenivetc.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772518978218,
+      "text": "Рыжеватый, воет звонко,\nХитрость — главный инструмент.\nЗа обедом льва в сторонке\nЖдёт он правильный момент.",
+      "answer": "Шакал",
+      "pic": "assets/images/riddles_pictures_opt/shakal.webp",
+      "level": "medium"
     }
   ],
   "info": [
@@ -750,5 +757,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T05:47:11.710Z"
+  "exportedAt": "2026-03-03T06:23:22.137Z"
 }
