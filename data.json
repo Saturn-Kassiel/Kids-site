@@ -139,7 +139,9 @@
       "name": "Песенка про Волка",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/volk.mp3"
+      "src": "assets/audio/songs/volk.mp3",
+      "tags": [],
+      "video": "C:\\Users\\Admin\\Desktop\\kids site\\assets\\video\\songs_video\\volk.mp4"
     }
   ],
   "podcasts": [
@@ -776,5 +778,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T10:34:03.892Z"
+  "exportedAt": "2026-03-03T10:43:45.500Z"
 }
