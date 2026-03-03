@@ -112,7 +112,9 @@
       "name": "Песенка про Весну",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/песенка_про_весну.mp3"
+      "src": "assets/audio/songs/песенка_про_весну.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\vesna.mp4"
     },
     {
       "id": 1772358832101,
@@ -788,5 +790,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T14:02:28.807Z"
+  "exportedAt": "2026-03-03T14:06:00.108Z"
 }
