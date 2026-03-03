@@ -4,7 +4,7 @@
 //  runtime), Data (Network First), Range Request support
 // ═══════════════════════════════════════════════════════
 
-const CACHE_VERSION = 19;
+const CACHE_VERSION = 24;
 const CACHE_SHELL = `gosha-shell-v${CACHE_VERSION}`;
 const CACHE_MEDIA = `gosha-media-v${CACHE_VERSION}`;
 const CACHE_DATA  = `gosha-data-v${CACHE_VERSION}`;

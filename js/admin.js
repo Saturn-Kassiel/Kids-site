@@ -9,7 +9,7 @@ const Admin = {
         // Seed defaults with full data
         const defaults = {
             songs: [
-                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'],   video:'assets/video/songs_video/kolybelnaya.mp4' },
+                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'],   video:'assets/video/songs_video/kolibelnaya.mp4' },
                 { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',      tags:['family'] },
                 { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
                 { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',tags:['holiday'] },

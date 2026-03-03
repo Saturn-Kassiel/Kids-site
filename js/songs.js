@@ -74,8 +74,9 @@ const Songs = {
         return [];
     },
 
-    // ── Video for songs ──
-    DEFAULT_VIDEO: 'assets/video/servis_video/slushaet.mp4',
+    // ── Visual for songs ──
+    DEFAULT_POSTER: 'assets/images/links_pictures_opt/slushaet.webp',
+    DEFAULT_VIDEO:  'assets/video/servis_video/slushaet.mp4',
 
     _VIDEO_BY_FILE: {
         'kolybelnaya':          'assets/video/songs_video/kolybelnaya.mp4',
@@ -87,11 +88,16 @@ const Songs = {
 
     _getVideoForSong(song) {
         // 1. Explicit video from data.json or admin
-        if (song.video) return song.video;
+        if (song.video) {
+            let v = song.video.replace(/^["']+|["']+$/g, ''); // strip quotes
+            // Ignore absolute Windows paths
+            if (v.match(/^[A-Z]:\\/i) || v.startsWith('file://')) return this.DEFAULT_VIDEO;
+            return v;
+        }
         // 2. Lookup by audio filename
         const fname = (song.src || '').split('/').pop().replace(/\.[^.]+$/, '');
         if (fname && this._VIDEO_BY_FILE[fname]) return this._VIDEO_BY_FILE[fname];
-        // 3. Default video
+        // 3. Default video for all others
         return this.DEFAULT_VIDEO;
     },
 
@@ -104,7 +110,7 @@ const Songs = {
         // Load from admin data or defaults
         const saved = this._loadData();
         const defaults = [
-            { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',             video:'assets/video/songs_video/kolybelnaya.mp4' },
+            { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',             video:'assets/video/songs_video/kolibelnaya.mp4' },
             { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',         video:null },
             { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',        video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
             { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',  video:null },
@@ -173,16 +179,6 @@ const Songs = {
         this._renderChips();
         this.render();
         setupProgress(this.audio, 'song-progress-bar', 'song-time-cur', 'song-time-dur', 'song-prog-wrap');
-
-        // Show default video on load
-        const songVidWrap = document.getElementById('song-video-wrap');
-        const songVid = document.getElementById('song-video');
-        if (songVidWrap && songVid && !songVid.src) {
-            songVid.src = this.DEFAULT_VIDEO;
-            songVid.load();
-            songVidWrap.style.display = 'block';
-            songVid.play().catch(() => {});
-        }
         if (!this._timeTracked) { StatTracker.trackAudioTime(this.audio, 'songs'); this._timeTracked = true; }
         this.audio.onended = () => {
             if (!this._wasPaused) {
@@ -345,35 +341,34 @@ const Songs = {
         document.getElementById('song-name').textContent = song.name;
         document.getElementById('song-sub').textContent  = song.duration || '';
         document.getElementById('song-progress-bar').style.width = '0%';
-        // Show video (always — use song-specific or default)
-        const songVidWrap = document.getElementById('song-video-wrap');
+        // Visual: poster first, video loads in background
         const songVid = document.getElementById('song-video');
-        if (songVidWrap && songVid) {
+        const songPoster = document.getElementById('song-poster');
+        if (songVid && songPoster) {
+            // Always show poster immediately
+            songPoster.style.display = 'block';
+            songVid.style.display = 'none';
+            songVid.pause();
+            songVid.oncanplay = null;
+            songVid.onerror = null;
+
             const videoSrc = this._getVideoForSong(song);
-            // Only reload if src changed
-            const currentSrc = songVid.getAttribute('src') || '';
-            if (currentSrc !== videoSrc) {
-                songVid.pause();
-                songVid.onloadeddata = () => {
-                    songVidWrap.style.display = 'block';
-                    songVid.play().catch(() => {});
-                };
-                songVid.onerror = () => {
-                    // If custom video fails, try default
-                    if (videoSrc !== this.DEFAULT_VIDEO) {
-                        songVid.src = this.DEFAULT_VIDEO;
-                        songVid.load();
-                    } else {
-                        songVidWrap.style.display = 'none';
-                    }
-                };
-                songVid.src = videoSrc;
-                songVid.load();
-            } else {
-                // Same video — just make sure it's playing
-                songVidWrap.style.display = 'block';
+            console.log('[Songs] video for', song.name, '→', videoSrc);
+
+            // Set up video load — poster stays until video is ready
+            songVid.oncanplay = () => {
+                console.log('[Songs] video ready:', videoSrc);
+                songPoster.style.display = 'none';
+                songVid.style.display = 'block';
                 songVid.play().catch(() => {});
-            }
+                songVid.oncanplay = null;
+            };
+            songVid.onerror = (e) => {
+                console.warn('[Songs] video error:', videoSrc, e);
+                songVid.style.display = 'none';
+                songPoster.style.display = 'block';
+            };
+            songVid.src = videoSrc;
         }
         this.render();
         this._wasPaused = false;
