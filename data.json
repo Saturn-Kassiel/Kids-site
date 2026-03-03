@@ -3,218 +3,147 @@
     {
       "id": 1,
       "name": "Колыбельная",
+      "desc": "",
       "duration": "",
       "src": "assets/audio/songs/kolybelnaya.mp3",
       "tags": [
         "sleep"
       ],
-      "video": "assets/video/songs_video/kolybelnaya.mp4"
+      "video": "assets\\video\\songs_video\\kolibelnaya.mp4\""
     },
     {
       "id": 2,
       "name": "Песенка для мамы",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_dlya_mamy.mp3",
-      "tags": [
-        "family"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_dlya_mamy.mp3"
     },
     {
       "id": 3,
       "name": "Песенка про Cлона",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_clona.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": "assets/video/songs_video/pesenka_pro_slona.mp4"
+      "src": "assets/audio/songs/pesenka_pro_clona.mp3"
     },
     {
       "id": 4,
       "name": "Песенка про Деда Мороза",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_deda_moroza.mp3",
-      "tags": [
-        "holiday"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_deda_moroza.mp3"
     },
     {
       "id": 5,
       "name": "Песенка про Февраль",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_fevral.mp3",
-      "tags": [
-        "months"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_fevral.mp3"
     },
     {
       "id": 6,
       "name": "Песенка про Льва",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_lva.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": "assets/video/songs_video/pesenka_pro_lva.mp4"
+      "src": "assets/audio/songs/pesenka_pro_lva.mp3"
     },
     {
       "id": 7,
       "name": "Песенка про Неделю",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nedelyu.mp3",
-      "tags": [
-        "learning"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_nedelyu.mp3"
     },
     {
       "id": 8,
       "name": "Песенка про Носорога",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": "assets/video/songs_video/pesenka_pro_nosoroga.mp4"
+      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3"
     },
     {
       "id": 9,
       "name": "Песенка про Папу",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_papu.mp3",
-      "tags": [
-        "family"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_papu.mp3"
     },
     {
       "id": 10,
       "name": "Песенка про Умывание",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3",
-      "tags": [
-        "learning"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_umyvanie.mp3"
     },
     {
       "id": 11,
       "name": "Песенка про Январь",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_yanvar.mp3",
-      "tags": [
-        "months"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/pesenka_pro_yanvar.mp3"
     },
     {
       "id": 12,
       "name": "Песенка про Зебру",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_zebru.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": "assets/video/songs_video/pesenka_pro_zebru.mp4"
+      "src": "assets/audio/songs/pesenka_pro_zebru.mp3"
     },
     {
       "id": 13,
       "name": "В лесу родилась ёлочка",
       "duration": "",
-      "src": "assets/audio/songs/v_lesu_rodilas_yolochka.mp3",
-      "tags": [
-        "holiday"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/v_lesu_rodilas_yolochka.mp3"
     },
     {
       "id": 1772279431254,
       "name": "Песенка про Рождество",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/rodgestvo.mp3",
-      "tags": [
-        "holiday"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/рождество_.mp3"
     },
     {
       "id": 1772345412199,
       "name": "Песенка про Весну",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/vesna.mp3",
-      "tags": [
-        "months"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/песенка_про_весну.mp3"
     },
     {
       "id": 1772358832101,
       "name": "Песенка про Енота",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/енот.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/енот.mp3"
     },
     {
       "id": 1772458162146,
       "name": "Песенка про Ленивца",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/lenivetc.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/ленивец.mp3"
     },
     {
       "id": 1772462249957,
-      "name": "Песенка про Март",
+      "name": "Песнка про Март",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/mart.mp3",
-      "tags": [
-        "months"
-      ],
-      "video": ""
+      "src": "assets/audio/songs/март.mp3"
     },
     {
-      "id": 1772462249958,
+      "id": 1772516817651,
       "name": "Песенка про Шакала",
       "desc": "",
       "duration": "",
       "src": "assets/audio/songs/shakal.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": ""
+      "tags": [],
+      "video": "assets\\video\\songs_video\\shakal.mp4"
     },
     {
-      "id": 1772462249959,
+      "id": 1772521779387,
       "name": "Песенка про Волка",
       "desc": "",
       "duration": "",
       "src": "assets/audio/songs/volk.mp3",
-      "tags": [
-        "animals"
-      ],
-      "video": ""
+      "tags": [],
+      "video": "assets\\video\\songs_video\\volk.mp4"
     }
   ],
   "podcasts": [
@@ -822,6 +751,20 @@
       "answer": "",
       "pic": "assets/images/riddles_pictures_opt/lenivetc.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772518978218,
+      "text": "Рыжеватый, воет звонко,\nХитрость — главный инструмент.\nЗа обедом льва в сторонке\nЖдёт он правильный момент.",
+      "answer": "Шакал",
+      "pic": "assets/images/riddles_pictures_opt/shakal.webp",
+      "level": "medium"
+    },
+    {
+      "id": 1772521854571,
+      "text": "В серой шубе, взгляд суров,\nСанитар густых лесов.\nНочью воет на луну,\nНарушая тишину.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/volk.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -837,9 +780,5 @@
     }
   ],
   "notifications": [],
-<<<<<<< HEAD
-  "exportedAt": "2026-03-02T14:37:34.998Z"
-=======
-  "exportedAt": "2026-03-03T12:03:04.781Z"
->>>>>>> 66cb87b98d747afe00e754ae2ee8658ce04d8892
+  "exportedAt": "2026-03-03T13:03:54.286Z"
 }
