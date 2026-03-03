@@ -22,7 +22,9 @@
       "name": "Песенка про Cлона",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_clona.mp3"
+      "src": "assets/audio/songs/pesenka_pro_clona.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\slon.mp4"
     },
     {
       "id": 4,
@@ -42,7 +44,9 @@
       "name": "Песенка про Льва",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_lva.mp3"
+      "src": "assets/audio/songs/pesenka_pro_lva.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\lev.mp4"
     },
     {
       "id": 7,
@@ -56,7 +60,9 @@
       "name": "Песенка про Носорога",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3"
+      "src": "assets/audio/songs/pesenka_pro_nosoroga.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\nosorog.mp4"
     },
     {
       "id": 9,
@@ -84,7 +90,9 @@
       "name": "Песенка про Зебру",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/pesenka_pro_zebru.mp3"
+      "src": "assets/audio/songs/pesenka_pro_zebru.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\zebra.mp4"
     },
     {
       "id": 13,
@@ -111,7 +119,9 @@
       "name": "Песенка про Енота",
       "desc": "",
       "duration": "",
-      "src": "assets/audio/songs/енот.mp3"
+      "src": "assets/audio/songs/енот.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\enot.mp4"
     },
     {
       "id": 1772458162146,
@@ -780,5 +790,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T13:03:54.286Z"
+  "exportedAt": "2026-03-03T13:26:38.039Z"
 }
