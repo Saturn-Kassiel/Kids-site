@@ -140,8 +140,8 @@ html.tg-webapp #app {
     height: 100vh; height: 100dvh;
 }
 html.tg-webapp #top-bar { top: var(--tg-safe-top, 0px); }
-html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
-html.tg-webapp section { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
+html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); padding-bottom: calc(var(--tg-safe-bottom, 24px) + 8px); }
+html.tg-webapp section { padding-top: calc(var(--tg-safe-top, 0px) + 58px); padding-bottom: calc(var(--tg-safe-bottom, 24px) + 8px); }
 
 /* ── PWA standalone on iPhone: hardcoded safe area ── */
 html.pwa #top-bar { top: 54px; }

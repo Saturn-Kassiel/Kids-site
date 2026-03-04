@@ -169,11 +169,12 @@ const App = {
         const REPO = 'Saturn-Kassiel/Kids-site';
 
         // Пытаемся загрузить data.json — сначала локальный, потом GitHub
+        const cacheBust = '?v=' + Math.floor(Date.now() / 300000); // меняется каждые 5 минут
         const urls = location.protocol === 'file:'
             ? ['data.json']  // локально — только рядом лежащий файл
             : [
-                'https://raw.githubusercontent.com/' + REPO + '/main/data.json',
-                'data.json'   // fallback на относительный путь
+                'https://raw.githubusercontent.com/' + REPO + '/main/data.json' + cacheBust,
+                'data.json' + cacheBust   // fallback на относительный путь
               ];
 
         let data = null;

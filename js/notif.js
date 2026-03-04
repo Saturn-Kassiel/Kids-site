@@ -260,18 +260,31 @@ function initTelegramWebApp() {
     try {
         tg.ready();
         tg.expand();
-        // Telegram SDK may provide safe area insets
-        if (tg.safeAreaInset) {
-            const top = tg.safeAreaInset.top || 0;
+
+        function applyTgInsets() {
+            // Top inset
+            const top        = tg.safeAreaInset?.top        || 0;
             const contentTop = tg.contentSafeAreaInset?.top || 0;
             document.documentElement.style.setProperty('--tg-safe-top', (top + contentTop) + 'px');
-        }
-        // Listen for viewport changes
-        tg.onEvent?.('viewportChanged', () => {
+
+            // Bottom inset — важно для iPhone home indicator
+            const bottom        = tg.safeAreaInset?.bottom        || 0;
+            const contentBottom = tg.contentSafeAreaInset?.bottom || 0;
+            const totalBottom   = Math.max(bottom, contentBottom, 16);
+            document.documentElement.style.setProperty('--tg-safe-bottom', totalBottom + 'px');
+
+            // Высота viewport
             const app = document.getElementById('app');
             if (app && tg.viewportStableHeight) {
                 app.style.height = tg.viewportStableHeight + 'px';
             }
-        });
+        }
+
+        applyTgInsets();
+
+        tg.onEvent?.('viewportChanged',      applyTgInsets);
+        tg.onEvent?.('safeAreaChanged',      applyTgInsets);
+        tg.onEvent?.('contentSafeAreaChanged', applyTgInsets);
+
     } catch(e) { console.warn('TG WebApp init:', e); }
 }
