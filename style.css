@@ -3977,3 +3977,19 @@ input[type=file] { display: none; }
 }
 .profiles-cancel-btn { background: var(--card2); color: var(--text2); }
 .profiles-save-btn   { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+
+/* Month report — close button in button row */
+.month-close-row-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background var(--tr);
+}
+.month-close-row-btn:hover { background: var(--border); }

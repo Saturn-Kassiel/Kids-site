@@ -986,12 +986,36 @@ const ParentDash = {
         if (!el) return;
 
         const name = localStorage.getItem('child_name') || 'Ребёнок';
-        const streak     = StatTracker.getDayStreak();
-        const dailyData  = StatTracker.getDailyData('week');
-        const lastActive = this._lastActiveDaysAgo();
+        const streak      = StatTracker.getDayStreak();
+        const dailyData   = StatTracker.getDailyData('week');
+        const lastActive  = this._lastActiveDaysAgo();
         const testResults = this._getTestResults();
-        const sections   = this._getSectionActivity();
+        const sections    = this._getSectionActivity();
+        const totalAns    = this._totalAnswers();
         const recommendation = this._getRecommendation(testResults, sections);
+
+        // Совсем пустой профиль — ещё ничего не делали
+        if (totalAns === 0 && !testResults.length && streak === 0) {
+            el.innerHTML = `
+                <div class="pd-wrap">
+                    <div class="pd-header">
+                        <div class="pd-avatar">👦</div>
+                        <div>
+                            <div class="pd-child-name">${name}</div>
+                            <div class="pd-last-seen">Ещё не занимался</div>
+                        </div>
+                    </div>
+                    <div class="pd-card" style="text-align:center;padding:32px 20px;">
+                        <div style="font-size:48px;margin-bottom:14px;">📊</div>
+                        <div style="font-size:16px;font-weight:var(--fw-semi);color:var(--text);margin-bottom:10px;">Здесь будет прогресс ${name}</div>
+                        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px;">
+                            Как только ребёнок начнёт заниматься — загадки, слова, песенки, тестирование — здесь появится статистика, серия дней и рекомендации.
+                        </div>
+                        <button class="pd-test-btn" onclick="App.back()">Начать заниматься →</button>
+                    </div>
+                </div>`;
+            return;
+        }
 
         el.innerHTML = `
             <div class="pd-wrap">
@@ -1350,18 +1374,7 @@ const Onboarding = {
         el.classList.add('onb-highlighted');
         this._hlEl = el;
 
-        // Position card above or below spotlight
-        const card = document.getElementById('onb-card');
-        const spBottom = rect.bottom + PAD;
-        const spTop    = rect.top - PAD;
-        const vh = window.innerHeight;
-        if (spBottom + 240 < vh) {
-            card.style.top    = (spBottom + 16) + 'px';
-            card.style.bottom = 'auto';
-        } else {
-            card.style.bottom = (vh - spTop + 16) + 'px';
-            card.style.top    = 'auto';
-        }
+        // Card stays fixed — no repositioning
     },
 
     _clearHighlight() {
@@ -1371,9 +1384,7 @@ const Onboarding = {
             this._hlEl.classList.remove('onb-highlighted');
             this._hlEl = null;
         }
-        const card = document.getElementById('onb-card');
-        card.style.top = '';
-        card.style.bottom = '';
+        // card position is fixed, no reset needed
     },
 
     next() {
