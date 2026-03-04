@@ -72,21 +72,44 @@ const Riddles = {
 
     _loadFromAdmin() {
         const adm = this._loadAdmin();
-        const src = adm.length ? adm : this.data.map((r, i) => ({
-            id: i + 1, text: r.q, answer: r.a, pic: r.pic,
-            level: i < 10 ? 'easy' : i < 20 ? 'medium' : 'hard'
-        }));
+        if (adm.length) {
+            this._applyData(adm);
+        } else {
+            // localStorage пуст — пробуем загрузить data.json напрямую
+            fetch('data.json').then(r => r.json()).then(d => {
+                const base = Array.isArray(d.riddles) ? d.riddles : [];
+                const extra = (() => { try { return JSON.parse(localStorage.getItem('admin_extra_riddles') || '[]'); } catch { return []; } })();
+                const baseIds = new Set(base.map(r => r.id));
+                const merged = [...base, ...extra.filter(r => !baseIds.has(r.id))];
+                if (merged.length) {
+                    localStorage.setItem('admin_riddles', JSON.stringify(merged));
+                    this._applyData(merged);
+                } else {
+                    this._applyData(this._hardcodedFallback());
+                }
+            }).catch(() => {
+                // data.json недоступен — последний резерв: захардкоженные загадки
+                this._applyData(this._hardcodedFallback());
+            });
+        }
+    },
+
+    _applyData(list) {
         this._data = { easy: [], medium: [], hard: [] };
-        src.forEach(r => {
+        list.forEach(r => {
             const lv = r.level || 'easy';
             if (this._data[lv]) this._data[lv].push({ q: r.text || r.q || '—', a: r.answer || r.a || '', pic: r.pic || '' });
         });
-        // Если уровень пуст — берём easy
         if (!this._data.medium.length) this._data.medium = [...this._data.easy];
         if (!this._data.hard.length)   this._data.hard   = [...this._data.easy];
         this._rebuildQueues();
-        const cnt = document.getElementById('riddle-counter');
-        if (cnt) cnt.textContent = this._totalCount();
+    },
+
+    _hardcodedFallback() {
+        return this.data.map((r, i) => ({
+            id: i + 1, text: r.q, answer: r.a, pic: r.pic,
+            level: i < 10 ? 'easy' : i < 20 ? 'medium' : 'hard'
+        }));
     },
 
     _current() {
@@ -117,8 +140,7 @@ const Riddles = {
         const dots = document.createElement('div');
         dots.id = 'riddle-level-dots';
         dots.innerHTML = `
-            <span class="lvl-counter" id="riddle-counter">${this._totalCount()}</span>
-            <button class="lvl-dot easy   ${this._level==='easy'   ?'active':''}" onclick="Riddles.setLevel('easy')"   title="Простой"></button>
+<button class="lvl-dot easy   ${this._level==='easy'   ?'active':''}" onclick="Riddles.setLevel('easy')"   title="Простой"></button>
             <button class="lvl-dot medium ${this._level==='medium' ?'active':''}" onclick="Riddles.setLevel('medium')" title="Средний"></button>
             <button class="lvl-dot hard   ${this._level==='hard'   ?'active':''}" onclick="Riddles.setLevel('hard')"   title="Сложный"></button>
         `;

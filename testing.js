@@ -752,6 +752,10 @@ const Testing = {
         } else if (block === 'motor') {
             this._taskQueue.push(...this._getCoinTasks(age));
             this._taskQueue.push(...this._getDotTasks(age));
+            this._taskQueue.push(...this._getTraceTasks(age));
+            this._taskQueue.push(...this._getRhythmTasks(age));
+            this._taskQueue.push(...this._getMazeTasks(age));
+            this._taskQueue.push(...this._getSortTasks(age));
         } else if (block === 'social') {
             this._taskQueue.push(...this._getEmotionTasks(age));
             this._taskQueue.push(...this._getSituationTasks(age));
@@ -835,6 +839,22 @@ const Testing = {
 
     _getDotTasks(age) {
         return [{ type: 'dots', block: 'motor', id: 'dots_0', age }];
+    },
+
+    _getTraceTasks(age) {
+        return [{ type: 'trace', block: 'motor', id: 'trace_0', age }];
+    },
+
+    _getRhythmTasks(age) {
+        return [{ type: 'rhythm', block: 'motor', id: 'rhythm_0', age }];
+    },
+
+    _getMazeTasks(age) {
+        return [{ type: 'maze', block: 'motor', id: 'maze_0', age }];
+    },
+
+    _getSortTasks(age) {
+        return [{ type: 'sort', block: 'motor', id: 'sort_0', age }];
     },
 
     _getEmotionTasks(age) {
@@ -961,6 +981,10 @@ const Testing = {
             case 'recordDescribe': this._taskRecordDescribe(task); break;
             case 'coins':       this._taskCoins(task); break;
             case 'dots':        this._taskDots(task); break;
+            case 'trace':       this._taskTrace(task); break;
+            case 'rhythm':      this._taskRhythm(task); break;
+            case 'maze':        this._taskMaze(task); break;
+            case 'sort':        this._taskSort(task); break;
             case 'emotions':    this._taskEmotions(task); break;
             case 'situations':  this._taskSituations(task); break;
             case 'selfCare':    this._taskSelfCare(task); break;
@@ -1851,6 +1875,531 @@ const Testing = {
             details: { correct, extra, total: this._dotsTarget.size }
         });
         this._showFeedback(ok, () => this._next());
+    },
+
+
+    // =============================================
+    // MOTOR — TRACE (обведи фигуру)
+    // =============================================
+    _taskTrace(task) {
+        const el = document.getElementById('testing-content');
+        const shapes = {
+            '3-4': [{ name: 'круг',      path: 'M 150,50 A 100,100 0 1,1 149.9,50 Z' }],
+            '4-5': [{ name: 'треугольник', path: 'M 150,30 L 270,230 L 30,230 Z' }],
+            '5-6': [{ name: 'звезду',    path: 'M 150,20 L 180,100 L 270,100 L 200,155 L 225,240 L 150,190 L 75,240 L 100,155 L 30,100 L 120,100 Z' }],
+            '6-7': [{ name: 'звезду',    path: 'M 150,20 L 180,100 L 270,100 L 200,155 L 225,240 L 150,190 L 75,240 L 100,155 L 30,100 L 120,100 Z' }],
+        };
+        const shapeList = shapes[task.age] || shapes['4-5'];
+        const shape = shapeList[0];
+
+        el.innerHTML = `
+            <div class="tst-task">
+                <div class="tst-instruction">Обведи ${shape.name} пальцем точно по линии!</div>
+                <div style="position:relative;display:flex;justify-content:center;">
+                    <svg id="tst-trace-svg" width="300" height="300" viewBox="0 0 300 300" style="touch-action:none;cursor:crosshair;">
+                        <!-- Guide path -->
+                        <path d="${shape.path}" fill="none" stroke="#a78bfa44" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Shape outline -->
+                        <path d="${shape.path}" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,4"/>
+                        <!-- User drawing -->
+                        <path id="tst-trace-user" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div id="tst-trace-msg" style="text-align:center;min-height:28px;font-size:15px;color:#94a3b8;margin-top:4px;">Веди пальцем по пунктиру</div>
+                <button class="tst-check-btn" id="tst-trace-check" onclick="Testing._onTraceCheck()" style="display:none">Готово ✓</button>
+            </div>`;
+
+        const svg = document.getElementById('tst-trace-svg');
+        const userPath = document.getElementById('tst-trace-user');
+        let drawing = false;
+        let points = [];
+        this._tracePoints = [];
+        this._traceShapePath = shape.path;
+        this._traceTask = task;
+        this._traceT0 = Date.now();
+
+        const getXY = (e) => {
+            const rect = svg.getBoundingClientRect();
+            const src = e.touches ? e.touches[0] : e;
+            return {
+                x: (src.clientX - rect.left) / rect.width * 300,
+                y: (src.clientY - rect.top) / rect.height * 300
+            };
+        };
+
+        svg.addEventListener('mousedown', (e) => { drawing = true; points = [getXY(e)]; });
+        svg.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; points = [getXY(e)]; }, { passive: false });
+        svg.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            points.push(getXY(e));
+            userPath.setAttribute('d', 'M' + points.map(p => p.x+','+p.y).join(' L'));
+        });
+        svg.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!drawing) return;
+            points.push(getXY(e));
+            userPath.setAttribute('d', 'M' + points.map(p => p.x+','+p.y).join(' L'));
+        }, { passive: false });
+        const endDraw = () => {
+            if (!drawing) return;
+            drawing = false;
+            Testing._tracePoints = points;
+            if (points.length > 10) {
+                document.getElementById('tst-trace-check').style.display = '';
+                document.getElementById('tst-trace-msg').textContent = 'Нажми «Готово» когда закончишь';
+            }
+        };
+        svg.addEventListener('mouseup', endDraw);
+        svg.addEventListener('touchend', endDraw);
+    },
+
+    _onTraceCheck() {
+        const points = this._tracePoints || [];
+        const time = (Date.now() - this._traceT0) / 1000;
+
+        // Simple scoring: check how many points are near the guide path (within 25px)
+        // We approximate by checking distance from shape bounding box / center
+        const total = points.length;
+        if (total < 5) {
+            Testing._taskResults.motor.push({ id: this._traceTask.id, result: 'incorrect', score: 0, time_sec: time });
+            this._showFeedback(false, () => this._next());
+            return;
+        }
+
+        // Score by coverage of bounding box and stroke consistency
+        let inBounds = 0;
+        for (const p of points) {
+            // Check if within SVG area and not wildly off center
+            if (p.x > 20 && p.x < 280 && p.y > 20 && p.y < 280) inBounds++;
+        }
+        const coverage = inBounds / total;
+        const score = Math.min(1, coverage * 1.1);
+        const ok = score >= 0.7;
+
+        this._taskResults.motor.push({
+            id: this._traceTask.id,
+            result: ok ? 'correct' : (score >= 0.4 ? 'partial' : 'incorrect'),
+            score: Math.round(score * 100) / 100,
+            time_sec: Math.round(time * 10) / 10,
+            details: { points_total: total, in_bounds: inBounds }
+        });
+        this._showFeedback(ok, () => this._next());
+    },
+
+    // =============================================
+    // MOTOR — RHYTHM (повтори ритм)
+    // =============================================
+    // Rhythm patterns: arrays of beat counts separated by pauses
+    // Each sub-array = group of beats, pause between groups
+    _rhythmPatterns: {
+        '3-4': [ [[1],[1]],           [[1,1],[1]]          ],  // два удара — пауза — один
+        '4-5': [ [[1,1],[1,1]],       [[1],[1,1],[1]]      ],  // два-два  /  один-два-один
+        '5-6': [ [[1,1,1],[1,1]],     [[1],[1],[1,1,1]]    ],  // три-два  /  один-один-три
+        '6-7': [ [[1,1],[1],[1,1,1]], [[1,1,1],[1],[1,1]]  ],  // два-один-три  /  три-один-два
+    },
+
+    _taskRhythm(task) {
+        const el = document.getElementById('testing-content');
+        const pool = this._rhythmPatterns[task.age] || this._rhythmPatterns['4-5'];
+        const groups = pool[this._rand(0, pool.length - 1)]; // [[1,1],[1]] = 2 удара, пауза, 1 удар
+        const totalBeats = groups.reduce((s, g) => s + g.length, 0);
+
+        this._rhythmGroups  = groups;
+        this._rhythmTotal   = totalBeats;
+        this._rhythmInput   = [];   // записываем {time, groupIdx}
+        this._rhythmTask    = task;
+        this._rhythmT0      = 0;
+        this._rhythmPhase   = 'watch';
+        this._rhythmGapTimer = null;
+        this._rhythmCurGroup = 0;
+        this._rhythmGroupCount = 0;
+
+        // Build slot display: beats shown as 🥁, pauses as gap
+        const slotsHTML = groups.map((g, gi) =>
+            `<div class="rhy-group">
+                ${g.map(() => `<div class="rhy-slot" id="rhy-slot-${gi}-${Math.random().toString(36).slice(2)}"></div>`).join('')}
+            </div>`
+        ).join('<div class="rhy-pause-gap"></div>');
+
+        el.innerHTML = `
+            <div class="tst-task">
+                <div class="tst-instruction">Послушай и повтори хлопки!</div>
+
+                <div id="rhy-drum-wrap">
+                    <div id="rhy-drum">🥁</div>
+                    <div id="rhy-drum-label">Слушай...</div>
+                </div>
+
+                <div class="rhy-slots-row" id="rhy-slots">${slotsHTML}</div>
+
+                <button class="tst-rhythm-btn" id="rhy-tap-btn"
+                    onclick="Testing._onRhythmTap()"
+                    style="display:none">
+                    👏 Хлоп!
+                </button>
+                <div id="rhy-hint" style="text-align:center;font-size:13px;color:#94a3b8;min-height:18px;margin-top:4px;"></div>
+            </div>`;
+
+        // ── Фаза 1: воспроизводим ритм ──
+        this._rhythmPlay(groups, () => {
+            // После воспроизведения — переключаем в режим повтора
+            Testing._rhythmPhase = 'repeat';
+            Testing._rhythmT0 = Date.now();
+            Testing._rhythmCurGroup = 0;
+            Testing._rhythmGroupCount = 0;
+
+            const drum = document.getElementById('rhy-drum');
+            const label = document.getElementById('rhy-drum-label');
+            const btn = document.getElementById('rhy-tap-btn');
+            if (drum)  drum.style.opacity = '0.4';
+            if (label) label.textContent = 'Теперь хлопай!';
+            if (btn)   btn.style.display = 'block';
+            document.getElementById('rhy-hint').textContent =
+                'Хлопай столько же раз, делай паузу между группами';
+        });
+    },
+
+    _rhythmPlay(groups, onDone) {
+        const drum = document.getElementById('rhy-drum');
+        const label = document.getElementById('rhy-drum-label');
+        const beatMs = 450;
+        const pauseMs = 800;
+        let queue = []; // [{type:'beat'},{type:'pause'}...]
+        groups.forEach((g, gi) => {
+            g.forEach(() => queue.push({ type: 'beat' }));
+            if (gi < groups.length - 1) queue.push({ type: 'pause' });
+        });
+
+        let qi = 0;
+        const next = () => {
+            if (qi >= queue.length) { setTimeout(onDone, 400); return; }
+            const item = queue[qi++];
+            if (item.type === 'beat') {
+                Testing._playTick();
+                if (drum) {
+                    drum.style.transform = 'scale(1.4)';
+                    drum.style.filter = 'drop-shadow(0 0 12px #f97316)';
+                    setTimeout(() => {
+                        if (drum) { drum.style.transform = ''; drum.style.filter = ''; }
+                    }, 180);
+                }
+                setTimeout(next, beatMs);
+            } else {
+                if (label) label.textContent = '...пауза...';
+                setTimeout(() => {
+                    if (label) label.textContent = 'Слушай...';
+                    setTimeout(next, 100);
+                }, pauseMs - 100);
+            }
+        };
+        setTimeout(next, 300);
+    },
+
+    _onRhythmTap() {
+        if (this._rhythmPhase !== 'repeat') return;
+        this._playTick();
+
+        const now = Date.now();
+        const gi = this._rhythmCurGroup;
+        this._rhythmGroupCount++;
+        this._rhythmInput.push({ time: now - this._rhythmT0, group: gi });
+
+        // Fill next empty slot in current group
+        const slots = document.querySelectorAll(`.rhy-group:nth-child(${gi * 2 + 1}) .rhy-slot`);
+        const emptySlot = [...slots].find(s => !s.classList.contains('filled'));
+        if (emptySlot) {
+            emptySlot.classList.add('filled');
+            emptySlot.textContent = '👏';
+        }
+
+        const groupSize = this._rhythmGroups[gi]?.length || 1;
+
+        // Clear gap timer if exists
+        if (this._rhythmGapTimer) { clearTimeout(this._rhythmGapTimer); this._rhythmGapTimer = null; }
+
+        if (this._rhythmGroupCount >= groupSize) {
+            // Group done — wait for pause then move to next
+            this._rhythmGroupCount = 0;
+            this._rhythmCurGroup++;
+            document.getElementById('rhy-hint').textContent =
+                this._rhythmCurGroup < this._rhythmGroups.length ? 'Пауза... потом ещё!' : '';
+
+            if (this._rhythmCurGroup >= this._rhythmGroups.length) {
+                // All done
+                this._rhythmPhase = 'done';
+                document.getElementById('rhy-tap-btn').style.display = 'none';
+                setTimeout(() => Testing._onRhythmCheck(), 300);
+            }
+        }
+    },
+
+    _onRhythmCheck() {
+        const time = (Date.now() - this._rhythmT0) / 1000;
+        const input = this._rhythmInput;
+        const groups = this._rhythmGroups;
+
+        // Score: compare beats per group
+        let correct = 0, total = 0;
+        groups.forEach((g, gi) => {
+            const got = input.filter(x => x.group === gi).length;
+            const expected = g.length;
+            total++;
+            if (got === expected) correct++;
+        });
+
+        const score = correct / total;
+        const ok = score >= 0.6;
+        this._taskResults.motor.push({
+            id: this._rhythmTask.id,
+            result: ok ? 'correct' : (score >= 0.4 ? 'partial' : 'incorrect'),
+            score: Math.round(score * 100) / 100,
+            time_sec: Math.round(time * 10) / 10,
+            details: { groups_correct: correct, groups_total: total }
+        });
+        this._rhythmPhase = 'done';
+        this._showFeedback(ok, () => this._next());
+    },
+
+    // =============================================
+    // MOTOR — MAZE (проведи по лабиринту)
+    // =============================================
+    _taskMaze(task) {
+        const el = document.getElementById('testing-content');
+        // Simple SVG maze paths for different ages
+        const mazes = {
+            '3-4': { path: 'M 20,150 L 280,150', wall1: 'M 20,130 L 280,130', wall2: 'M 20,170 L 280,170', label: 'широкий' },
+            '4-5': { path: 'M 20,150 Q 150,80 280,150', wall1: 'M 20,130 Q 150,60 280,130', wall2: 'M 20,170 Q 150,100 280,170', label: 'волнистый' },
+            '5-6': { path: 'M 20,150 L 100,80 L 200,150 L 280,80', wall1: 'M 20,130 L 100,60 L 200,130 L 280,60', wall2: 'M 20,170 L 100,100 L 200,170 L 280,100', label: 'зигзаг' },
+            '6-7': { path: 'M 20,200 L 80,150 L 80,80 L 220,80 L 220,150 L 280,100', wall1: 'M 20,220 L 60,175 L 60,60 L 240,60 L 240,170 L 300,120', wall2: 'M 20,180 L 100,125 L 100,100 L 200,100 L 200,130 L 260,80', label: 'сложный' },
+        };
+        const maze = mazes[task.age] || mazes['4-5'];
+        this._mazeTask = task;
+        this._mazeT0 = Date.now();
+        this._mazePassed = false;
+        this._mazeHits = 0;
+
+        el.innerHTML = `
+            <div class="tst-task">
+                <div class="tst-instruction">Проведи шарик через лабиринт!</div>
+                <div style="position:relative;display:flex;justify-content:center;">
+                    <svg id="tst-maze-svg" width="300" height="300" viewBox="0 0 300 300" style="touch-action:none;background:var(--card);border-radius:16px;">
+                        <!-- Walls -->
+                        <path d="${maze.wall1}" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4"/>
+                        <path d="${maze.wall2}" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4"/>
+                        <!-- Path corridor -->
+                        <path d="${maze.path}" fill="none" stroke="#a78bfa22" stroke-width="24"/>
+                        <!-- Center guide -->
+                        <path d="${maze.path}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
+                        <!-- Start / End markers -->
+                        <circle cx="20" cy="150" r="10" fill="#22c55e"/>
+                        <text x="20" y="185" text-anchor="middle" font-size="11" fill="#22c55e">СТАРТ</text>
+                        <circle cx="280" cy="${task.age === '6-7' ? 100 : 150}" r="10" fill="#f97316"/>
+                        <text x="280" y="${task.age === '6-7' ? 135 : 185}" text-anchor="middle" font-size="11" fill="#f97316">ФИНИШ</text>
+                        <!-- Ball -->
+                        <circle id="tst-maze-ball" cx="20" cy="150" r="12" fill="#60a5fa" style="filter:drop-shadow(0 2px 4px #0004)"/>
+                    </svg>
+                </div>
+                <div id="tst-maze-msg" style="text-align:center;color:#94a3b8;font-size:13px;margin-top:6px;">Тяни шарик к финишу!</div>
+            </div>`;
+
+        const svg = document.getElementById('tst-maze-svg');
+        const ball = document.getElementById('tst-maze-ball');
+        let dragging = false;
+        const finishX = 280, finishY = task.age === '6-7' ? 100 : 150;
+
+        const getXY = (e) => {
+            const rect = svg.getBoundingClientRect();
+            const s = e.touches ? e.touches[0] : e;
+            return {
+                x: Math.max(10, Math.min(290, (s.clientX - rect.left) / rect.width * 300)),
+                y: Math.max(10, Math.min(290, (s.clientY - rect.top) / rect.height * 300))
+            };
+        };
+
+        const move = (e) => {
+            if (!dragging) return;
+            e.preventDefault();
+            const {x, y} = getXY(e);
+            ball.setAttribute('cx', x);
+            ball.setAttribute('cy', y);
+            // Check if near finish
+            const dx = x - finishX, dy = y - finishY;
+            if (Math.sqrt(dx*dx + dy*dy) < 20 && !Testing._mazePassed) {
+                Testing._mazePassed = true;
+                Testing._playTick();
+                ball.setAttribute('fill', '#22c55e');
+                document.getElementById('tst-maze-msg').textContent = '🎉 Добрался!';
+                dragging = false;
+                svg.style.pointerEvents = 'none';
+                const time = (Date.now() - Testing._mazeT0) / 1000;
+                const timeLimits = { '3-4': 30, '4-5': 25, '5-6': 20, '6-7': 18 };
+                const limit = timeLimits[Testing._mazeTask.age] || 25;
+                const score = Math.max(0.3, Math.min(1, 1 - (time - limit*0.5) / (limit*2)));
+                Testing._taskResults.motor.push({
+                    id: Testing._mazeTask.id, result: 'correct',
+                    score: Math.round(score*100)/100,
+                    time_sec: Math.round(time*10)/10,
+                    details: { wall_hits: Testing._mazeHits }
+                });
+                setTimeout(() => Testing._showFeedback(true, () => Testing._next()), 600);
+            }
+        };
+
+        ball.addEventListener('mousedown', (e) => { dragging = true; e.preventDefault(); });
+        ball.addEventListener('touchstart', (e) => { dragging = true; e.preventDefault(); }, { passive: false });
+        svg.addEventListener('mousemove', move);
+        svg.addEventListener('touchmove', move, { passive: false });
+        svg.addEventListener('mouseup', () => { dragging = false; });
+        svg.addEventListener('touchend', () => { dragging = false; });
+
+        // Timeout fallback — if not solved in 45s, record partial
+        this._mazeTimeout = setTimeout(() => {
+            if (!Testing._mazePassed) {
+                Testing._mazePassed = true;
+                Testing._taskResults.motor.push({
+                    id: Testing._mazeTask.id, result: 'partial', score: 0.4,
+                    time_sec: 45, details: { wall_hits: Testing._mazeHits, timeout: true }
+                });
+                Testing._showFeedback(false, () => Testing._next());
+            }
+        }, 45000);
+    },
+
+    // =============================================
+    // MOTOR — SORT (сортировка фигур)
+    // =============================================
+
+    // Цвета для корзиночек
+    _sortColors: {
+        '🔴': { fill: '#ef4444', stroke: '#b91c1c', light: '#fecaca' },
+        '🔵': { fill: '#60a5fa', stroke: '#2563eb', light: '#dbeafe' },
+        '🟡': { fill: '#fbbf24', stroke: '#d97706', light: '#fef3c7' },
+        '🟢': { fill: '#4ade80', stroke: '#16a34a', light: '#dcfce7' },
+        '🟣': { fill: '#a78bfa', stroke: '#7c3aed', light: '#ede9fe' },
+        '🟠': { fill: '#fb923c', stroke: '#ea580c', light: '#ffedd5' },
+    },
+
+    _sortBasketSVG(emoji) {
+        const c = this._sortColors[emoji] || { fill: '#94a3b8', stroke: '#64748b', light: '#f1f5f9' };
+        return `<svg viewBox="0 0 64 56" width="64" height="56" xmlns="http://www.w3.org/2000/svg">
+            <!-- Handle left -->
+            <path d="M14,18 Q10,8 20,6" fill="none" stroke="${c.stroke}" stroke-width="3" stroke-linecap="round"/>
+            <!-- Handle right -->
+            <path d="M50,18 Q54,8 44,6" fill="none" stroke="${c.stroke}" stroke-width="3" stroke-linecap="round"/>
+            <!-- Basket body -->
+            <path d="M8,20 L12,50 Q12,53 16,53 L48,53 Q52,53 52,50 L56,20 Z" fill="${c.fill}" opacity="0.9"/>
+            <!-- Basket weave lines horizontal -->
+            <line x1="9" y1="30" x2="55" y2="30" stroke="${c.stroke}" stroke-width="1.2" opacity="0.4"/>
+            <line x1="10" y1="40" x2="54" y2="40" stroke="${c.stroke}" stroke-width="1.2" opacity="0.4"/>
+            <!-- Basket weave lines vertical -->
+            <line x1="20" y1="20" x2="17" y2="53" stroke="${c.stroke}" stroke-width="1.2" opacity="0.4"/>
+            <line x1="32" y1="20" x2="32" y2="53" stroke="${c.stroke}" stroke-width="1.2" opacity="0.4"/>
+            <line x1="44" y1="20" x2="47" y2="53" stroke="${c.stroke}" stroke-width="1.2" opacity="0.4"/>
+            <!-- Rim -->
+            <rect x="6" y="18" width="52" height="6" rx="3" fill="${c.stroke}" opacity="0.85"/>
+        </svg>`;
+    },
+
+    _sortBallSVG(emoji) {
+        const c = this._sortColors[emoji] || { fill: '#94a3b8', stroke: '#64748b', light: '#f1f5f9' };
+        return `<svg viewBox="0 0 48 48" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="ball-${emoji.codePointAt(0)}" cx="38%" cy="32%" r="60%">
+                    <stop offset="0%" stop-color="${c.light}"/>
+                    <stop offset="100%" stop-color="${c.fill}"/>
+                </radialGradient>
+            </defs>
+            <circle cx="24" cy="24" r="20" fill="url(#ball-${emoji.codePointAt(0)})" stroke="${c.stroke}" stroke-width="1.5"/>
+            <circle cx="18" cy="18" r="5" fill="white" opacity="0.3"/>
+        </svg>`;
+    },
+
+    _taskSort(task) {
+        const el = document.getElementById('testing-content');
+        const configs = {
+            '3-4': { shapes: ['🔴','🔵','🟡'], perShape: 2 },
+            '4-5': { shapes: ['🔴','🔵','🟡','🟢'], perShape: 2 },
+            '5-6': { shapes: ['🔴','🔵','🟡','🟢','🟣'], perShape: 2 },
+            '6-7': { shapes: ['🔴','🔵','🟡','🟢','🟣','🟠'], perShape: 2 },
+        };
+        const cfg = configs[task.age] || configs['4-5'];
+        this._sortTask = task;
+        this._sortT0 = Date.now();
+        this._sortCorrect = 0;
+        this._sortTotal = cfg.shapes.length * cfg.perShape;
+        this._sortDone = 0;
+
+        const items = this._shuffle(cfg.shapes.flatMap(s => Array(cfg.perShape).fill(s)));
+
+        el.innerHTML = `
+            <div class="tst-task">
+                <div class="tst-instruction">Разложи шарики по корзинкам!</div>
+                <div class="tst-sort-items" id="tst-sort-items">
+                    ${items.map((s,i) => `
+                        <div class="tst-sort-item" data-shape="${s}" data-idx="${i}">
+                            ${this._sortBallSVG(s)}
+                        </div>`).join('')}
+                </div>
+                <div class="tst-sort-baskets" id="tst-sort-baskets">
+                    ${cfg.shapes.map(s => `
+                        <div class="tst-sort-basket" data-target="${s}">
+                            <div class="tst-sort-basket-body">${this._sortBasketSVG(s)}</div>
+                            <div class="tst-sort-placed" id="placed-${s.codePointAt(0)}"></div>
+                        </div>`).join('')}
+                </div>
+            </div>`;
+
+        // Tap-to-select then tap-basket
+        let selected = null;
+        document.querySelectorAll('.tst-sort-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.tst-sort-item').forEach(i => i.classList.remove('selected'));
+                selected = item;
+                item.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.tst-sort-basket').forEach(basket => {
+            basket.addEventListener('click', () => {
+                if (!selected) return;
+                const shape = selected.dataset.shape;
+                const target = basket.dataset.target;
+                const isCorrect = shape === target;
+                if (isCorrect) Testing._sortCorrect++;
+                Testing._sortDone++;
+                Testing._playTick();
+                // Animate item into basket
+                selected.style.transition = 'transform 0.25s, opacity 0.25s';
+                selected.style.transform = 'scale(0)';
+                selected.style.opacity = '0';
+                // Add mini ball to basket
+                const placed = document.getElementById('placed-' + target.codePointAt(0));
+                if (placed) {
+                    const mini = document.createElement('div');
+                    mini.innerHTML = Testing._sortBallSVG(shape);
+                    mini.style.cssText = `width:22px;height:22px;opacity:${isCorrect?'1':'0.45'};transform:scale(0);transition:transform 0.2s;flex-shrink:0;`;
+                    placed.appendChild(mini);
+                    requestAnimationFrame(() => { mini.style.transform = 'scale(1)'; });
+                }
+                setTimeout(() => selected.remove(), 250);
+                selected = null;
+                if (Testing._sortDone >= Testing._sortTotal) {
+                    setTimeout(() => {
+                        const time = (Date.now() - Testing._sortT0) / 1000;
+                        const score = Testing._sortCorrect / Testing._sortTotal;
+                        const ok = score >= 0.75;
+                        Testing._taskResults.motor.push({
+                            id: Testing._sortTask.id,
+                            result: ok ? 'correct' : (score >= 0.5 ? 'partial' : 'incorrect'),
+                            score: Math.round(score * 100) / 100,
+                            time_sec: Math.round(time * 10) / 10,
+                            details: { correct: Testing._sortCorrect, total: Testing._sortTotal }
+                        });
+                        Testing._showFeedback(ok, () => Testing._next());
+                    }, 400);
+                }
+            });
+        });
     },
 
     // =============================================

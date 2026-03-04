@@ -152,6 +152,31 @@ const ShareHelper = {
             return;
         }
 
+        // Riddles section: use promo image
+        if (sectionId === 'riddles') {
+            const riddlesText = 'Отгадывай 🤔 загадки в мини-школе Гоша\n' + url;
+            try {
+                const resp = await fetch('assets/images/links_pictures_opt/zagadki.webp');
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const file = new File([blob], 'zagadki.webp', { type: 'image/webp' });
+                    if (navigator.share) {
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: riddlesText, text: riddlesText });
+                        } else {
+                            await navigator.share({ text: riddlesText, url });
+                        }
+                        return;
+                    }
+                }
+            } catch(e) { console.warn('Riddles promo share failed:', e); }
+            if (navigator.share) {
+                try { await navigator.share({ text: riddlesText, url }); return; } catch(e) {}
+            }
+            try { await navigator.clipboard.writeText(riddlesText); if (typeof showToast === 'function') showToast('Ссылка скопирована!'); } catch(e) {}
+            return;
+        }
+
         // Colors section: use promo image
         if (sectionId === 'colors') {
             const colorsText = 'Слушай 🎧 песенку о цветах в мини-школе Гоша\n' + url;

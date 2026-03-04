@@ -91,48 +91,66 @@ const App = {
         showToast('🗑️ Прогресс сброшен');
     },
 
-    // Загружаем data.json из репозитория — ВСЕГДА при старте, ждём завершения
+    // Загружаем data.json — ВСЕГДА при старте, ждём завершения
     async _loadRemoteData() {
         const KEYS = ['songs','podcasts','puzzles','riddles','info'];
         const REPO = 'Saturn-Kassiel/Kids-site';
 
-        // Локально (file://) — пропускаем, используем localStorage/defaults
-        if (location.protocol === 'file:') return;
+        // Пытаемся загрузить data.json — сначала локальный, потом GitHub
+        const urls = location.protocol === 'file:'
+            ? ['data.json']  // локально — только рядом лежащий файл
+            : [
+                'https://raw.githubusercontent.com/' + REPO + '/main/data.json',
+                'data.json'   // fallback на относительный путь
+              ];
 
-        // ВСЕГДА загружаем свежий data.json из GitHub —
-        // это единственный источник правды для GitHub Pages
-        try {
-            const url = 'https://raw.githubusercontent.com/' + REPO + '/main/data.json';
-            // Таймаут 5 сек чтобы не висеть вечно
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 5000);
-            const resp = await fetch(url + '?_=' + Date.now(), {
-                cache: 'no-store',
-                signal: controller.signal
-            });
-            clearTimeout(timer);
-            if (!resp.ok) {
-                console.log('data.json не найден, используем localStorage');
-                return;
+        let data = null;
+        for (const url of urls) {
+            try {
+                const isRemote = url.startsWith('http');
+                const fetchUrl = isRemote ? url + '?_=' + Date.now() : url;
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 5000);
+                const resp = await fetch(fetchUrl, {
+                    cache: isRemote ? 'no-store' : 'default',
+                    signal: controller.signal
+                });
+                clearTimeout(timer);
+                if (!resp.ok) continue;
+                data = await resp.json();
+                console.log('✅ data.json загружен из:', url);
+                break;
+            } catch(e) {
+                console.log('data.json недоступен по:', url, e.message);
             }
-            const data = await resp.json();
-            KEYS.forEach(k => {
-                if (Array.isArray(data[k]) && data[k].length) {
-                    localStorage.setItem('admin_' + k, JSON.stringify(data[k]));
-                }
-            });
-            // Загружаем уведомления из data.json
-            if (Array.isArray(data.notifications)) {
-                localStorage.setItem('admin_notif_remote', JSON.stringify(data.notifications));
-            }
-            // Проверяем новый контент
-            Notif.checkNewContent(data);
-            localStorage.removeItem('gh_data_updated');
-            console.log('✅ data.json загружен с GitHub');
-        } catch(e) {
-            // Нет сети или GitHub недоступен — берём что есть в localStorage
-            console.log('data.json недоступен:', e.message);
         }
+
+        if (!data) {
+            // Нет ни сети, ни локального файла — берём что есть в localStorage
+            console.log('data.json недоступен, используем localStorage/defaults');
+            return;
+        }
+
+        KEYS.forEach(k => {
+            if (Array.isArray(data[k]) && data[k].length) {
+                // Мержим: базовые из data.json + добавленные через админку
+                const extra = (() => { try { return JSON.parse(localStorage.getItem('admin_extra_' + k) || '[]'); } catch { return []; } })();
+                const baseIds = new Set(data[k].map(r => r.id));
+                const merged = [...data[k], ...extra.filter(r => !baseIds.has(r.id))];
+                localStorage.setItem('admin_' + k, JSON.stringify(merged));
+                // Запоминаем ID базовых элементов чтобы admin знал что добавлено им
+                if (k === 'riddles') {
+                    localStorage.setItem('admin_riddles_base_ids', JSON.stringify([...baseIds]));
+                }
+            }
+        });
+
+        // Уведомления
+        if (Array.isArray(data.notifications)) {
+            localStorage.setItem('admin_notif_remote', JSON.stringify(data.notifications));
+        }
+        Notif.checkNewContent(data);
+        localStorage.removeItem('gh_data_updated');
     },
 
     async init() {
@@ -431,11 +449,8 @@ const CardBadges = {
                 }
             }
             if (newEl) {
-                if (key === 'songs') {
+                if (total > 0) {
                     newEl.textContent = total;
-                    newEl.style.display = total > 0 ? 'flex' : 'none';
-                } else if (newCount > 0 && total > 0) {
-                    newEl.textContent = newCount;
                     newEl.style.display = 'flex';
                 } else {
                     newEl.style.display = 'none';

@@ -9,18 +9,18 @@ const Admin = {
         // Seed defaults with full data
         const defaults = {
             songs: [
-                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'] },
+                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'],   video:'assets/video/songs_video/kolibelnaya.mp4' },
                 { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',      tags:['family'] },
-                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',      tags:['animals'] },
+                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
                 { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',tags:['holiday'] },
                 { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3',     tags:['months'] },
-                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3',        tags:['animals'] },
+                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3',        tags:['animals'], video:'assets/video/songs_video/pesenka_pro_lva.mp4' },
                 { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3',    tags:['learning'] },
-                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3',   tags:['animals'] },
+                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3',   tags:['animals'], video:'assets/video/songs_video/pesenka_pro_nosoroga.mp4' },
                 { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3',       tags:['family'] },
                 { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3',   tags:['learning'] },
                 { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3',     tags:['months'] },
-                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3',      tags:['animals'] },
+                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_zebru.mp4' },
                 { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3',tags:['holiday'] },
                 { id:14, name:'Песенка про Рождество',    duration:'', src:'assets/audio/songs/rodgestvo.mp3',              tags:['holiday'] },
                 { id:15, name:'Песенка про Весну',        duration:'', src:'assets/audio/songs/vesna.mp3',                  tags:['months'] },
@@ -61,54 +61,19 @@ const Admin = {
                 { id:3, name:'💡 Советы', body:'Занимайтесь каждый день по 15–20 минут. Хвалите ребёнка за каждый правильный ответ!' },
                 { id:4, name:'🔗 Пример ссылки', body:'Наш сайт: [Говоруша](https://govorusha.ru)\nНаписать нам: [Telegram](https://t.me/govorusha)' },
             ],
-            riddles: [
-                { id:1, text:'Белым снегом всё одето, значит наступает ...', answer:'Зима', pic:'assets/images/riddles_pictures_opt/zima.webp' , level:'easy' },
-                { id:2, text:'Охраняет часто дом, повиляет всем хвостом, зарычит, коль ты чужой, и оближет, если свой.', answer:'Собака', pic:'assets/images/riddles_pictures_opt/sobaka.webp' , level:'easy' },
-                { id:3, text:'По реке плывёт бревно, ох и злющее оно,  тем, кто в речку угодил, нос откусит ...', answer:'Крокодил', pic:'assets/images/riddles_pictures_opt/krokodil.webp' , level:'easy' },
-                { id:7, text:'Мимо улья проходил косолапый ...', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' , level:'easy' },
-                { id:8, text:'Ночью каждое оконце слабо освещает ...', answer:'Луна', pic:'assets/images/riddles_pictures_opt/luna.webp' , level:'easy' },
-                { id:9, text:'Овощ это непростой,\nВызовет слезу порой,\nНо уж больно он полезный\nЗащищает от болезней!', answer:'Лук', pic:'assets/images/riddles_pictures_opt/luk.webp' , level:'easy' },
-                { id:10, text:'Кто мычит там на лугу,\nСочную жует траву,\nУгощает молоком\nИ полезным творожком.', answer:'Корова', pic:'assets/images/riddles_pictures_opt/korova.webp' , level:'easy' },
-                { id:11, text:'С ветки прыгает на ветку\nРыжая красавица.\nШишки, желуди, орехи\nЗапасает на зиму.', answer:'белка', pic:'assets/images/riddles_pictures_opt/belka.webp' , level:'easy' },
-                { id:12, text:'Он хвостастый и зубастый,\nНа луну он воет часто,\nВсе в лесу его боятся,\nА в особенности, зайцы.', answer:'волк', pic:'assets/images/riddles_pictures_opt/volk.webp' , level:'easy' },
-                { id:13, text:'В лесу живёт плутовка,\nХитры её глаза,\nА цветом, как морковка,\nПушистая...', answer:'Лиса', pic:'assets/images/riddles_pictures_opt/lisa.webp' , level:'easy' },
-                { id:14, text:'Живет в берлоге он в лесу,\nПугает волка и лису,\nЛюбит ягоды и мед,\nКосолапо он идет.', answer:'Медведь', pic:'assets/images/riddles_pictures_opt/medved.webp' , level:'medium' },
-                { id:16, text:'Он пятнистый, с длинной шеей,\nГде-то в Африке живет.\nИ с огромных он деревьев\nЛегко листья достает.', answer:'Жираф', pic:'assets/images/riddles_pictures_opt/zhiraf.webp' , level:'medium' },
-                { id:17, text:'Траву жуёт. Носит матроску\nВ чёрно - белую полоску.', answer:'Зебра', pic:'assets/images/riddles_pictures_opt/zebra.webp' , level:'medium' },
-                { id:18, text:'В цирке трюки выполняет,\nБрёвна хоботом таскает.\nСерый и громадный он,\nКто же это? Это ...', answer:'Слон', pic:'assets/images/riddles_pictures_opt/slon.webp' , level:'medium' },
-                { id:19, text:'В зоопарке, в синей клетке\nЛовко прыгает по сетке,\nКорчит рожи, ест бананы.\nКто? Конечно', answer:'Обезьяна', pic:'assets/images/riddles_pictures_opt/obezyana.webp' , level:'medium' },
-                { id:20, text:'Нет того, кто не боится\nЭтой грозной хищной птицы.\nКто куда бы не забрёл,\nСверху видит всё…', answer:'Орёл', pic:'assets/images/riddles_pictures_opt/orel.webp' , level:'medium' },
-                { id:21, text:'Хвост веером, на голове корона, нет птицы краше чем ...', answer:'Павлин', pic:'assets/images/riddles_pictures_opt/pavlin.webp' , level:'medium' },
-                { id:22, text:'Рано он всегда встаёт,\nПо утрам всегда поёт,\nНосит гребень и серёжки,\nВ перьях все его одёжки.', answer:'Петух', pic:'assets/images/riddles_pictures_opt/petukh.webp' , level:'medium' },
-                { id:23, text:'Маленькая птичка\nЧирикает отлично,\nПрыгает по веткам,\nЖить не станет в клетке.\nНе таится от людей\nРазвесёлый...', answer:'воробей', pic:'assets/images/riddles_pictures_opt/vorobey.webp' , level:'medium' },
-                { id:24, text:'Перья черные летят,\nВсюду каркают, кричат,\nЧто за важная персона?\nЭто черная...', answer:'Ворона', pic:'assets/images/riddles_pictures_opt/vorona.webp' , level:'medium' },
-                { id:25, text:'Я по травке не спешу.\nЕсли станет страшно вдруг,\nСпрячусь в домик, милый друг.', answer:'Улитка', pic:'assets/images/riddles_pictures_opt/ulitka.webp' , level:'hard' },
-                { id:26, text:'На пруду на живёт,\nГромко песенки поёт,\nПучеглазая зверюшка\nНазывается...', answer:'Лягушка', pic:'assets/images/riddles_pictures_opt/lyagushka.webp' , level:'hard' },
-                { id:27, text:'В пустыне живёт,\nПодолгу не пьёт,\nС жарой легко справляется,\nКолючками питается.', answer:'Верблюд', pic:'assets/images/riddles_pictures_opt/verblyud.webp' , level:'hard' },
-                { id:29, text:'Через море-океан\nПлывёт чудо-великан,\nПрячет ус во рту,\nРастянулся на версту.', answer:'Кит', pic:'assets/images/riddles_pictures_opt/kit.webp' , level:'hard' },
-                { id:30, text:'Ем я уголь, пью я воду,\nКак напьюсь — прибавлю ходу.\nВезу обоз на сто колес\nИ называюсь...', answer:'Паровоз', pic:'assets/images/riddles_pictures_opt/parovoz.webp' , level:'hard' },
-                { id:31, text:'Она идет и зиму прогоняет.\nКогда придет, вокруг всё расцветает.\nОт солнышка прекрасного ясна.\nЗовут ее, конечно же ...', answer:'Весна', pic:'assets/images/riddles_pictures_opt/vesna.webp' , level:'hard' },
-                { id:32, text:'Если крылья распахнет —\nКрасотой с ума сведет.\nНа лугу она летает,\nВсех собою удивляет.', answer:'Бабочка', pic:'assets/images/riddles_pictures_opt/babochka.webp' , level:'hard' },
-                { id:34, text:'Живёт в норке, грызёт корки, боится кошки.', answer:'Мышь', pic:'assets/images/riddles_pictures_opt/mysh.webp' , level:'hard' },
-                { id:36, text:'Лечит маленьких детей,\nЛечит птичек и зверей,\nСквозь очки свои глядит\nДобрый доктор...', answer:'Айболит', pic:'assets/images/riddles_pictures_opt/aybolit.webp' , level:'hard' },
-                { id:37, text:'Сначала пашут,\nПотом засевают,\nВремя придёт,\nУрожай собирают!', answer:'Поле', pic:'assets/images/riddles_pictures_opt/pshenitsa.webp' , level:'hard' },
-            ],
+            riddles: [],
         };
-        // Always refresh — force re-seed for all sections
-        ['songs','podcasts','puzzles','riddles'].forEach(k => {
+        // Reseed секций если localStorage пуст или устарел
+        // Загадки НЕ сидируем из кода — они приходят из data.json через core.js
+        ['songs','podcasts','puzzles'].forEach(k => {
             const stored = localStorage.getItem('admin_' + k);
             let needsReseed = !stored;
             if (!needsReseed) {
                 try {
                     const parsed = JSON.parse(stored);
-                    // Reseed if empty, or podcasts is old placeholder, or riddles use old emoji format
                     if (parsed.length === 0) needsReseed = true;
                     if (k === 'podcasts' && parsed.length < 3) needsReseed = true;
-                    if (k === 'riddles' && parsed[0] && (parsed[0].emoji !== undefined || parsed[0].text === '—')) needsReseed = true;
-                    if (k === 'info' && parsed[0] && (!parsed[0].body || parsed.length < 4)) needsReseed = true;
-                    // Убираем старые ребусы без pic или с неверными файлами
                     if (k === 'puzzles' && parsed.some(p => !p.pic || p.pic.includes('5+2'))) needsReseed = true;
-                    // Убираем если есть ребусы с пустым answer (битые)
                     if (k === 'puzzles' && parsed.some(p => !p.answer)) needsReseed = true;
                     if (k === 'puzzles' && parsed[0] && parsed[0].img && !parsed[0].pic) needsReseed = true;
                 } catch { needsReseed = true; }
@@ -311,6 +276,12 @@ const Admin = {
             tagSel.value = item && item.tags && item.tags.length ? item.tags[0] : '';
         }
 
+        // Video/photo field for songs
+        const videoWrap = document.getElementById('m-video-wrap');
+        const videoInput = document.getElementById('m-video');
+        if (videoWrap) videoWrap.style.display = this._tab === 'songs' ? 'block' : 'none';
+        if (videoInput) videoInput.value = item ? (item.video || '') : '';
+
         // Reset file input
         const fileInput = document.getElementById('m-file');
         if (fileInput) fileInput.value = '';
@@ -384,6 +355,7 @@ const Admin = {
             const nd = document.getElementById('m-desc');       if (nd) nd.value = '';
             const nb = document.getElementById('m-body');       if (nb) nb.value = '';
             const nt = document.getElementById('m-tag');        if (nt) nt.value = '';
+            const nv = document.getElementById('m-video');      if (nv) nv.value = '';
         }
     },
 
@@ -468,7 +440,8 @@ const Admin = {
                 tags:     this._tab === 'songs' ? (function() {
                     const v = document.getElementById('m-tag')?.value;
                     return v ? [v] : (existing && existing.tags ? existing.tags : []);
-                })() : undefined
+                })() : undefined,
+                video:    this._tab === 'songs' ? (document.getElementById('m-video')?.value.trim() || '') : undefined
             };
         } else if (this._tab === 'riddles') {
             newItem = {
@@ -503,6 +476,18 @@ const Admin = {
         }
 
         this._setData(this._tab, items);
+
+        // Для загадок: сохраняем добавленные через админку отдельно
+        // чтобы они пережили перезагрузку data.json
+        if (this._tab === 'riddles') {
+            try {
+                const base = (() => { try { return JSON.parse(localStorage.getItem('admin_riddles_base_ids') || '[]'); } catch { return []; } })();
+                const baseSet = new Set(base);
+                const extra = items.filter(r => !baseSet.has(r.id));
+                localStorage.setItem('admin_extra_riddles', JSON.stringify(extra));
+            } catch(e) {}
+        }
+
         this.closeModal();
         this.render();
         if (this._tab === 'songs') {
