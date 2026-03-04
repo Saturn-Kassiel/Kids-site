@@ -2678,7 +2678,6 @@ input[type=file] { display: none; }
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    touch-action: manipulation;
     outline: none;
 }
 .words-tile:focus {
@@ -2686,8 +2685,7 @@ input[type=file] { display: none; }
     border-color: var(--border);
 }
 .words-tile:focus-visible {
-    outline: none;
-    border-color: var(--border);
+    border-color: #a78bfa;
 }
 .words-tile:hover {
     transform: translateY(-3px);
@@ -3416,59 +3414,4 @@ input[type=file] { display: none; }
 /* Настройки: иконки */
 .si-snd-inter, .si-snd-inter2 {
     background: linear-gradient(135deg, #f59e0b, #f97316);
-}
-
-/* ── Wrong flash on tiles ── */
-@keyframes wrong-flash-anim {
-    0%   { background: var(--card); }
-    30%  { background: #fca5a5; border-color: #ef4444; }
-    100% { background: var(--card); }
-}
-.words-slot.wrong-flash {
-    animation: wrong-flash-anim 0.6s ease;
-}
-
-/* ── "Дальше" button after correct answer ── */
-.words-next-btn {
-    display: none;
-    margin: 0 auto 4px;
-    padding: 10px 32px;
-    border-radius: 14px;
-    border: none;
-    background: linear-gradient(135deg, #a78bfa, #818cf8);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: var(--font);
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(139,92,246,0.35);
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-.words-next-btn.words-next-btn-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-.words-next-btn:active {
-    transform: scale(0.95);
-}
-
-/* ── Streak counter ── */
-.words-streak {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #f97316;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    min-width: 40px;
-}
-.words-streak.visible {
-    opacity: 1;
 }
