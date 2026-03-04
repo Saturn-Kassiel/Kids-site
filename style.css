@@ -140,7 +140,7 @@ html.tg-webapp #app {
     height: 100vh; height: 100dvh;
 }
 html.tg-webapp #top-bar { top: var(--tg-safe-top, 0px); }
-html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
+html.tg-webapp #main { padding-top: calc(var(--tg-safe-top, 0px) + 58px); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 html.tg-webapp section { padding-top: calc(var(--tg-safe-top, 0px) + 58px); }
 
 /* ── PWA standalone on iPhone: hardcoded safe area ── */
@@ -250,7 +250,7 @@ section.hidden { display: none !important; }
 }
 
 /* ===== MAIN / HOME ===== */
-#main { padding-top: 58px; padding-top: calc(constant(safe-area-inset-top) + 58px); padding-top: calc(env(safe-area-inset-top, 0px) + 58px); }
+#main { padding-top: 58px; padding-top: calc(constant(safe-area-inset-top) + 58px); padding-top: calc(env(safe-area-inset-top, 0px) + 58px); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
 
 /* ── Home Hero: маскот + приветствие ── */
 .home-hero {

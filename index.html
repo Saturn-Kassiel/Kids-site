@@ -63,7 +63,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notif-badge" id="notif-badge" style="display:none">0</span>
         </button>
-        <button id="settings-icon-btn" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();},50)" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button id="settings-icon-btn" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();CloudSync.init();},50)" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
     <!-- ========== MAIN ========== -->
@@ -150,7 +150,7 @@
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
                 <span class="mc-label">Статистика</span>
             </button>
-            <button class="menu-card mc-settings" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();},50)">
+            <button class="menu-card mc-settings" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();CloudSync.init();},50)">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
                 <span class="mc-label">Настройки</span>
             </button>
@@ -713,6 +713,41 @@
 
         <div class="settings-group-title">Синхронизация</div>
         <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.push()" id="sync-push-row">
+                <span class="s-icon" style="background:rgba(34,197,94,0.12);color:#22c55e">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                </span>
+                <div>
+                    <div class="s-label">Сохранить в облако</div>
+                    <div class="s-sub" id="sync-push-sub">Загрузить прогресс на другое устройство</div>
+                </div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.pull()" id="sync-pull-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,17 12,21 16,17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                </span>
+                <div>
+                    <div class="s-label">Загрузить из облака</div>
+                    <div class="s-sub" id="sync-pull-sub">Восстановить прогресс с другого устройства</div>
+                </div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.clearCache()">
+                <span class="s-icon" style="background:rgba(249,115,22,0.12);color:#f97316">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.57"/></svg>
+                </span>
+                <div><div class="s-label">Сбросить кеш</div><div class="s-sub">Загрузить свежие данные с сервера</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div class="settings-group" id="sync-noauth-group" style="display:none">
+            <div class="settings-row">
+                <span class="s-icon">☁️</span>
+                <div><div class="s-label" style="color:var(--text2)">Синхронизация недоступна</div><div class="s-sub">Откройте приложение через Telegram</div></div>
+            </div>
+        </div>
+        <div class="settings-group" style="display:none" id="sync-old-placeholder">
             <div class="settings-row">
                 <span class="s-icon si-sync"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
                 <div style="flex:1">
@@ -1596,6 +1631,171 @@ function tgReminderSetHour(val) {
     if (s.enabled !== false) TgReminder.register(true, hour);
     showToast('⏰ Время напоминания: ' + val + ':00');
 }
+</script>
+
+
+<script>
+// ── CLOUD SYNC ────────────────────────────────────────────────────────────────
+const CloudSync = {
+    WORKER_URL: 'https://gosha-notify.saturngroup2025.workers.dev',
+
+    _userId() {
+        return window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
+    },
+
+    // Все ключи для синхронизации (из Profiles.KEYS + profiles_list)
+    _collectData() {
+        const keys = [
+            ...Profiles.KEYS,
+            'profiles_list', 'active_profile_id',
+            'onboarding_done', 'tg_reminder_settings',
+        ];
+        // Также сохраняем данные всех профилей
+        const profileList = Profiles._list();
+        profileList.forEach(p => keys.push('profile_data_' + p.id));
+
+        const data = {};
+        keys.forEach(k => {
+            const v = localStorage.getItem(k);
+            if (v !== null) data[k] = v;
+        });
+        return data;
+    },
+
+    _applyData(data) {
+        if (!data || typeof data !== 'object') return;
+        Object.entries(data).forEach(([k, v]) => {
+            try { localStorage.setItem(k, v); } catch(e) {}
+        });
+    },
+
+    _fmtDate(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) +
+               ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    },
+
+    // ── Сохранить в облако ──
+    async push() {
+        const userId = this._userId();
+        if (!userId) { showToast('⚠️ Доступно только в Telegram'); return; }
+
+        const sub = document.getElementById('sync-push-sub');
+        if (sub) sub.textContent = 'Сохраняем...';
+
+        try {
+            const data = this._collectData();
+            const resp = await fetch(this.WORKER_URL + '/sync/push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, data, profile_id: 'main' })
+            });
+            const json = await resp.json();
+            if (json.ok) {
+                const ts = this._fmtDate(json.saved_at);
+                localStorage.setItem('sync_last_push', json.saved_at);
+                if (sub) sub.textContent = 'Сохранено ' + ts;
+                showToast('☁️ Прогресс сохранён в облако');
+            } else {
+                if (sub) sub.textContent = 'Загрузить прогресс на другое устройство';
+                showToast('❌ Ошибка сохранения');
+            }
+        } catch(e) {
+            if (sub) sub.textContent = 'Загрузить прогресс на другое устройство';
+            showToast('❌ Нет соединения');
+        }
+    },
+
+    // ── Загрузить из облака ──
+    async pull() {
+        const userId = this._userId();
+        if (!userId) { showToast('⚠️ Доступно только в Telegram'); return; }
+
+        const sub = document.getElementById('sync-pull-sub');
+        if (sub) sub.textContent = 'Загружаем...';
+
+        try {
+            const resp = await fetch(this.WORKER_URL + '/sync/pull', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, profile_id: 'main' })
+            });
+            const json = await resp.json();
+
+            if (json.ok && json.data) {
+                const ts = this._fmtDate(json.saved_at);
+                // Подтверждение перед перезаписью
+                const ok = confirm(`Загрузить данные из облака?
+Сохранено: ${ts}
+
+Текущие данные на этом устройстве будут заменены.`);
+                if (!ok) {
+                    if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                    return;
+                }
+                this._applyData(json.data);
+                if (sub) sub.textContent = 'Загружено ' + ts;
+                showToast('✅ Прогресс восстановлен!');
+
+                // Перезагружаем UI
+                setTimeout(() => {
+                    Profiles.init();
+                    regUpdateCard();
+                    updateHomeGreeting();
+                    if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+                    Profiles.renderCard();
+                }, 200);
+            } else if (json.error === 'no_data') {
+                if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                showToast('☁️ Нет данных в облаке — сначала сохрани');
+            } else {
+                if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                showToast('❌ Ошибка загрузки');
+            }
+        } catch(e) {
+            if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+            showToast('❌ Нет соединения');
+        }
+    },
+
+    // ── Сбросить SW кеш ──
+    async clearCache() {
+        if (!confirm('Сбросить кеш? Приложение перезагрузится и загрузит свежие данные.')) return;
+        try {
+            // Удаляем все SW кеши
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+            // Отписываем SW чтобы он переустановился
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
+            }
+            showToast('🔄 Кеш сброшен, перезагружаем...');
+            setTimeout(() => location.reload(true), 800);
+        } catch(e) {
+            showToast('❌ Ошибка сброса кеша');
+        }
+    },
+
+    // Инициализация: показать дату последнего сохранения
+    init() {
+        const userId = this._userId();
+        if (!userId) {
+            // Не в Telegram — скрываем кнопки, показываем заглушку
+            const pushRow = document.getElementById('sync-push-row')?.closest('.settings-row');
+            const pullRow = document.getElementById('sync-pull-row')?.closest('.settings-row');
+            const noAuth  = document.getElementById('sync-noauth-group');
+            // оставляем как есть — просто не инициализируем
+            return;
+        }
+        const lastPush = localStorage.getItem('sync_last_push');
+        if (lastPush) {
+            const sub = document.getElementById('sync-push-sub');
+            if (sub) sub.textContent = 'Последнее сохранение: ' + this._fmtDate(Number(lastPush));
+        }
+    },
+};
 </script>
 
 </body>
