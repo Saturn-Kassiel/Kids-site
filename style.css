@@ -681,6 +681,7 @@ section.hidden { display: none !important; }
 
 /* Color chips */
 .color-chip {
+    border: none;
     border-radius: 14px;
     padding: 13px 6px;
     text-align: center;
@@ -695,7 +696,8 @@ section.hidden { display: none !important; }
 }
 .color-chip:hover  { transform: scale(1.06); }
 .color-chip:active { transform: scale(0.93); }
-.color-chip.active { outline: 3px solid white; outline-offset: 2px; }
+.color-chip { box-shadow: none !important; }
+
 
 /* ===== SONGS ===== */
 .search-bar {

@@ -9,6 +9,7 @@ const Media = {
     isShuffle: false,
     isRepeat:  false,
     _sectionType: '',
+    _videoLoadId: 0,
 
     initSection(type) {
         this._sectionType = type;
@@ -155,25 +156,42 @@ const Media = {
         const placeholder = document.getElementById('video-placeholder');
         document.getElementById('video-label').textContent = item.label;
 
-        // Полный сброс видео — скрываем элемент, показываем placeholder
+        // Race condition guard
+        const loadId = ++this._videoLoadId;
+
+        // Reset video
         vid.pause();
         vid.removeAttribute('src');
         vid.load();
         vid.style.display = 'none';
         placeholder.style.display = 'flex';
 
+        // Colored placeholder for colors section
+        if (this._sectionType === 'colors' && item.hex) {
+            placeholder.style.background = item.hex;
+            placeholder.style.borderRadius = '18px';
+        } else {
+            placeholder.style.background = '';
+        }
+
         if (item.video) {
             vid.onloadeddata = () => {
+                if (this._videoLoadId !== loadId) return;
                 vid.style.display = 'block';
                 placeholder.style.display = 'none';
                 vid.play().catch(() => {});
             };
             vid.onerror = () => {
+                if (this._videoLoadId !== loadId) return;
                 vid.style.display = 'none';
                 placeholder.style.display = 'flex';
             };
             vid.src = item.video;
-            vid.load();
+            if (vid.readyState >= 2) {
+                vid.style.display = 'block';
+                placeholder.style.display = 'none';
+                vid.play().catch(() => {});
+            }
         }
 
         // Audio
@@ -181,7 +199,14 @@ const Media = {
         AudioMgr.play(this.player, 'media');
         document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
         document.getElementById('track-name').textContent = item.label;
-        document.getElementById('track-icon').textContent = item.icon;
+        const trackIcon = document.getElementById('track-icon');
+        if (trackIcon) {
+            if (this._sectionType === 'colors' && item.hex) {
+                trackIcon.innerHTML = '<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:' + item.hex + ';border:1.5px solid rgba(0,0,0,0.1);vertical-align:middle"></span>';
+            } else {
+                trackIcon.textContent = item.icon;
+            }
+        }
         document.getElementById('track-sub').textContent  = this._sectionType === 'alphabet' ? 'Кириллический алфавит' : this._sectionType === 'colors' ? 'Учим цвета' : 'Учим цифры';
         document.getElementById('progress-bar').style.width = '0%';
 
@@ -192,11 +217,14 @@ const Media = {
     },
 
     toggle() {
+        const vid = document.getElementById('global-video');
         if (this.player.paused) {
             AudioMgr.play(this.player, 'media');
+            if (vid && vid.src) vid.play().catch(() => {});
             document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
         } else {
             this.player.pause();
+            if (vid && vid.src) vid.pause();
             document.getElementById('play-btn').innerHTML = '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg>';
         }
     },
