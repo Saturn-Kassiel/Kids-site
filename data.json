@@ -785,164 +785,87 @@
       "level": "easy"
     },
     {
-      "id": 1772521854572,
-      "text": "Овощ это непростой,\\nВызовет слезу порой,\\nНо уж больно он полезный\\nЗащищает от болезней!",
-      "answer": "Лук",
-      "pic": "assets/images/riddles_pictures_opt/luk.webp",
+      "id": 1772626183980,
+      "text": "Белый камушек растаял,\nНа доске следы оставил.\nБуквы, цифры рисовал,\nСам при этом исчезал.",
+      "answer": "Мел",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_nk4hbenk4hbenk4h.png",
       "level": "easy"
     },
     {
-      "id": 1772521854573,
-      "text": "Кто мычит там на лугу,\\nСочную жует траву,\\nУгощает молоком\\nИ полезным творожком.",
-      "answer": "Корова",
-      "pic": "assets/images/riddles_pictures_opt/korova.webp",
+      "id": 1772626255737,
+      "text": "Его бьют, а он не плачет,\nТолько выше, выше скачет.\nКруглый бок и без углов,\nПоиграть всегда готов.",
+      "answer": "Мяч",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_6az0e6az0e6az0e6.png",
       "level": "easy"
     },
     {
-      "id": 1772521854574,
-      "text": "С ветки прыгает на ветку\\nРыжая красавица.\\nШишки, желуди, орехи\\nЗапасает на зиму.",
-      "answer": "белка",
-      "pic": "assets/images/riddles_pictures_opt/belka.webp",
+      "id": 1772626377216,
+      "text": "В ясный день в углу скучает,\nВ ливень — «шляпкой» расцветает.\nСам промокнет до костей,\nНо спасёт своих друзей.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_gs4zargs4zargs4z.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854575,
-      "text": "Он хвостастый и зубастый,\\nНа луну он воет часто,\\nВсе в лесу его боятся,\\nА в особенности, зайцы.",
-      "answer": "волк",
-      "pic": "assets/images/riddles_pictures_opt/volk.webp",
+      "id": 1772626468000,
+      "text": "По утрам и вечерам\nЧистит зубы нам и вам.\nС мятной пастой крепко дружит,\nБелизне усердно служит.",
+      "answer": "Зубная щетка",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_l914r6l914r6l914.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854576,
-      "text": "В лесу живёт плутовка,\\nХитры её глаза,\\nА цветом, как морковка,\\nПушистая...",
-      "answer": "Лиса",
-      "pic": "assets/images/riddles_pictures_opt/lisa.webp",
+      "id": 1772626577979,
+      "text": "Шёрстка есть, а не живой,\nСпит в кроватке он со мной.\nМягкий, ласковый на ощупь,\nС ним уснуть гораздо проще.",
+      "answer": "Мишка",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_movpakmovpakmovp.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854577,
-      "text": "Живет в берлоге он в лесу,\\nПугает волка и лису,\\nЛюбит ягоды и мед,\\nКосолапо он идет.",
-      "answer": "Медведь",
-      "pic": "assets/images/riddles_pictures_opt/medved.webp",
+      "id": 1772626677944,
+      "text": "В ярком ящике живут,\nВ гости нас к себе зовут.\nКуклы, мячики, машинки —\nСловно с красочной картинки.",
+      "answer": "Игрушки",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_eo6xxceo6xxceo6x.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854578,
-      "text": "Он пятнистый, с длинной шеей,\\nГде-то в Африке живет.\\nИ с огромных он деревьев\\nЛегко листья достает.",
-      "answer": "Жираф",
-      "pic": "assets/images/riddles_pictures_opt/zhiraf.webp",
+      "id": 1772626824055,
+      "text": "Замерли на ткани кружева,\nВаза, яблоки, листва.\nЖизнь застыла в красках гордо —\nИх назвали ...",
+      "answer": "Натюрмортом",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_dfwku3dfwku3dfwk.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854579,
-      "text": "Траву жуёт. Носит матроску\\nВ чёрно - белую полоску.",
-      "answer": "Зебра",
-      "pic": "assets/images/riddles_pictures_opt/zebra.webp",
+      "id": 1772626928401,
+      "text": "В огороде у дорожки\nСветит солнце на ножке.\nВ центре зреют семена —\nЧёрных зёрнышек сполна.",
+      "answer": "Подсолнух",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_8inh4m8inh4m8inh.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854580,
-      "text": "В цирке трюки выполняет,\\nБрёвна хоботом таскает.\\nСерый и громадный он,\\nКто же это? Это ...",
-      "answer": "Слон",
-      "pic": "assets/images/riddles_pictures_opt/slon.webp",
+      "id": 1772627465625,
+      "text": "Зёрна в травке собирает,\nГромко крыльями хлопочет.\n«Ко-ко-ко» — она вещает,\nМамой быть цыплятам хочет.",
+      "answer": "Курица",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_jytc3xjytc3xjytc.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854581,
-      "text": "В зоопарке, в синей клетке\\nЛовко прыгает по сетке,\\nКорчит рожи, ест бананы.\\nКто? Конечно",
-      "answer": "Обезьяна",
-      "pic": "assets/images/riddles_pictures_opt/obezyana.webp",
+      "id": 1772627662129,
+      "text": "К дому плотно прилегает,\nОтдохнуть нас приглашает.\nЗдесь в тени, под крышей ясной,\nВ летний вечер быть прекрасно.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_fuowfpfuowfpfuow.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854582,
-      "text": "Нет того, кто не боится\\nЭтой грозной хищной птицы.\\nКто куда бы не забрёл,\\nСверху видит всё…",
-      "answer": "Орёл",
-      "pic": "assets/images/riddles_pictures_opt/orel.webp",
+      "id": 1772627817553,
+      "text": "Для девчонок украшенье,\nДля любого настроенья.\nСверху — ворот, снизу — клёш,\nКраше в мире не найдёшь.",
+      "answer": "Платье",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_y9xw1ey9xw1ey9xw.webp",
       "level": "easy"
     },
     {
-      "id": 1772521854583,
-      "text": "Рано он всегда встаёт,\\nПо утрам всегда поёт,\\nНосит гребень и серёжки,\\nВ перьях все его одёжки.",
-      "answer": "Петух",
-      "pic": "assets/images/riddles_pictures_opt/petukh.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854584,
-      "text": "Маленькая птичка\\nЧирикает отлично,\\nПрыгает по веткам,\\nЖить не станет в клетке.\\nНе таится от людей\\nРазвесёлый...",
-      "answer": "воробей",
-      "pic": "assets/images/riddles_pictures_opt/vorobey.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854585,
-      "text": "Перья черные летят,\\nВсюду каркают, кричат,\\nЧто за важная персона?\\nЭто черная...",
-      "answer": "Ворона",
-      "pic": "assets/images/riddles_pictures_opt/vorona.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854586,
-      "text": "Я по травке не спешу.\\nЕсли станет страшно вдруг,\\nСпрячусь в домик, милый друг.",
-      "answer": "Улитка",
-      "pic": "assets/images/riddles_pictures_opt/ulitka.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854587,
-      "text": "На пруду на живёт,\\nГромко песенки поёт,\\nПучеглазая зверюшка\\nНазывается...",
-      "answer": "Лягушка",
-      "pic": "assets/images/riddles_pictures_opt/lyagushka.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854588,
-      "text": "В пустыне живёт,\\nПодолгу не пьёт,\\nС жарой легко справляется,\\nКолючками питается.",
-      "answer": "Верблюд",
-      "pic": "assets/images/riddles_pictures_opt/verblyud.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854589,
-      "text": "Через море-океан\\nПлывёт чудо-великан,\\nПрячет ус во рту,\\nРастянулся на версту.",
-      "answer": "Кит",
-      "pic": "assets/images/riddles_pictures_opt/kit.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854590,
-      "text": "Ем я уголь, пью я воду,\\nКак напьюсь — прибавлю ходу.\\nВезу обоз на сто колес\\nИ называюсь...",
-      "answer": "Паровоз",
-      "pic": "assets/images/riddles_pictures_opt/parovoz.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854591,
-      "text": "Она идет и зиму прогоняет.\\nКогда придет, вокруг всё расцветает.\\nОт солнышка прекрасного ясна.\\nЗовут ее, конечно же ...",
-      "answer": "Весна",
-      "pic": "assets/images/riddles_pictures_opt/vesna.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854592,
-      "text": "Если крылья распахнет —\\nКрасотой с ума сведет.\\nНа лугу она летает,\\nВсех собою удивляет.",
-      "answer": "Бабочка",
-      "pic": "assets/images/riddles_pictures_opt/babochka.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854593,
-      "text": "Лечит маленьких детей,\\nЛечит птичек и зверей,\\nСквозь очки свои глядит\\nДобрый доктор...",
-      "answer": "Айболит",
-      "pic": "assets/images/riddles_pictures_opt/aybolit.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772521854594,
-      "text": "Сначала пашут,\\nПотом засевают,\\nВремя придёт,\\nУрожай собирают!",
-      "answer": "Поле",
-      "pic": "assets/images/riddles_pictures_opt/pshenitsa.webp",
+      "id": 1772630723992,
+      "text": "В небе на верёвочке\nПляшет он в обновочке.\nВетер дунет — он летит,\nХвостиком своим шумит.",
+      "answer": "Воздушный змей",
+      "pic": "assets/images/riddles_pictures_opt/unnamed__1_.webp",
       "level": "easy"
     }
   ],
@@ -959,5 +882,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-03T15:49:18.366Z"
+  "exportedAt": "2026-03-04T13:25:24.008Z"
 }
