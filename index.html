@@ -1259,18 +1259,32 @@ const ParentDash = {
 <!-- BATCH UPLOAD MODAL -->
 <div class="modal-overlay hidden" id="batch-modal" onclick="Admin.closeBatch(event)">
     <div class="modal-box" style="max-height:82vh;overflow-y:auto;">
-        <div class="modal-title">Пакетная загрузка картинок</div>
-        <label class="file-label" style="justify-content:center;padding:18px;border-style:dashed;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-            Выбрать картинки
-            <input type="file" id="batch-files" accept="image/*" multiple onchange="Admin._onBatchFiles(this)">
-        </label>
-        <div id="batch-preview-list"></div>
-        <div id="batch-summary" style="display:none;font-size:13px;color:var(--text2);text-align:center;"></div>
-        <select id="batch-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;">
-            <option value="easy">Уровень для всех: Простой</option>
-            <option value="medium">Уровень для всех: Средний</option>
-            <option value="hard">Уровень для всех: Сложный</option>
+        <div class="modal-title" id="batch-modal-title">Пакетная загрузка</div>
+
+        <!-- Ребусы: загрузка картинок -->
+        <div id="batch-pics-section">
+            <label class="file-label" style="justify-content:center;padding:18px;border-style:dashed;">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                Выбрать картинки
+                <input type="file" id="batch-files" accept="image/*" multiple onchange="Admin._onBatchFiles(this)">
+            </label>
+            <div id="batch-preview-list"></div>
+            <div id="batch-summary" style="display:none;font-size:13px;color:var(--text2);text-align:center;margin:6px 0;"></div>
+        </div>
+
+        <!-- Загадки: текстовый ввод -->
+        <div id="batch-text-section" style="display:none;">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6;">
+                Построчно: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;">Текст загадки|Ответ|easy</code><br>
+                Или вставьте JSON-массив: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;">[{"text":"...","answer":"...","level":"easy"}]</code>
+            </div>
+            <textarea id="batch-riddle-text" rows="8" placeholder="Белым снегом всё одето...|Зима|easy&#10;Охраняет дом, виляет хвостом...|Собака|easy" style="width:100%;padding:12px 14px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-size:13px;color:var(--text);outline:none;resize:none;line-height:1.6;font-family:monospace;"></textarea>
+        </div>
+
+        <select id="batch-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-top:8px;">
+            <option value="easy">Уровень: Простой</option>
+            <option value="medium">Уровень: Средний</option>
+            <option value="hard">Уровень: Сложный</option>
         </select>
         <div class="modal-btns">
             <button class="modal-cancel" onclick="Admin.closeBatch()">Отмена</button>

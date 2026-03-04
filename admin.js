@@ -57,9 +57,7 @@ const Admin = {
         const isNotif = this._tab === 'notif';
         // Toggle add/batch buttons visibility
         const addBtn = document.querySelector('.admin-add-btn');
-        const batchBtn = document.getElementById('admin-batch-btn');
         if (addBtn) addBtn.style.display = isNotif ? 'none' : '';
-        if (batchBtn && !isNotif) batchBtn.classList.toggle('hidden', this._tab !== 'puzzles');
 
         if (isNotif) {
             this._renderNotifTab();
@@ -69,6 +67,11 @@ const Admin = {
         const items = this._getData(this._tab);
         const list = document.getElementById('admin-list');
         list.innerHTML = '';
+
+        // Кнопка «Загрузить пачкой» в footer — только для ребусов и загадок
+        const batchBtn = document.getElementById('admin-batch-btn');
+        if (batchBtn) batchBtn.classList.toggle('hidden', this._tab !== 'puzzles' && this._tab !== 'riddles');
+
         if (!items.length) {
             list.innerHTML = '<div style="text-align:center;color:var(--text2);padding:30px;font-weight:700;">Список пуст</div>';
             return;
@@ -534,6 +537,146 @@ const Admin = {
 
 
     // ── Обновить счётчик pending картинок на кнопке публикации ──
+
+    // ── Пакетная загрузка ──────────────────────────────────────────────────────
+    _batchItems: [],
+
+    openBatch() {
+        const modal = document.getElementById('batch-modal');
+        if (!modal) return;
+        // Настраиваем модал под текущую вкладку
+        const isRiddles = this._tab === 'riddles';
+        document.getElementById('batch-modal-title').textContent =
+            isRiddles ? 'Загадки пачкой' : 'Пакетная загрузка картинок';
+        document.getElementById('batch-pics-section').style.display = isRiddles ? 'none' : '';
+        document.getElementById('batch-text-section').style.display = isRiddles ? '' : 'none';
+        document.getElementById('batch-preview-list').innerHTML = '';
+        document.getElementById('batch-summary').style.display = 'none';
+        const filesEl = document.getElementById('batch-files');
+        if (filesEl) filesEl.value = '';
+        this._batchItems = [];
+        modal.classList.remove('hidden');
+    },
+
+    closeBatch(e) {
+        if (e && e.target !== document.getElementById('batch-modal')) return;
+        document.getElementById('batch-modal').classList.add('hidden');
+        this._batchItems = [];
+    },
+
+    _onBatchFiles(input) {
+        const files = Array.from(input.files);
+        if (!files.length) return;
+        const preview = document.getElementById('batch-preview-list');
+        preview.innerHTML = '';
+        this._batchItems = [];
+
+        const data = this._getData(this._tab);
+        const maxId = data.reduce((m, i) => Math.max(m, i.id || 0), 0);
+
+        files.forEach((file, idx) => {
+            const rawName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+            const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+            const id = maxId + idx + 1;
+            const pending_key = 'puzzle_' + id;
+
+            this._batchItems.push({ id, name, answer: name, file, pending_key, level: 'easy' });
+
+            const url = URL.createObjectURL(file);
+            const div = document.createElement('div');
+            div.className = 'batch-item';
+            div.dataset.idx = idx;
+            div.innerHTML = `
+                <img src="${url}" class="batch-thumb">
+                <div class="batch-item-fields">
+                    <input type="text" class="batch-name" value="${name}" placeholder="Название / ответ">
+                    <select class="batch-lvl">
+                        <option value="easy">Простой</option>
+                        <option value="medium">Средний</option>
+                        <option value="hard">Сложный</option>
+                    </select>
+                </div>`;
+            preview.appendChild(div);
+        });
+
+        const summary = document.getElementById('batch-summary');
+        summary.textContent = `Найдено: ${files.length} картинок`;
+        summary.style.display = '';
+    },
+
+    _parseBatchText(raw) {
+        // Поддерживаем два формата:
+        // 1. JSON: [{"text":"...","answer":"...","level":"easy"}, ...]
+        // 2. Построчный: Текст загадки|Ответ|easy (уровень опционален)
+        raw = raw.trim();
+        if (raw.startsWith('[')) {
+            try { return JSON.parse(raw); } catch(e) { showToast('❌ Ошибка JSON: ' + e.message); return []; }
+        }
+        return raw.split('\n').filter(l => l.trim()).map(line => {
+            const parts = line.split('|');
+            return { text: (parts[0]||'').trim(), answer: (parts[1]||'').trim(), level: (parts[2]||'easy').trim() };
+        }).filter(r => r.text && r.answer);
+    },
+
+    saveBatch() {
+        const level = document.getElementById('batch-level')?.value || 'easy';
+        const isRiddles = this._tab === 'riddles';
+
+        if (isRiddles) {
+            // Сохраняем загадки из текста
+            const raw = document.getElementById('batch-riddle-text')?.value || '';
+            const parsed = this._parseBatchText(raw);
+            if (!parsed.length) { showToast('❌ Нет данных для сохранения'); return; }
+
+            const data = this._getData('riddles');
+            const maxId = data.reduce((m, i) => Math.max(m, i.id || 0), 0);
+            parsed.forEach((r, idx) => {
+                data.push({ id: maxId + idx + 1, text: r.text, answer: r.answer, level: r.level || level, pic: '' });
+            });
+            this._setData('riddles', data);
+            showToast(`✅ Добавлено ${parsed.length} загадок`);
+        } else {
+            // Сохраняем ребусы из картинок
+            const preview = document.getElementById('batch-preview-list');
+            const rows = preview.querySelectorAll('.batch-item');
+            if (!rows.length) { showToast('❌ Выберите картинки'); return; }
+
+            const data = this._getData('puzzles');
+            const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+
+            rows.forEach((row, idx) => {
+                const item = this._batchItems[idx];
+                if (!item) return;
+                const nameEl = row.querySelector('.batch-name');
+                const lvlEl  = row.querySelector('.batch-lvl');
+                const name   = nameEl ? nameEl.value.trim() : item.name;
+                const lvl    = lvlEl  ? lvlEl.value          : 'easy';
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    pending[item.pending_key] = { data: e.target.result, name: item.file.name };
+                    localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                };
+                reader.readAsDataURL(item.file);
+
+                const safeName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^а-яёa-z0-9_]/gi, '');
+                data.push({
+                    id: item.id, name, answer: name, level: lvl,
+                    pic: `assets/images/rebuses_pictures_opt/${safeName}.webp`,
+                    hint: 'Присмотрись к картинке',
+                    _pending_pic: item.pending_key,
+                });
+            });
+
+            this._setData('puzzles', data);
+            showToast(`✅ Добавлено ${rows.length} ребусов. Не забудьте опубликовать на GitHub!`);
+        }
+
+        document.getElementById('batch-modal').classList.add('hidden');
+        this._batchItems = [];
+        this.render();
+    },
+
     // Запрашивает немедленную отправку отчёта через воркер
     async requestReport() {
         const btn = document.getElementById('admin-report-btn');
