@@ -9,6 +9,12 @@ let TESTING_ALL_COLORS = [];
 
 async function _loadTestingData() {
     if (TESTING_TASKS) return;
+    // fetch() падает с CORS-ошибкой при открытии через file://.
+    // В этом случае тихо выходим — тестирование будет недоступно.
+    if (location.protocol === 'file:') {
+        console.warn('[Testing] file:// протокол — testing-data.json недоступен');
+        return;
+    }
     try {
         const resp = await fetch('testing-data.json');
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);

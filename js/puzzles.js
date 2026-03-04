@@ -193,7 +193,7 @@ const Puzzles = {
             starsBurst();
             playCorrectSound('puzzles');
             Achievements.correct('puzzles');
-            CardBadges.markTried('puzzles', this._current().answer);
+            CardBadges.markTried('puzzles', this._current().id);
             StatTracker.inc('puzzles');
         } else {
             inp.className = 'wrong';

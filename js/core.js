@@ -34,23 +34,27 @@ const App = {
         else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
         if (isMain) CardBadges.updateAll();
         window.scrollTo(0, 0);
-        // Stop songs/video when leaving section
-        if (id !== 'songs' && typeof Songs !== 'undefined' && Songs.index !== -1) {
-            Songs.destroy();
-        }
-        // Управляем кнопками топ-бара
-        if (id === 'puzzles') {
-            Puzzles._renderLevelDots();
-        } else {
-            const el = document.getElementById('puzzle-level-dots'); if (el) el.remove();
-        }
-        if (id === 'riddles') {
-            Riddles._renderTopBar();
-        } else {
-            const el = document.getElementById('riddle-level-dots'); if (el) el.remove();
-        }
-        // Рендерим динамические разделы
-        if (id === 'info') Info.render();
+
+        // Реестр хуков навигации: onEnter / onLeave.
+        // Добавляя новый раздел — регистрируй хук здесь, не расширяй if-цепочку.
+        const NAV_HOOKS = {
+            songs:   { onLeave: () => { if (typeof Songs !== 'undefined' && Songs.index !== -1) Songs.destroy(); } },
+            puzzles: {
+                onEnter: () => Puzzles._renderLevelDots(),
+                onLeave: () => document.getElementById('puzzle-level-dots')?.remove(),
+            },
+            riddles: {
+                onEnter: () => Riddles._renderTopBar(),
+                onLeave: () => document.getElementById('riddle-level-dots')?.remove(),
+            },
+            info:    { onEnter: () => Info.render() },
+        };
+
+        // Вызываем onLeave для предыдущего раздела
+        const prev = this._history[this._history.length - 1];
+        if (prev && prev !== id && NAV_HOOKS[prev]?.onLeave) NAV_HOOKS[prev].onLeave();
+        // Вызываем onEnter для нового раздела
+        if (NAV_HOOKS[id]?.onEnter) NAV_HOOKS[id].onEnter();
     },
 
     // Обрабатываем deep link хэш (#song-5, #podcast-3)
@@ -187,10 +191,13 @@ const App = {
         for (const url of urls) {
             try {
                 const isRemote = url.startsWith('http');
-                const fetchUrl = isRemote ? url + '?_=' + Date.now() : url;
+                // Ранее: url + '?_=' + Date.now() создавало невалидный URL
+                // вида «data.json?v=123?_=456» (два знака ?), т.к. cacheBust
+                // уже добавлен в строке 182. cache:'no-store' достаточно для
+                // браузера, ?v= достаточно для CDN — дополнительный параметр не нужен.
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 5000);
-                const resp = await fetch(fetchUrl, {
+                const resp = await fetch(url, {
                     cache: isRemote ? 'no-store' : 'default',
                     signal: controller.signal
                 });
@@ -268,11 +275,20 @@ const App = {
         document.getElementById('modal').classList.add('hidden');
 
         // Admin via hash — check on load too
-        const checkHash = () => {
+        // Пароль не хранится в коде — только его SHA-256.
+        // crypto.subtle доступен без зависимостей в любом современном браузере.
+        const ADMIN_HASH = '4cd5e4c0c0f4fa450cd8a8789033f06d55122edfa597047221025a33bb3f7e4a';
+        const _checkAdminPass = async (pass) => {
+            if (!pass) return false;
+            const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+            const hex  = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+            return hex === ADMIN_HASH;
+        };
+        const checkHash = async () => {
             if (window.location.hash === '#see') {
                 history.replaceState(null, '', location.pathname);
                 const pass = prompt('Введите пароль:');
-                if (pass === '1239940') {
+                if (await _checkAdminPass(pass)) {
                     Admin.init();
                     Admin._updatePendingBadge();
                     App.navigate('admin', 'Админка');
@@ -509,12 +525,39 @@ const CardBadges = {
                 if (key === 'songs' && typeof Songs !== 'undefined') { if (!Songs._listBuilt) try { Songs._buildList(); } catch(e) {} if (Songs._allSongs.length) return Songs._allSongs.map(s => String(s.id)); }
                 return data.map(item => String(item.id));
             } else {
-                // riddles / puzzles — use answer as identifier
-                return data.map(item => (item.answer || item.name || '').toLowerCase().trim()).filter(Boolean);
+                // riddles / puzzles — используем id как стабильный идентификатор.
+                // Ранее использовался answer, из-за чего два задания с одинаковым
+                // ответом («Медведь» id 7 и id 14) засчитывались оба при решении одного.
+                return data.map(item => String(item.id)).filter(Boolean);
             }
         } catch { return []; }
     },
+    // Однократная миграция tried_* из answer-ключей в id-ключи.
+    // Запускается при первом updateAll() после обновления кода.
+    _migrateTried() {
+        if (localStorage.getItem('tried_migrated_v2')) return;
+        ['puzzles', 'riddles'].forEach(key => {
+            const data = (() => { try { return JSON.parse(localStorage.getItem('admin_' + key) || '[]'); } catch { return []; } })();
+            if (!data.length) return;
+            // Строим карту answer→id для конвертации
+            const answerToId = {};
+            data.forEach(item => {
+                const ans = (item.answer || item.name || '').toLowerCase().trim();
+                if (ans) answerToId[ans] = String(item.id);
+            });
+            const oldSet = this._getTriedSet(key);
+            if (!oldSet.size) return;
+            const newSet = new Set();
+            oldSet.forEach(val => {
+                // Если значение уже выглядит как id (число) — оставляем
+                newSet.add(answerToId[val] || val);
+            });
+            this._saveTriedSet(key, newSet);
+        });
+        localStorage.setItem('tried_migrated_v2', '1');
+    },
     updateAll() {
+        this._migrateTried();
         ['songs', 'podcasts', 'puzzles', 'riddles'].forEach(key => {
             const allIds = this._getAllIds(key);
             const tried = this._getTriedSet(key);
@@ -533,8 +576,8 @@ const CardBadges = {
                 }
             }
             if (newEl) {
-                if (total > 0) {
-                    newEl.textContent = total;
+                if (newCount > 0) {
+                    newEl.textContent = newCount;
                     newEl.style.display = 'flex';
                 } else {
                     newEl.style.display = 'none';

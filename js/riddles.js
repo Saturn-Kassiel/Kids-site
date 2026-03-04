@@ -204,7 +204,7 @@ const Riddles = {
             starsBurst();
             playCorrectSound('riddles');
             Achievements.correct('riddles');
-            CardBadges.markTried('riddles', item.a || item.answer);
+            CardBadges.markTried('riddles', item.id);
             StatTracker.inc('riddles');
         } else {
             inp.className = 'wrong';

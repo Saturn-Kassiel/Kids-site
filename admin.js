@@ -6,83 +6,39 @@ const Admin = {
     _editId: null,
 
     init() {
-        // Seed defaults with full data
-        const defaults = {
-            songs: [
-                { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',            tags:['sleep'],   video:'assets/video/songs_video/kolibelnaya.mp4' },
-                { id:2,  name:'Песенка для мамы',         duration:'', src:'assets/audio/songs/pesenka_dlya_mamy.mp3',      tags:['family'] },
-                { id:3,  name:'Песенка про слона',        duration:'', src:'assets/audio/songs/pesenka_pro_clona.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_slona.mp4' },
-                { id:4,  name:'Песенка про Деда Мороза',  duration:'', src:'assets/audio/songs/pesenka_pro_deda_moroza.mp3',tags:['holiday'] },
-                { id:5,  name:'Песенка про февраль',      duration:'', src:'assets/audio/songs/pesenka_pro_fevral.mp3',     tags:['months'] },
-                { id:6,  name:'Песенка про льва',         duration:'', src:'assets/audio/songs/pesenka_pro_lva.mp3',        tags:['animals'], video:'assets/video/songs_video/pesenka_pro_lva.mp4' },
-                { id:7,  name:'Песенка про неделю',       duration:'', src:'assets/audio/songs/pesenka_pro_nedelyu.mp3',    tags:['learning'] },
-                { id:8,  name:'Песенка про носорога',     duration:'', src:'assets/audio/songs/pesenka_pro_nosoroga.mp3',   tags:['animals'], video:'assets/video/songs_video/pesenka_pro_nosoroga.mp4' },
-                { id:9,  name:'Песенка про папу',         duration:'', src:'assets/audio/songs/pesenka_pro_papu.mp3',       tags:['family'] },
-                { id:10, name:'Песенка про умывание',     duration:'', src:'assets/audio/songs/pesenka_pro_umyvanie.mp3',   tags:['learning'] },
-                { id:11, name:'Песенка про январь',       duration:'', src:'assets/audio/songs/pesenka_pro_yanvar.mp3',     tags:['months'] },
-                { id:12, name:'Песенка про зебру',        duration:'', src:'assets/audio/songs/pesenka_pro_zebru.mp3',      tags:['animals'], video:'assets/video/songs_video/pesenka_pro_zebru.mp4' },
-                { id:13, name:'В лесу родилась ёлочка',   duration:'', src:'assets/audio/songs/v_lesu_rodilas_yolochka.mp3',tags:['holiday'] },
-                { id:14, name:'Песенка про Рождество',    duration:'', src:'assets/audio/songs/rodgestvo.mp3',              tags:['holiday'] },
-                { id:15, name:'Песенка про Весну',        duration:'', src:'assets/audio/songs/vesna.mp3',                  tags:['months'] },
-                { id:16, name:'Песенка про Енота',        duration:'', src:'assets/audio/songs/енот.mp3',                   tags:['animals'] },
-                { id:17, name:'Песенка про Ленивца',      duration:'', src:'assets/audio/songs/lenivetc.mp3',               tags:['animals'] },
-                { id:18, name:'Песенка про Март',         duration:'', src:'assets/audio/songs/mart.mp3',                   tags:['months'] },
-                { id:19, name:'Песенка про Шакала',       duration:'', src:'assets/audio/songs/shakal.mp3',                 tags:['animals'] },
-                { id:20, name:'Песенка про Волка',        duration:'', src:'assets/audio/songs/volk.mp3',                   tags:['animals'] },
-            ],
-            podcasts: [
-                { id:1, name:'Благодарность',    desc:'', duration:'', src:'assets/audio/podcasts/blagodarnost.mp3' },
-                { id:2, name:'Доверие ребёнка',  desc:'', duration:'', src:'assets/audio/podcasts/doverie_rebyonka.mp3' },
-                { id:3, name:'Мозг дошкольника', desc:'', duration:'', src:'assets/audio/podcasts/mozg_doshkolnika.mp3' },
-                { id:4, name:'Поколение Альфа',  desc:'', duration:'', src:'assets/audio/podcasts/pokolenie_alfa.mp3' },
-                { id:5, name:'Слушать сердцем',  desc:'', duration:'', src:'assets/audio/podcasts/slushat_serdtsem.mp3' },
-                { id:6, name:'Сравнение',         desc:'', duration:'', src:'assets/audio/podcasts/sravnenie.mp3' },
-            ],
-            puzzles: [
-                { id:1,  name:'Рыба',      pic:'assets/images/rebuses_pictures_opt/ryba.webp',     hint:'Присмотрись к картинке', answer:'рыба',     level:'easy' },
-                { id:2,  name:'Ложка',     pic:'assets/images/rebuses_pictures_opt/lozhka.webp',   hint:'Присмотрись к картинке', answer:'ложка',    level:'easy' },
-                { id:3,  name:'Вилка',     pic:'assets/images/rebuses_pictures_opt/vilka.webp',    hint:'Присмотрись к картинке', answer:'вилка',    level:'easy' },
-                { id:4,  name:'Море',      pic:'assets/images/rebuses_pictures_opt/more.webp',     hint:'Присмотрись к картинке', answer:'море',     level:'easy' },
-                { id:5,  name:'Радуга',    pic:'assets/images/rebuses_pictures_opt/raduga.webp',   hint:'Присмотрись к картинке', answer:'радуга',   level:'easy' },
-                { id:6,  name:'Слон',      pic:'assets/images/rebuses_pictures_opt/slon.webp',     hint:'Присмотрись к картинке', answer:'слон',     level:'easy' },
-                { id:7,  name:'Бабочка',   pic:'assets/images/rebuses_pictures_opt/babochka.webp', hint:'Присмотрись к картинке', answer:'бабочка',  level:'medium' },
-                { id:8,  name:'Коньки',    pic:'assets/images/rebuses_pictures_opt/konki.webp',    hint:'Присмотрись к картинке', answer:'коньки',   level:'medium' },
-                { id:9,  name:'Трактор',   pic:'assets/images/rebuses_pictures_opt/traktor.webp',  hint:'Присмотрись к картинке', answer:'трактор',  level:'medium' },
-                { id:10, name:'Туча',      pic:'assets/images/rebuses_pictures_opt/tucha.webp',    hint:'Присмотрись к картинке', answer:'туча',     level:'medium' },
-                { id:11, name:'Туман',     pic:'assets/images/rebuses_pictures_opt/tuman.webp',    hint:'Присмотрись к картинке', answer:'туман',    level:'medium' },
-                { id:12, name:'Зелень',    pic:'assets/images/rebuses_pictures_opt/zelen.webp',    hint:'Присмотрись к картинке', answer:'зелень',   level:'medium' },
-                { id:13, name:'Креветка',  pic:'assets/images/rebuses_pictures_opt/krevetka.webp', hint:'Присмотрись к картинке', answer:'креветка', level:'hard' },
-                { id:14, name:'Забор',     pic:'assets/images/rebuses_pictures_opt/zabor.webp',    hint:'Присмотрись к картинке', answer:'забор',    level:'hard' },
-                { id:15, name:'Токарь',    pic:'assets/images/rebuses_pictures_opt/tokar.webp',    hint:'Присмотрись к картинке', answer:'токарь',   level:'hard' },
-            ],
-            info: [
-                { id:1, name:'🌟 О приложении', body:'Говоруша — детское образовательное приложение для изучения букв, цифр, цветов и развития речи через игру и песенки.' },
-                { id:2, name:'📚 Разделы', body:'Алфавит — учим буквы с видео и аудио. Цифры — считаем от 0 до 9. Цвета — изучаем цвета. Песенки — любимые детские треки. Ребусы и Загадки — развиваем мышление. Гимнастика — пальчиковые и артик. упражнения.' },
-                { id:3, name:'💡 Советы', body:'Занимайтесь каждый день по 15–20 минут. Хвалите ребёнка за каждый правильный ответ!' },
-                { id:4, name:'🔗 Пример ссылки', body:'Наш сайт: [Говоруша](https://govorusha.ru)\nНаписать нам: [Telegram](https://t.me/govorusha)' },
-            ],
-            riddles: [],
+        // Данные поступают из data.json через App._loadRemoteData(), которая
+        // отрабатывает до открытия админки и пишет в localStorage('admin_*').
+        // Дублировать их здесь в виде defaults не нужно — это единственный
+        // источник правды. Здесь только миграция старых форматов данных.
+        const _needsMigration = (k, parsed) => {
+            if (!parsed || parsed.length === 0) return true;
+            if (k === 'podcasts'  && parsed.length < 3) return true;
+            if (k === 'riddles'   && parsed[0] && (parsed[0].emoji !== undefined || parsed[0].text === '—')) return true;
+            if (k === 'info'      && parsed[0] && (!parsed[0].body || parsed.length < 4)) return true;
+            if (k === 'puzzles'   && parsed.some(p => !p.pic || p.pic.includes('5+2'))) return true;
+            if (k === 'puzzles'   && parsed.some(p => !p.answer)) return true;
+            if (k === 'puzzles'   && parsed[0] && parsed[0].img && !parsed[0].pic) return true;
+            return false;
         };
-        // Reseed секций если localStorage пуст или устарел
-        // Загадки НЕ сидируем из кода — они приходят из data.json через core.js
-        ['songs','podcasts','puzzles'].forEach(k => {
+        let staleSections = [];
+        ['songs','podcasts','puzzles','riddles','info'].forEach(k => {
             const stored = localStorage.getItem('admin_' + k);
-            let needsReseed = !stored;
-            if (!needsReseed) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    if (parsed.length === 0) needsReseed = true;
-                    if (k === 'podcasts' && parsed.length < 3) needsReseed = true;
-                    if (k === 'puzzles' && parsed.some(p => !p.pic || p.pic.includes('5+2'))) needsReseed = true;
-                    if (k === 'puzzles' && parsed.some(p => !p.answer)) needsReseed = true;
-                    if (k === 'puzzles' && parsed[0] && parsed[0].img && !parsed[0].pic) needsReseed = true;
-                } catch { needsReseed = true; }
-            }
-            if (needsReseed) {
-                localStorage.setItem('admin_' + k, JSON.stringify(defaults[k]));
+            let parsed = null;
+            try { parsed = stored ? JSON.parse(stored) : null; } catch { /* ignore */ }
+            if (_needsMigration(k, parsed)) {
+                // Устаревший/битый формат — сбрасываем; свежие данные придут
+                // при следующем _loadRemoteData() (вызывается ниже).
+                localStorage.removeItem('admin_' + k);
+                staleSections.push(k);
             }
         });
-        this.render();
+        if (staleSections.length > 0) {
+            // Перезагружаем данные из сети и только потом рендерим
+            console.log('[Admin] Устаревшие секции, перезагружаем:', staleSections);
+            App._loadRemoteData().then(() => this.render());
+        } else {
+            this.render();
+        }
         // Восстанавливаем токен из localStorage
         setTimeout(() => this._loadToken(), 30);
     },
@@ -476,18 +432,6 @@ const Admin = {
         }
 
         this._setData(this._tab, items);
-
-        // Для загадок: сохраняем добавленные через админку отдельно
-        // чтобы они пережили перезагрузку data.json
-        if (this._tab === 'riddles') {
-            try {
-                const base = (() => { try { return JSON.parse(localStorage.getItem('admin_riddles_base_ids') || '[]'); } catch { return []; } })();
-                const baseSet = new Set(base);
-                const extra = items.filter(r => !baseSet.has(r.id));
-                localStorage.setItem('admin_extra_riddles', JSON.stringify(extra));
-            } catch(e) {}
-        }
-
         this.closeModal();
         this.render();
         if (this._tab === 'songs') {

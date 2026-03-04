@@ -95,6 +95,15 @@ self.addEventListener('activate', (event) => {
             ))
             .then(() => trimMediaCache())
             .then(() => self.clients.claim())
+            // Уведомляем вкладки ПОСЛЕ claim() — только тогда SW
+            // контролирует клиентов и matchAll() вернёт непустой список.
+            // Ранее это было отдельным addEventListener('activate'),
+            // без waitUntil — SW мог завершить активацию раньше чем
+            // промис matchAll() успевал разрешиться.
+            .then(() => self.clients.matchAll({ type: 'window' }))
+            .then(clients => clients.forEach(
+                client => client.postMessage({ type: 'sw-updated', version: CACHE_VERSION })
+            ))
     );
 });
 
@@ -315,9 +324,3 @@ self.addEventListener('message', (event) => {
     }
 });
 
-// Уведомляем все вкладки когда новый SW взял управление
-self.addEventListener('activate', () => {
-    self.clients.matchAll({ type: 'window' }).then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'sw-updated', version: CACHE_VERSION }));
-    });
-});
