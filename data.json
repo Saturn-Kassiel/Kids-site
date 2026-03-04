@@ -818,6 +818,13 @@
       "answer": "Мишка",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_movpakmovpakmovp.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772626677944,
+      "text": "В ярком ящике живут,\nВ гости нас к себе зовут.\nКуклы, мячики, машинки —\nСловно с красочной картинки.",
+      "answer": "Игрушки",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_eo6xxceo6xxceo6x.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -833,5 +840,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:16:18.025Z"
+  "exportedAt": "2026-03-04T12:17:57.994Z"
 }
