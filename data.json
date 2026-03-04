@@ -888,6 +888,20 @@
       "answer": "Лось",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_lcbzhzlcbzhzlcbz.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772632375823,
+      "text": "Ветви гордо на макушке,\nСкачет быстро по опушке.\nГрациозен и красив,\nЛеса сказочный мотив.",
+      "answer": "Олень",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_4nvyru4nvyru4nvy.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772632426817,
+      "text": "Мордочка в полосках серых,\nРоет норы очень смело.\nЧистоту в дому хранит,\nДнём в норе глубокой спит.",
+      "answer": "Барсук",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_i4cneki4cneki4cn.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -903,5 +917,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T13:52:11.099Z"
+  "exportedAt": "2026-03-04T13:53:46.830Z"
 }
