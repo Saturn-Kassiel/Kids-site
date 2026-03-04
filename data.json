@@ -832,6 +832,13 @@
       "answer": "Натюрмортом",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_dfwku3dfwku3dfwk.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772626928401,
+      "text": "В огороде у дорожки\nСветит солнце на ножке.\nВ центре зреют семена —\nЧёрных зёрнышек сполна.",
+      "answer": "Подсолнух",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_8inh4m8inh4m8inh.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -847,5 +854,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:20:24.117Z"
+  "exportedAt": "2026-03-04T12:22:08.473Z"
 }
