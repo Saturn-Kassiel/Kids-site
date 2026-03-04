@@ -839,6 +839,13 @@
       "answer": "Подсолнух",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_8inh4m8inh4m8inh.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772627465625,
+      "text": "Зёрна в травке собирает,\nГромко крыльями хлопочет.\n«Ко-ко-ко» — она вещает,\nМамой быть цыплятам хочет.",
+      "answer": "Курица",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_jytc3xjytc3xjytc.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -854,5 +861,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:22:08.473Z"
+  "exportedAt": "2026-03-04T12:31:05.637Z"
 }
