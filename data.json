@@ -811,6 +811,13 @@
       "answer": "Зубная щетка",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_l914r6l914r6l914.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772626577979,
+      "text": "Шёрстка есть, а не живой,\nСпит в кроватке он со мной.\nМягкий, ласковый на ощупь,\nС ним уснуть гораздо проще.",
+      "answer": "Мишка",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_movpakmovpakmovp.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -826,5 +833,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:14:28.044Z"
+  "exportedAt": "2026-03-04T12:16:18.025Z"
 }
