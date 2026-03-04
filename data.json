@@ -867,6 +867,13 @@
       "answer": "Воздушный змей",
       "pic": "assets/images/riddles_pictures_opt/unnamed__1_.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772630825277,
+      "text": "На макушке или в ушках\nШепчут музыку подружки.\nПроводами к нам бегут,\nПесню звонкую поют.",
+      "answer": "Наушники",
+      "pic": "assets/images/riddles_pictures_opt/slushaet.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -882,5 +889,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T13:25:24.008Z"
+  "exportedAt": "2026-03-04T13:27:05.293Z"
 }
