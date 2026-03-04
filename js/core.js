@@ -403,25 +403,8 @@ const CardBadges = {
         try {
             const data = JSON.parse(localStorage.getItem('admin_' + key) || '[]');
             if (key === 'songs' || key === 'podcasts') {
-                // Use runtime merged list if section was already visited
-                const mod = key === 'songs' ? (typeof Songs !== 'undefined' ? Songs : null)
-                          : (typeof Podcasts !== 'undefined' ? Podcasts : null);
-                if (mod && mod._allSongs && mod._allSongs.length) return mod._allSongs.map(s => String(s.id));
-                if (mod && mod._all && mod._all.length) return mod._all.map(s => String(s.id));
-                // Before first visit: merge by audio filename (same as Songs.init)
-                if (key === 'songs') {
-                    const DEFAULTS = [
-                        'kolybelnaya','pesenka_dlya_mamy','pesenka_pro_clona','pesenka_pro_deda_moroza',
-                        'pesenka_pro_fevral','pesenka_pro_lva','pesenka_pro_nedelyu','pesenka_pro_nosoroga',
-                        'pesenka_pro_papu','pesenka_pro_umyvanie','pesenka_pro_yanvar','pesenka_pro_zebru',
-                        'v_lesu_rodilas_yolochka','rodgestvo','vesna','енот','lenivetc','mart','shakal','volk'
-                    ];
-                    const existingSrcs = new Set(data.map(s => (s.src||'').split('/').pop().replace(/\.[^.]+$/,'')));
-                    const count = data.length + DEFAULTS.filter(f => !existingSrcs.has(f)).length;
-                    const ids = data.map(s => String(s.id));
-                    for (let i = ids.length + 1; ids.length < count; i++) ids.push(String(i));
-                    return ids;
-                }
+                // Songs: actual file count in assets/audio/songs/
+                if (key === 'songs' && typeof Songs !== 'undefined') { if (!Songs._listBuilt) try { Songs._buildList(); } catch(e) {} if (Songs._allSongs.length) return Songs._allSongs.map(s => String(s.id)); }
                 return data.map(item => String(item.id));
             } else {
                 // riddles / puzzles — use answer as identifier
@@ -448,7 +431,10 @@ const CardBadges = {
                 }
             }
             if (newEl) {
-                if (newCount > 0 && total > 0) {
+                if (key === 'songs') {
+                    newEl.textContent = total;
+                    newEl.style.display = total > 0 ? 'flex' : 'none';
+                } else if (newCount > 0 && total > 0) {
                     newEl.textContent = newCount;
                     newEl.style.display = 'flex';
                 } else {

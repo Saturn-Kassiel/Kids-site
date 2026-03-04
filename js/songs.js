@@ -11,8 +11,7 @@ const Songs = {
     _activeTag: 'all',
     _searchQ: '',
     _favorites: new Set(),
-    _videoLoadId: 0,
-    DEFAULT_IDS: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], // guard against race conditions (fix #7)
+    _videoLoadId: 0, // guard against race conditions (fix #7)
 
     // ── SVG icons for play/pause button (fix #5) ──
     SVG_PLAY:  '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>',
@@ -153,13 +152,9 @@ const Songs = {
         document.head.appendChild(style);
     },
 
-    init() {
-        this._injectCSS();
-        App.navigate('songs', 'Песенки');
-        AudioMgr.stop();
-
-        this._loadFavorites();
-
+    _buildList() {
+        if (this._listBuilt) return;
+        this._listBuilt = true;
         const saved = this._loadData();
         const defaults = [
             { id:1,  name:'Колыбельная',             duration:'', src:'assets/audio/songs/kolybelnaya.mp3',             video:'assets/video/songs_video/kolibelnaya.mp4' },
@@ -222,6 +217,17 @@ const Songs = {
             if (!s.tags || !s.tags.length) s.tags = this._getTagsForSong(s);
         });
 
+        
+    },
+
+    init() {
+        this._injectCSS();
+        App.navigate('songs', 'Песенки');
+        AudioMgr.stop();
+
+        this._loadFavorites();
+
+        this._buildList();
         this._applyFilter();
         this._renderChips();
         this.render();
@@ -563,3 +569,6 @@ const Songs = {
         try { return JSON.parse(localStorage.getItem('admin_songs')) || []; } catch { return []; }
     }
 };
+
+// Build song list immediately so CardBadges can read count
+try { Songs._buildList(); if (typeof CardBadges !== "undefined") CardBadges.updateAll(); } catch(e) {}
