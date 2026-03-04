@@ -63,7 +63,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notif-badge" id="notif-badge" style="display:none">0</span>
         </button>
-        <button id="settings-icon-btn" onclick="App.navigate('settings')" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button id="settings-icon-btn" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();},50)" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
     <!-- ========== MAIN ========== -->
@@ -150,7 +150,7 @@
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
                 <span class="mc-label">Статистика</span>
             </button>
-            <button class="menu-card mc-settings" onclick="App.navigate('settings')">
+            <button class="menu-card mc-settings" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();},50)">
                 <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
                 <span class="mc-label">Настройки</span>
             </button>
@@ -593,24 +593,17 @@
 
     <!-- ========== SETTINGS ========== -->
     <section id="settings" class="hidden">
-        <div class="reg-card" id="reg-card">
-            <div class="reg-avatar" id="reg-avatar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <!-- Profiles card -->
+        <div class="profiles-card" id="profiles-card">
+            <div class="profiles-title">Дети</div>
+            <div class="profiles-row" id="profiles-row"></div>
+            <div class="profiles-add-wrap" id="profiles-add-wrap" style="display:none">
+                <input type="text" id="profiles-add-input" placeholder="Имя ребёнка" maxlength="20" autocomplete="off" spellcheck="false">
+                <div class="profiles-add-btns">
+                    <button class="profiles-cancel-btn" onclick="Profiles.cancelAdd()">Отмена</button>
+                    <button class="profiles-save-btn" onclick="Profiles.saveNew()">Добавить</button>
+                </div>
             </div>
-            <div class="reg-name-display" id="reg-name-display" style="display:none"></div>
-            <div class="reg-input-wrap" id="reg-input-wrap">
-                <input type="text" id="child-name-input"
-                    placeholder="Как зовут малыша?"
-                    maxlength="20"
-                    autocomplete="off"
-                    spellcheck="false">
-                <button class="reg-save-btn" id="reg-save-btn" onclick="regSaveName()">Сохранить</button>
-            </div>
-            <div class="reg-hint" id="reg-hint">Имя используется в приветствии, похвале за правильные ответы, достижениях и итогах месяца</div>
-            <button class="reg-edit-btn" id="reg-edit-btn" style="display:none" onclick="regEditName()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
-                Изменить имя
-            </button>
         </div>
 
         <div class="settings-group">
@@ -688,6 +681,36 @@
             </div>
         </div>
 
+        <div class="settings-group-title" id="tg-reminder-section" style="display:none">Напоминания</div>
+        <div class="settings-group" id="tg-reminder-group" style="display:none">
+            <div class="settings-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </span>
+                <div><div class="s-label">Напоминать заниматься</div><div class="s-sub">Уведомление в Telegram если не заходили</div></div>
+                <div class="toggle" id="tog-reminder" onclick="tgReminderToggle(this)"></div>
+            </div>
+            <div class="settings-row" id="remind-hour-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                </span>
+                <div><div class="s-label">Время напоминания</div><div class="s-sub">В какое время слать уведомление</div></div>
+                <select id="remind-hour-select" onchange="tgReminderSetHour(this.value)"
+                    style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;">
+                    <option value="8">8:00</option>
+                    <option value="9">9:00</option>
+                    <option value="10" selected>10:00</option>
+                    <option value="11">11:00</option>
+                    <option value="12">12:00</option>
+                    <option value="15">15:00</option>
+                    <option value="17">17:00</option>
+                    <option value="18">18:00</option>
+                    <option value="19">19:00</option>
+                    <option value="20">20:00</option>
+                </select>
+            </div>
+        </div>
+
         <div class="settings-group-title">Синхронизация</div>
         <div class="settings-group">
             <div class="settings-row">
@@ -723,6 +746,21 @@
         </div>
 
         <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="localStorage.removeItem('onboarding_done');Onboarding.start();App.back();">
+                <span class="s-icon" style="background:rgba(99,102,241,0.12);color:#6366f1"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                <div><div class="s-label">Экскурсия по приложению</div><div class="s-sub">Показать тур заново</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="App.navigate('parent-dash','Для родителей')">
+                <span class="s-icon" style="background:rgba(99,102,241,0.12);color:#6366f1"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <div><div class="s-label">Для родителей</div><div class="s-sub">Сводка прогресса ребёнка</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+
+        <div class="settings-group">
             <div class="settings-row" style="cursor:pointer" onclick="App.resetStats()">
                 <span class="s-icon si-reset"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
                 <div><div class="s-label" style="color:#ef4444">Сбросить прогресс</div><div class="s-sub">Очистить все данные</div></div>
@@ -730,6 +768,11 @@
             </div>
         </div>
         <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;">Гоша v1.2 · Сделано с <svg class="icon-svg" viewBox="0 0 24 24" fill="#f87171" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    </section>
+
+    <!-- ========== PARENT DASHBOARD ========== -->
+    <section id="parent-dash" class="hidden">
+        <div id="parent-dash-content"></div>
     </section>
 
     <!-- ========== ADMIN ========== -->
@@ -844,9 +887,311 @@
 <script defer src="js/interstitials.js"></script>
 <script defer src="js/notif.js"></script>
 <script defer src="js/init.js"></script>
+<script>
+// ── Service Worker ──────────────────────────────
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Определяем путь к sw.js относительно текущего location
+        // Работает и на GitHub Pages (/Kids-site/) и локально (/)
+        const swPath = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
+        navigator.serviceWorker.register(swPath)
+            .then(reg => {
+                // Проверяем обновления при каждом визите
+                reg.update();
+
+                // Новый SW установлен и ждёт — активируем сразу
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Есть новая версия — активируем без ожидания
+                            newWorker.postMessage('skipWaiting');
+                        }
+                    });
+                });
+            })
+            .catch(err => console.warn('[SW] Registration failed:', err));
+
+        // SW взял управление — показываем тост и перезагружаем стили/скрипты
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            if (typeof showToast === 'function') {
+                showToast('✨ Приложение обновлено!');
+            }
+        });
+
+        // Слушаем сообщение sw-updated
+        navigator.serviceWorker.addEventListener('message', e => {
+            if (e.data?.type === 'sw-updated' && typeof showToast === 'function') {
+                showToast('✨ Приложение обновлено до v' + e.data.version);
+            }
+        });
+    });
+}
+</script>
 
 <!-- ── Extra modules ── -->
 <script defer src="testing.js"></script>
+<script>
+// =============================================
+// PARENT DASHBOARD — сводка прогресса ребёнка
+// =============================================
+const ParentDash = {
+
+    show() {
+        App.navigate('parent-dash', 'Для родителей');
+        this._render();
+    },
+
+    _render() {
+        const el = document.getElementById('parent-dash-content');
+        if (!el) return;
+
+        const name = localStorage.getItem('child_name') || 'Ребёнок';
+        const streak     = StatTracker.getDayStreak();
+        const dailyData  = StatTracker.getDailyData('week');
+        const lastActive = this._lastActiveDaysAgo();
+        const testResults = this._getTestResults();
+        const sections   = this._getSectionActivity();
+        const recommendation = this._getRecommendation(testResults, sections);
+
+        el.innerHTML = `
+            <div class="pd-wrap">
+
+                <!-- ── Шапка ── -->
+                <div class="pd-header">
+                    <div class="pd-avatar">👦</div>
+                    <div>
+                        <div class="pd-child-name">${name}</div>
+                        <div class="pd-last-seen">${this._lastSeenText(lastActive)}</div>
+                    </div>
+                </div>
+
+                <!-- ── Серия и активность ── -->
+                <div class="pd-row-2">
+                    <div class="pd-stat-card pd-streak">
+                        <div class="pd-stat-num">${streak}</div>
+                        <div class="pd-stat-label">🔥 дней подряд</div>
+                    </div>
+                    <div class="pd-stat-card pd-total">
+                        <div class="pd-stat-num">${this._totalAnswers()}</div>
+                        <div class="pd-stat-label">✅ ответов всего</div>
+                    </div>
+                    <div class="pd-stat-card pd-time">
+                        <div class="pd-stat-num">${this._totalTimeFormatted()}</div>
+                        <div class="pd-stat-label">🎵 прослушано</div>
+                    </div>
+                </div>
+
+                <!-- ── Активность за неделю ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Активность за 7 дней</div>
+                    <div class="pd-week-chart" id="pd-week-bars">
+                        ${this._weekBarsHTML(dailyData)}
+                    </div>
+                </div>
+
+                <!-- ── Топ разделов ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Самые активные разделы</div>
+                    ${this._topSectionsHTML(sections)}
+                </div>
+
+                <!-- ── Результаты тестирования ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Тестирование</div>
+                    ${this._testingHTML(testResults)}
+                </div>
+
+                <!-- ── Рекомендация ── -->
+                ${recommendation ? `
+                <div class="pd-card pd-rec-card">
+                    <div class="pd-card-title">💡 Рекомендация</div>
+                    <div class="pd-rec-text">${recommendation}</div>
+                </div>` : ''}
+
+            </div>`;
+    },
+
+    // ── Данные ────────────────────────────────────────────
+
+    _lastActiveDaysAgo() {
+        const log = StatTracker._getDailyLog();
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(today); d.setDate(d.getDate() - i);
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const e = log[k];
+            if (e && ((e.answers || 0) > 0 || (e.time || 0) > 0)) return i;
+        }
+        return null;
+    },
+
+    _lastSeenText(daysAgo) {
+        if (daysAgo === null) return 'Ещё не занимался';
+        if (daysAgo === 0) return 'Занимался сегодня 🟢';
+        if (daysAgo === 1) return 'Занимался вчера 🟡';
+        return `Последний раз ${daysAgo} дн. назад 🔴`;
+    },
+
+    _totalAnswers() {
+        return StatTracker.get('puzzles') + StatTracker.get('riddles')
+             + StatTracker.get('words')   + StatTracker.get('math')
+             + StatTracker.get('letters') + StatTracker.get('numbers')
+             + StatTracker.get('colors')  + StatTracker.get('songs')
+             + StatTracker.get('interstitials');
+    },
+
+    _totalTimeFormatted() {
+        const secs = StatTracker.getTime('songs') + StatTracker.getTime('podcasts');
+        if (secs < 60) return secs + 'с';
+        const m = Math.floor(secs / 60);
+        if (m < 60) return m + ' мин';
+        return Math.floor(m / 60) + 'ч ' + (m % 60) + 'м';
+    },
+
+    _getTestResults() {
+        try { return JSON.parse(localStorage.getItem('testing_results') || '[]'); } catch { return []; }
+    },
+
+    _getSectionActivity() {
+        const sections = [
+            { key: 'riddles',   label: 'Загадки',     emoji: '❓', stat: 'riddles' },
+            { key: 'puzzles',   label: 'Ребусы',      emoji: '🧩', stat: 'puzzles' },
+            { key: 'words',     label: 'Слова',       emoji: '📝', stat: 'words' },
+            { key: 'math',      label: 'Арифметика',  emoji: '➕', stat: 'math' },
+            { key: 'songs',     label: 'Песенки',     emoji: '🎵', stat: 'songs' },
+            { key: 'podcasts',  label: 'Подкасты',    emoji: '🎧', statTime: 'podcasts' },
+            { key: 'letters',   label: 'Алфавит',     emoji: '🔤', stat: 'letters' },
+            { key: 'numbers',   label: 'Цифры',       emoji: '🔢', stat: 'numbers' },
+            { key: 'colors',    label: 'Цвета',       emoji: '🎨', stat: 'colors' },
+        ];
+        return sections.map(s => ({
+            ...s,
+            count: s.stat ? StatTracker.get(s.stat) : Math.round(StatTracker.getTime(s.statTime || '') / 60)
+        })).filter(s => s.count > 0).sort((a, b) => b.count - a.count);
+    },
+
+    _getRecommendation(testResults, sections) {
+        // Find weakest test block
+        if (testResults.length) {
+            const last = testResults[testResults.length - 1];
+            const blocks = last.blocks || {};
+            let weakest = null, weakScore = 1;
+            for (const [k, v] of Object.entries(blocks)) {
+                if (v.score != null && v.score >= 0 && v.score < weakScore) {
+                    weakScore = v.score; weakest = k;
+                }
+            }
+            const tips = {
+                cognitive: 'Тренируйте логику: пазлы, сортировка, «что лишнее?», счёт предметов',
+                speech:    'Читайте вслух каждый день, задавайте вопросы по прочитанному',
+                motor:     'Лепка, рисование, застёгивание пуговиц — отличные упражнения',
+                social:    'Играйте в ролевые игры, обсуждайте чувства героев мультфильмов',
+            };
+            if (weakest && weakScore < 0.65 && tips[weakest]) {
+                const blockNames = { cognitive: 'Когниция', speech: 'Речь', motor: 'Моторика', social: 'Социум' };
+                return `<strong>${blockNames[weakest]}</strong> — ${Math.round(weakScore*100)}%. ${tips[weakest]}.`;
+            }
+        }
+        // Suggest least used section
+        const allSections = ['riddles','puzzles','words','math','songs','letters','numbers','colors'];
+        const usedKeys = new Set(sections.map(s => s.key));
+        const unused = allSections.filter(k => !usedKeys.has(k));
+        if (unused.length) {
+            const labels = { riddles:'Загадки', puzzles:'Ребусы', words:'Слова', math:'Арифметика',
+                             songs:'Песенки', letters:'Алфавит', numbers:'Цифры', colors:'Цвета' };
+            return `Ещё не пробовали раздел <strong>${labels[unused[0]] || unused[0]}</strong> — попробуйте сегодня!`;
+        }
+        return '';
+    },
+
+    // ── HTML-фрагменты ────────────────────────────────────
+
+    _weekBarsHTML(data) {
+        if (!data || !data.length) return '<div style="color:var(--text2);font-size:13px">Нет данных</div>';
+        const max = Math.max(...data.map(d => d.activity), 1);
+        const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+        return '<div class="pd-bars">' + data.map(d => {
+            const pct = Math.round((d.activity / max) * 100);
+            const dayName = days[d.date.getDay()];
+            const isToday = d.isToday;
+            return `<div class="pd-bar-col">
+                <div class="pd-bar-outer">
+                    <div class="pd-bar-fill ${isToday ? 'today' : ''}" style="height:${pct}%"></div>
+                </div>
+                <div class="pd-bar-label ${isToday ? 'today' : ''}">${dayName}</div>
+            </div>`;
+        }).join('') + '</div>';
+    },
+
+    _topSectionsHTML(sections) {
+        if (!sections.length) return '<div style="color:var(--text2);font-size:13px">Нет активности</div>';
+        const top = sections.slice(0, 5);
+        const max = top[0].count;
+        return top.map(s => {
+            const pct = Math.round((s.count / max) * 100);
+            const unit = s.statTime ? 'мин' : 'раз';
+            return `<div class="pd-section-row">
+                <span class="pd-section-emoji">${s.emoji}</span>
+                <div class="pd-section-info">
+                    <div class="pd-section-name">${s.label}</div>
+                    <div class="pd-section-bar-wrap">
+                        <div class="pd-section-bar" style="width:${pct}%"></div>
+                    </div>
+                </div>
+                <span class="pd-section-count">${s.count} ${unit}</span>
+            </div>`;
+        }).join('');
+    },
+
+    _testingHTML(results) {
+        if (!results.length) {
+            return '<div class="pd-no-test">Тестирование ещё не пройдено.<br><button class="pd-test-btn" onclick="Testing.init()">Начать тест →</button></div>';
+        }
+        const last = results[results.length - 1];
+        const d = new Date(last.date);
+        const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+        const blockNames = { cognitive:'🧠 Когниция', speech:'💬 Речь', motor:'✋ Моторика', social:'❤️ Социум' };
+        const colors = { cognitive:'#a855f7', speech:'#3b82f6', motor:'#22c55e', social:'#f59e0b' };
+
+        // Trend arrow vs previous
+        let trendHtml = '';
+        if (results.length > 1) {
+            const avg = r => {
+                const bs = Object.values(r.blocks).filter(b => b.score != null && b.score >= 0);
+                return bs.length ? bs.reduce((s, b) => s + b.score, 0) / bs.length : 0;
+            };
+            const diff = Math.round((avg(last) - avg(results[results.length - 2])) * 100);
+            if (diff > 0) trendHtml = `<span class="pd-trend up">↑${diff}%</span>`;
+            else if (diff < 0) trendHtml = `<span class="pd-trend down">↓${Math.abs(diff)}%</span>`;
+            else trendHtml = `<span class="pd-trend flat">→ без изм.</span>`;
+        }
+
+        const blocksHtml = Object.entries(last.blocks).map(([k, v]) => {
+            if (v.voiceOnly || v.score == null || v.score < 0) return '';
+            const pct = Math.round(v.score * 100);
+            const color = colors[k] || '#94a3b8';
+            return `<div class="pd-test-block">
+                <div class="pd-test-block-top">
+                    <span class="pd-test-block-name">${blockNames[k] || k}</span>
+                    <span class="pd-test-block-pct" style="color:${color}">${pct}%</span>
+                </div>
+                <div class="pd-test-bar-wrap"><div class="pd-test-bar" style="width:${pct}%;background:${color}"></div></div>
+            </div>`;
+        }).join('');
+
+        return `<div class="pd-test-date">${dateStr} ${trendHtml}</div>
+                ${blocksHtml}
+                ${results.length > 1 ? `<div class="pd-test-count">${results.length} тестов пройдено</div>` : ''}
+                <button class="pd-test-btn" onclick="Testing.init()">Пройти тест →</button>`;
+    },
+};
+
+</script>
 <script defer src="share.js"></script>
 
 <!-- BATCH UPLOAD MODAL -->
@@ -871,5 +1216,387 @@
         </div>
     </div>
 </div>
+
+    <!-- ========== ONBOARDING ========== -->
+    <div id="onb-overlay" class="hidden">
+        <div id="onb-backdrop"></div>
+        <div id="onb-card">
+            <button id="onb-skip" onclick="Onboarding.skip()">Пропустить</button>
+            <div id="onb-emoji"></div>
+            <div id="onb-title"></div>
+            <div id="onb-text"></div>
+            <div id="onb-dots"></div>
+            <button id="onb-next" onclick="Onboarding.next()">Далее →</button>
+        </div>
+        <div id="onb-spotlight"></div>
+    </div>
+
+<script>
+// ── ONBOARDING ────────────────────────────────────────────────────────────
+const Onboarding = {
+    _step: 0,
+    _steps: [
+        {
+            emoji: '👋',
+            title: 'Привет! Я Гоша!',
+            text:  'Твой помощник для учёбы и игры. Покажу что здесь есть!',
+            highlight: null
+        },
+        {
+            emoji: '❓',
+            title: 'Загадки и Ребусы',
+            text:  'Отгадывай загадки и решай ребусы — тренируй логику и смекалку!',
+            highlight: '.mc-riddles'
+        },
+        {
+            emoji: '📝',
+            title: 'Слова и Арифметика',
+            text:  'Собирай слова из букв и считай примеры. Каждый день новые задания!',
+            highlight: '.mc-words'
+        },
+        {
+            emoji: '🎵',
+            title: 'Песенки и Подкасты',
+            text:  'Слушай детские песенки и познавательные подкасты в любое время!',
+            highlight: '.mc-songs'
+        },
+        {
+            emoji: '✅',
+            title: 'Тестирование',
+            text:  'Проверь что уже умеешь! Тест покажет сильные стороны и чему ещё учиться.',
+            highlight: '.mc-testing'
+        },
+    ],
+
+    shouldShow() {
+        return !localStorage.getItem('onboarding_done');
+    },
+
+    start() {
+        if (!this.shouldShow()) return;
+        this._step = 0;
+        document.getElementById('onb-overlay').classList.remove('hidden');
+        this._render();
+    },
+
+    _render() {
+        const step = this._steps[this._step];
+        const total = this._steps.length;
+        const isLast = this._step === total - 1;
+
+        document.getElementById('onb-emoji').textContent  = step.emoji;
+        document.getElementById('onb-title').textContent  = step.title;
+        document.getElementById('onb-text').textContent   = step.text;
+        document.getElementById('onb-next').textContent   = isLast ? '🚀 Поехали!' : 'Далее →';
+
+        // Dots
+        const dots = document.getElementById('onb-dots');
+        dots.innerHTML = this._steps.map((_, i) =>
+            `<span class="onb-dot ${i === this._step ? 'active' : ''}"></span>`
+        ).join('');
+
+        // Spotlight
+        this._clearHighlight();
+        if (step.highlight) {
+            const el = document.querySelector(step.highlight);
+            if (el) this._spotlight(el);
+        }
+    },
+
+    _spotlight(el) {
+        const rect = el.getBoundingClientRect();
+        const sp = document.getElementById('onb-spotlight');
+        const PAD = 8;
+        sp.style.top    = (rect.top    - PAD + window.scrollY) + 'px';
+        sp.style.left   = (rect.left   - PAD) + 'px';
+        sp.style.width  = (rect.width  + PAD * 2) + 'px';
+        sp.style.height = (rect.height + PAD * 2) + 'px';
+        sp.style.opacity = '1';
+        el.classList.add('onb-highlighted');
+        this._hlEl = el;
+
+        // Position card above or below spotlight
+        const card = document.getElementById('onb-card');
+        const spBottom = rect.bottom + PAD;
+        const spTop    = rect.top - PAD;
+        const vh = window.innerHeight;
+        if (spBottom + 240 < vh) {
+            card.style.top    = (spBottom + 16) + 'px';
+            card.style.bottom = 'auto';
+        } else {
+            card.style.bottom = (vh - spTop + 16) + 'px';
+            card.style.top    = 'auto';
+        }
+    },
+
+    _clearHighlight() {
+        const sp = document.getElementById('onb-spotlight');
+        sp.style.opacity = '0';
+        if (this._hlEl) {
+            this._hlEl.classList.remove('onb-highlighted');
+            this._hlEl = null;
+        }
+        const card = document.getElementById('onb-card');
+        card.style.top = '';
+        card.style.bottom = '';
+    },
+
+    next() {
+        this._step++;
+        if (this._step >= this._steps.length) {
+            this.finish();
+        } else {
+            this._render();
+        }
+    },
+
+    skip() {
+        this.finish();
+    },
+
+    finish() {
+        this._clearHighlight();
+        const overlay = document.getElementById('onb-overlay');
+        overlay.classList.add('onb-fade-out');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('onb-fade-out');
+        }, 350);
+        localStorage.setItem('onboarding_done', '1');
+    },
+};
+</script>
+
+<script>
+// ── PROFILES — несколько детей ─────────────────────────────────────────────
+const Profiles = {
+    MAX: 4,
+
+    // Все ключи данных привязанных к профилю
+    KEYS: [
+        'child_name',
+        'testing_profile','testing_results',
+        'stat_songs','stat_letters','stat_numbers','stat_colors',
+        'stat_puzzles','stat_riddles','stat_words','stat_math',
+        'stat_time_songs','stat_time_podcasts',
+        'stat_ach_puzzles','stat_ach_riddles',
+        'achievements_best','badges_unlocked',
+        'viewed_letters','viewed_numbers','viewed_colors',
+        'stat_interstitials','inter_best_streak',
+        'stat_hints_words','stat_hints_math',
+        'stat_daily_log','stat_daily_migrated',
+        'tried_songs','tried_podcasts','tried_puzzles','tried_riddles'
+    ],
+
+    EMOJIS: ['👦','👧','🧒','👼'],
+
+    _list() {
+        try { return JSON.parse(localStorage.getItem('profiles_list') || '[]'); } catch { return []; }
+    },
+    _save(list) { localStorage.setItem('profiles_list', JSON.stringify(list)); },
+    activeId() { return localStorage.getItem('active_profile_id') || null; },
+
+    // ── Init: если профилей нет, создаём из существующего child_name ────────
+    init() {
+        let list = this._list();
+        if (!list.length) {
+            const name = localStorage.getItem('child_name') || '';
+            const id = 'p' + Date.now();
+            list = [{ id, name: name || '', emoji: this.EMOJIS[0] }];
+            this._save(list);
+            localStorage.setItem('active_profile_id', id);
+        }
+        this.renderCard();
+    },
+
+    // ── Сохранить данные текущего профиля ────────────────────────────────────
+    _saveCurrentData() {
+        const id = this.activeId();
+        if (!id) return;
+        const data = {};
+        this.KEYS.forEach(k => {
+            const v = localStorage.getItem(k);
+            if (v !== null) data[k] = v;
+        });
+        localStorage.setItem('profile_data_' + id, JSON.stringify(data));
+    },
+
+    // ── Загрузить данные профиля в localStorage ───────────────────────────────
+    _loadProfileData(id) {
+        // Сначала очищаем текущие ключи профиля
+        this.KEYS.forEach(k => localStorage.removeItem(k));
+        // Восстанавливаем сохранённые
+        try {
+            const raw = localStorage.getItem('profile_data_' + id);
+            if (raw) {
+                const data = JSON.parse(raw);
+                Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
+            }
+        } catch(e) { console.warn('Profiles: ошибка загрузки данных', e); }
+    },
+
+    // ── Переключить профиль ───────────────────────────────────────────────────
+    switchTo(id) {
+        const cur = this.activeId();
+        if (id === cur) return;
+        this._saveCurrentData();
+        this._loadProfileData(id);
+        localStorage.setItem('active_profile_id', id);
+        // Обновляем UI
+        updateHomeGreeting();
+        if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+        if (typeof regUpdateCard === 'function') regUpdateCard();
+        this.renderCard();
+        const list = this._list();
+        const profile = list.find(p => p.id === id);
+        if (profile?.name) showToast('👋 ' + profile.name);
+    },
+
+    // ── Рендер карточки профилей в настройках ────────────────────────────────
+    renderCard() {
+        const row = document.getElementById('profiles-row');
+        if (!row) return;
+        const list = this._list();
+        const activeId = this.activeId();
+
+        row.innerHTML = list.map(p => {
+            const initial = p.name ? p.name.charAt(0).toUpperCase() : p.emoji;
+            const isActive = p.id === activeId;
+            return `<div class="profile-bubble-wrap">
+                <button class="profile-bubble ${isActive ? 'active' : ''}"
+                    onclick="Profiles.switchTo('${p.id}')"
+                    title="${p.name || 'Профиль'}">
+                    ${initial}
+                </button>
+                <div class="profile-bubble-name">${p.name || '—'}</div>
+                ${list.length > 1 ? `<button class="profile-del-btn" onclick="Profiles.remove('${p.id}')" title="Удалить">×</button>` : ''}
+            </div>`;
+        }).join('');
+
+        // Кнопка добавить (если не достигнут лимит)
+        if (list.length < this.MAX) {
+            row.innerHTML += `<div class="profile-bubble-wrap">
+                <button class="profile-bubble profile-add-btn" onclick="Profiles.showAdd()" title="Добавить ребёнка">+</button>
+                <div class="profile-bubble-name">Добавить</div>
+            </div>`;
+        }
+    },
+
+    showAdd() {
+        const wrap = document.getElementById('profiles-add-wrap');
+        const inp  = document.getElementById('profiles-add-input');
+        if (wrap) { wrap.style.display = ''; inp?.focus(); }
+    },
+
+    cancelAdd() {
+        const wrap = document.getElementById('profiles-add-wrap');
+        const inp  = document.getElementById('profiles-add-input');
+        if (wrap) wrap.style.display = 'none';
+        if (inp) inp.value = '';
+    },
+
+    saveNew() {
+        const inp = document.getElementById('profiles-add-input');
+        const name = (inp?.value || '').trim();
+        if (!name) { showToast('✏️ Введи имя'); inp?.focus(); return; }
+
+        const list = this._list();
+        if (list.length >= this.MAX) { showToast('Максимум ' + this.MAX + ' профиля'); return; }
+
+        // Сохраняем данные текущего профиля
+        this._saveCurrentData();
+
+        const id = 'p' + Date.now();
+        const emoji = this.EMOJIS[list.length % this.EMOJIS.length];
+        list.push({ id, name, emoji });
+        this._save(list);
+
+        // Переключаемся на новый (пустой) профиль
+        this.KEYS.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('child_name', name);
+        localStorage.setItem('active_profile_id', id);
+
+        this.cancelAdd();
+        this.renderCard();
+        updateHomeGreeting();
+        if (typeof regUpdateCard === 'function') regUpdateCard();
+        showToast('👋 Привет, ' + name + '!');
+    },
+
+    remove(id) {
+        const list = this._list();
+        if (list.length <= 1) { showToast('Нельзя удалить последний профиль'); return; }
+
+        const profile = list.find(p => p.id === id);
+        const name = profile?.name || 'профиль';
+        if (!confirm('Удалить профиль «' + name + '»? Все данные будут потеряны.')) return;
+
+        // Если удаляем активный — переключаемся на другой
+        if (id === this.activeId()) {
+            const other = list.find(p => p.id !== id);
+            this._loadProfileData(other.id);
+            localStorage.setItem('active_profile_id', other.id);
+        }
+
+        // Удаляем данные и из списка
+        localStorage.removeItem('profile_data_' + id);
+        const newList = list.filter(p => p.id !== id);
+        this._save(newList);
+
+        this.renderCard();
+        updateHomeGreeting();
+        if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+        showToast('🗑 Профиль удалён');
+    },
+};
+</script>
+
+
+<script>
+// ── Reminder settings UI ──────────────────────────────
+function tgReminderInitUI() {
+    // Показываем только в Telegram WebApp
+    if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) return;
+    const section = document.getElementById('tg-reminder-section');
+    const group   = document.getElementById('tg-reminder-group');
+    if (section) section.style.display = '';
+    if (group)   group.style.display = '';
+
+    const s = TgReminder.getSettings();
+    const enabled = s.enabled !== false;
+    const hour    = s.hour ?? 10;
+
+    const tog = document.getElementById('tog-reminder');
+    if (tog) tog.classList.toggle('on', enabled);
+
+    const sel = document.getElementById('remind-hour-select');
+    if (sel) sel.value = String(hour);
+
+    const hourRow = document.getElementById('remind-hour-row');
+    if (hourRow) hourRow.style.opacity = enabled ? '1' : '0.4';
+}
+
+function tgReminderToggle(el) {
+    el.classList.toggle('on');
+    const enabled = el.classList.contains('on');
+    const s = TgReminder.getSettings();
+    s.enabled = enabled;
+    TgReminder.saveSettings(s);
+    TgReminder.register(enabled, s.hour ?? 10);
+    const hourRow = document.getElementById('remind-hour-row');
+    if (hourRow) hourRow.style.opacity = enabled ? '1' : '0.4';
+    showToast(enabled ? '🔔 Напоминания включены' : '🔕 Напоминания выключены');
+}
+
+function tgReminderSetHour(val) {
+    const hour = parseInt(val);
+    const s = TgReminder.getSettings();
+    s.hour = hour;
+    TgReminder.saveSettings(s);
+    if (s.enabled !== false) TgReminder.register(true, hour);
+    showToast('⏰ Время напоминания: ' + val + ':00');
+}
+</script>
+
 </body>
 </html>

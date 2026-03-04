@@ -92,6 +92,78 @@ const App = {
     },
 
     // Загружаем data.json — ВСЕГДА при старте, ждём завершения
+    // ── Валидация data.json ──────────────────────────────────────────────────
+    // Проверяет структуру до записи в localStorage.
+    // Возвращает очищенный объект или null если данные непригодны.
+    _validateDataJson(raw, url) {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+            console.warn('[Validation] data.json: ожидался объект, получено:', typeof raw);
+            return null;
+        }
+
+        const SCHEMAS = {
+            riddles:  { required: ['id','q','a'],       optional: ['hint','pic','level'] },
+            puzzles:  { required: ['id','img','answer'], optional: ['hint','level','pic'] },
+            songs:    { required: ['id','title','src'],  optional: ['artist','cover','lyrics'] },
+            podcasts: { required: ['id','title','src'],  optional: ['cover','desc'] },
+            info:     { required: ['id'],                optional: [] },
+        };
+
+        const result = {};
+        let totalErrors = 0;
+
+        for (const [key, schema] of Object.entries(SCHEMAS)) {
+            if (!Array.isArray(raw[key])) continue; // секция отсутствует — ок
+
+            const seen = new Set();
+            const clean = [];
+
+            for (const item of raw[key]) {
+                if (!item || typeof item !== 'object') { totalErrors++; continue; }
+
+                // Проверяем обязательные поля
+                const missing = schema.required.filter(f => !item[f] && item[f] !== 0);
+                if (missing.length) {
+                    console.warn(`[Validation] ${key}[${item.id ?? '?'}]: отсутствуют поля:`, missing);
+                    totalErrors++;
+                    continue;
+                }
+
+                // Дедупликация по id
+                const id = String(item.id);
+                if (seen.has(id)) {
+                    console.warn(`[Validation] ${key}: дубль id="${id}", пропускаем`);
+                    totalErrors++;
+                    continue;
+                }
+                seen.add(id);
+                clean.push(item);
+            }
+
+            if (clean.length) result[key] = clean;
+            else if (raw[key].length) {
+                // Все записи оказались невалидны — секция пуста, не записываем
+                console.warn(`[Validation] ${key}: все ${raw[key].length} записей невалидны`);
+            }
+        }
+
+        // Notifications — просто проверяем что массив
+        if (Array.isArray(raw.notifications)) result.notifications = raw.notifications;
+
+        if (totalErrors > 0) {
+            console.warn(`[Validation] data.json из ${url}: ${totalErrors} ошибок исправлено`);
+        }
+
+        // Если ни одной валидной секции — возвращаем null
+        const hasContent = Object.keys(SCHEMAS).some(k => Array.isArray(result[k]) && result[k].length);
+        if (!hasContent) {
+            console.error('[Validation] data.json: нет ни одной валидной секции — игнорируем файл');
+            return null;
+        }
+
+        return result;
+    },
+
     async _loadRemoteData() {
         const KEYS = ['songs','podcasts','puzzles','riddles','info'];
         const REPO = 'Saturn-Kassiel/Kids-site';
@@ -117,9 +189,14 @@ const App = {
                 });
                 clearTimeout(timer);
                 if (!resp.ok) continue;
-                data = await resp.json();
-                console.log('✅ data.json загружен из:', url);
-                break;
+                const raw = await resp.json();
+                data = App._validateDataJson(raw, url);
+                if (data) {
+                    console.log('✅ data.json загружен из:', url);
+                    break;
+                } else {
+                    console.warn('⚠️ data.json не прошёл валидацию:', url);
+                }
             } catch(e) {
                 console.log('data.json недоступен по:', url, e.message);
             }

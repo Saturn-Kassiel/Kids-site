@@ -86,17 +86,41 @@
 .tst-delta-down { color: #ef4444; }
 
 /* ── Sparklines ── */
-.tst-sparklines {
-    display: flex; flex-wrap: wrap; gap: 8px 16px;
-    justify-content: center; margin-bottom: 16px;
-    padding: 10px 14px; background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px;
+.tst-progress-section {
+    margin: 4px 0 12px;
+    padding: 12px 14px;
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
 }
-.tst-sparkline-row {
-    display: flex; align-items: center; gap: 6px;
+.tst-progress-title {
+    font-size: 12px;
+    font-weight: var(--fw-semi);
+    color: var(--text2);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
-.tst-sparkline-label { font-size: 14px; width: 20px; text-align: center; }
-.tst-sparkline-canvas { width: 120px; height: 32px; }
+.tst-trend-text {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+#tst-progress-chart {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: 160px;
+    margin: 0 auto;
+}
+.tst-progress-legend {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 6px;
+    font-size: 13px;
+    align-items: center;
+}
 
 .tst-no-results {
     text-align: center; padding: 32px 16px;

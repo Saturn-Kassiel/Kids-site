@@ -152,6 +152,31 @@ const ShareHelper = {
             return;
         }
 
+        // Puzzles section: use promo image
+        if (sectionId === 'puzzles') {
+            const puzzlesText = 'Решай 🤔 ребусы в мини-школе Гоша\n' + url;
+            try {
+                const resp = await fetch('assets/images/links_pictures_opt/rebusi.webp');
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const file = new File([blob], 'rebusi.webp', { type: 'image/webp' });
+                    if (navigator.share) {
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: puzzlesText, text: puzzlesText });
+                        } else {
+                            await navigator.share({ text: puzzlesText, url });
+                        }
+                        return;
+                    }
+                }
+            } catch(e) { console.warn('Puzzles promo share failed:', e); }
+            if (navigator.share) {
+                try { await navigator.share({ text: puzzlesText, url }); return; } catch(e) {}
+            }
+            try { await navigator.clipboard.writeText(puzzlesText); if (typeof showToast === 'function') showToast('Ссылка скопирована!'); } catch(e) {}
+            return;
+        }
+
         // Riddles section: use promo image
         if (sectionId === 'riddles') {
             const riddlesText = 'Отгадывай 🤔 загадки в мини-школе Гоша\n' + url;

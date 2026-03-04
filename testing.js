@@ -263,8 +263,8 @@ const Testing = {
             // При переполнении — удаляем старые результаты
             console.warn('[Testing] localStorage full, trimming old results');
             try {
-                if (this._results.length > 3) {
-                    this._results = this._results.slice(-3);
+                if (this._results.length > 15) {
+                    this._results = this._results.slice(-15);
                     localStorage.setItem('testing_results', JSON.stringify(this._results));
                 }
             } catch(e2) { console.error('[Testing] Cannot save results:', e2); }
@@ -368,20 +368,30 @@ const Testing = {
                     ${this._scoreBadgeWithDelta('Социум', lastResult.blocks.social?.score, prevResult?.blocks?.social?.score, '#f59e0b')}
                 </div>`;
 
-            // Sparklines if we have more than 1 result
+            // Progress chart + trend summary if we have more than 1 result
             if (this._results.length > 1) {
-                chartHtml += '<div class="tst-sparklines">';
-                const blockMap = { cognitive: '🧠', speech: '💬', motor: '✋', social: '❤️' };
-                for (const [key, emoji] of Object.entries(blockMap)) {
-                    const points = this._results.slice(-8).map(r => r.blocks[key]?.score ?? null).filter(v => v !== null && v >= 0);
-                    if (points.length > 1) {
-                        chartHtml += `<div class="tst-sparkline-row">
-                            <span class="tst-sparkline-label">${emoji}</span>
-                            <canvas class="tst-sparkline-canvas" data-block="${key}" data-points="${points.join(',')}" width="120" height="32"></canvas>
-                        </div>`;
-                    }
-                }
-                chartHtml += '</div>';
+                const trendText = this._calcTrend();
+                chartHtml += `
+                    <div class="tst-progress-section">
+                        <div class="tst-progress-title">Динамика</div>
+                        ${trendText ? `<div class="tst-trend-text">${trendText}</div>` : ''}
+                        <canvas id="tst-progress-chart" width="320" height="160"
+                            data-history="${encodeURIComponent(JSON.stringify(this._results.slice(-12).map(r => ({
+                                date: r.date,
+                                avg:  this._avgScore(r),
+                                cog:  r.blocks.cognitive?.score ?? null,
+                                spe:  r.blocks.speech?.score ?? null,
+                                mot:  r.blocks.motor?.score ?? null,
+                                soc:  r.blocks.social?.score ?? null
+                            }))))}"></canvas>
+                        <div class="tst-progress-legend">
+                            <span style="color:#a855f7">🧠</span>
+                            <span style="color:#3b82f6">💬</span>
+                            <span style="color:#22c55e">✋</span>
+                            <span style="color:#f59e0b">❤️</span>
+                            <span style="color:#fff;opacity:0.6;font-size:11px">— Общий</span>
+                        </div>
+                    </div>`;
             }
         } else {
             chartHtml = `<div class="tst-no-results">
@@ -394,7 +404,7 @@ const Testing = {
         if (this._results.length) {
             const blockNames = { cognitive: '🧠 Когниция', speech: '💬 Речь', motor: '✋ Моторика', social: '❤️ Социум' };
             historyHtml = '<div class="tst-history-title">История</div><div class="tst-history-list">';
-            const shown = this._results.slice(-5).reverse();
+            const shown = this._results.slice(-10).reverse();
             for (let ri = 0; ri < shown.length; ri++) {
                 const r = shown[ri];
                 const d = new Date(r.date);
@@ -486,7 +496,7 @@ const Testing = {
         if (lastResult) {
             requestAnimationFrame(() => {
                 this._drawSpider(lastResult);
-                this._drawSparklines();
+                this._drawProgressChart();
             });
         }
     },
@@ -546,6 +556,126 @@ const Testing = {
             ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
             ctx.fill();
         });
+    },
+
+    _calcTrend() {
+        if (this._results.length < 2) return '';
+        const recent = this._results.slice(-3);
+        const older  = this._results.slice(-6, -3);
+        const avgRecent = recent.reduce((s, r) => s + this._avgScore(r), 0) / recent.length;
+        if (!older.length) {
+            // Compare just last 2
+            const prev = this._avgScore(this._results[this._results.length - 2]);
+            const last = this._avgScore(this._results[this._results.length - 1]);
+            const diff = Math.round((last - prev) * 100);
+            if (diff > 0)  return `📈 Улучшение на ${diff}% с прошлого теста`;
+            if (diff < 0)  return `📉 Снижение на ${Math.abs(diff)}% с прошлого теста`;
+            return '➡️ Результат стабилен';
+        }
+        const avgOlder = older.reduce((s, r) => s + this._avgScore(r), 0) / older.length;
+        const diff = Math.round((avgRecent - avgOlder) * 100);
+        if (diff > 3)   return `📈 Прогресс +${diff}% за последние тесты`;
+        if (diff < -3)  return `📉 Снижение на ${Math.abs(diff)}% — стоит позаниматься`;
+        return '➡️ Результаты стабильны';
+    },
+
+    _drawProgressChart() {
+        const canvas = document.getElementById('tst-progress-chart');
+        if (!canvas) return;
+        let history;
+        try { history = JSON.parse(decodeURIComponent(canvas.dataset.history || '[]')); } catch { return; }
+        if (history.length < 2) return;
+
+        const ctx = canvas.getContext('2d');
+        const W = 320, H = 160, PAD_L = 36, PAD_R = 12, PAD_T = 12, PAD_B = 28;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.scale(dpr, dpr);
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+        const labelColor = isDark ? '#94a3b8' : '#64748b';
+        const n = history.length;
+        const xStep = (W - PAD_L - PAD_R) / (n - 1);
+
+        const toX = i => PAD_L + i * xStep;
+        const toY = v => PAD_T + (1 - v) * (H - PAD_T - PAD_B);
+
+        // Grid lines at 25%, 50%, 75%, 100%
+        ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75, 1].forEach(v => {
+            const y = toY(v);
+            ctx.strokeStyle = gridColor;
+            ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(W - PAD_R, y); ctx.stroke();
+            ctx.fillStyle = labelColor;
+            ctx.font = `${10 * dpr / dpr}px sans-serif`;
+            ctx.textAlign = 'right';
+            ctx.fillText(Math.round(v * 100) + '%', PAD_L - 4, y + 4);
+        });
+
+        // Draw date labels on X axis (max 4 labels to avoid crowding)
+        const labelStep = Math.max(1, Math.floor(n / 4));
+        ctx.fillStyle = labelColor;
+        ctx.textAlign = 'center';
+        ctx.font = '9px sans-serif';
+        history.forEach((pt, i) => {
+            if (i % labelStep === 0 || i === n - 1) {
+                const d = new Date(pt.date);
+                const label = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                ctx.fillText(label, toX(i), H - 4);
+            }
+        });
+
+        // Draw block lines (thin, semi-transparent)
+        const blockLines = [
+            { key: 'cog', color: '#a855f7', alpha: 0.5 },
+            { key: 'spe', color: '#3b82f6', alpha: 0.5 },
+            { key: 'mot', color: '#22c55e', alpha: 0.5 },
+            { key: 'soc', color: '#f59e0b', alpha: 0.5 },
+        ];
+        blockLines.forEach(({ key, color, alpha }) => {
+            const pts = history.map((pt, i) => pt[key] != null ? { i, v: pt[key] } : null).filter(Boolean);
+            if (pts.length < 2) return;
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            pts.forEach(({ i, v }, pi) => {
+                pi === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v));
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+        });
+        ctx.globalAlpha = 1;
+
+        // Draw overall avg line (thick, white/light)
+        const avgPts = history.map((pt, i) => ({ i, v: pt.avg }));
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,59,0.85)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        avgPts.forEach(({ i, v }, pi) => {
+            pi === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v));
+        });
+        ctx.stroke();
+
+        // Dots on avg line
+        avgPts.forEach(({ i, v }) => {
+            ctx.fillStyle = this._scoreColor(v);
+            ctx.beginPath();
+            ctx.arc(toX(i), toY(v), 4, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Last value label
+        const last = avgPts[avgPts.length - 1];
+        ctx.fillStyle = this._scoreColor(last.v);
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(Math.round(last.v * 100) + '%', toX(last.i) + 7, toY(last.v) + 4);
     },
 
     _avgScore(r) {
@@ -1953,35 +2083,93 @@ const Testing = {
         svg.addEventListener('touchend', endDraw);
     },
 
+    // Sample N evenly-spaced points along a polyline path string
+    _samplePathPoints(pathStr, n) {
+        // Parse M x,y L x,y ... or M x,y A ... Z (circle) into segments
+        const pts = [];
+        // For circle: M cx,cy A rx,ry → sample around circle
+        const circleMatch = pathStr.match(/M\s*([\d.]+),([\d.]+)\s*A\s*([\d.]+),([\d.]+)/);
+        if (circleMatch) {
+            const cx = 150, cy = 150, r = 100;
+            for (let i = 0; i < n; i++) {
+                const angle = (2 * Math.PI * i) / n;
+                pts.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+            }
+            return pts;
+        }
+        // For polyline: extract all coordinates
+        const coords = [];
+        const re = /[ML]\s*([\d.]+),([\d.]+)/g;
+        let m;
+        while ((m = re.exec(pathStr)) !== null) coords.push({ x: +m[1], y: +m[2] });
+        if (coords.length < 2) return coords;
+        // Compute total length
+        let totalLen = 0;
+        const segs = [];
+        for (let i = 1; i < coords.length; i++) {
+            const dx = coords[i].x - coords[i-1].x, dy = coords[i].y - coords[i-1].y;
+            const len = Math.sqrt(dx*dx + dy*dy);
+            segs.push({ from: coords[i-1], to: coords[i], len });
+            totalLen += len;
+        }
+        // Sample evenly
+        const step = totalLen / (n - 1);
+        let dist = 0, si = 0;
+        pts.push(coords[0]);
+        for (let i = 1; i < n - 1; i++) {
+            let target = step * i;
+            while (si < segs.length - 1 && dist + segs[si].len < target) { dist += segs[si].len; si++; }
+            const seg = segs[si];
+            const t = seg.len > 0 ? (target - dist) / seg.len : 0;
+            pts.push({ x: seg.from.x + t * (seg.to.x - seg.from.x), y: seg.from.y + t * (seg.to.y - seg.from.y) });
+        }
+        pts.push(coords[coords.length - 1]);
+        return pts;
+    },
+
     _onTraceCheck() {
         const points = this._tracePoints || [];
         const time = (Date.now() - this._traceT0) / 1000;
 
-        // Simple scoring: check how many points are near the guide path (within 25px)
-        // We approximate by checking distance from shape bounding box / center
-        const total = points.length;
-        if (total < 5) {
-            Testing._taskResults.motor.push({ id: this._traceTask.id, result: 'incorrect', score: 0, time_sec: time });
+        if (points.length < 8) {
+            this._taskResults.motor.push({ id: this._traceTask.id, result: 'incorrect', score: 0, time_sec: time });
             this._showFeedback(false, () => this._next());
             return;
         }
 
-        // Score by coverage of bounding box and stroke consistency
-        let inBounds = 0;
+        // Sample guide path into 60 reference points
+        const guidePts = this._samplePathPoints(this._traceShapePath, 60);
+        const THRESHOLD = 28; // px — max allowed distance from path
+
+        // 1) Accuracy: what fraction of user strokes are within threshold of the guide
+        let nearCount = 0;
         for (const p of points) {
-            // Check if within SVG area and not wildly off center
-            if (p.x > 20 && p.x < 280 && p.y > 20 && p.y < 280) inBounds++;
+            const nearest = guidePts.reduce((best, gp) => {
+                const d = Math.sqrt((p.x - gp.x)**2 + (p.y - gp.y)**2);
+                return d < best ? d : best;
+            }, Infinity);
+            if (nearest <= THRESHOLD) nearCount++;
         }
-        const coverage = inBounds / total;
-        const score = Math.min(1, coverage * 1.1);
-        const ok = score >= 0.7;
+        const accuracy = nearCount / points.length;
+
+        // 2) Coverage: what fraction of guide points have at least one user point nearby
+        let coveredCount = 0;
+        for (const gp of guidePts) {
+            const covered = points.some(p => Math.sqrt((p.x - gp.x)**2 + (p.y - gp.y)**2) <= THRESHOLD * 1.5);
+            if (covered) coveredCount++;
+        }
+        const coverage = coveredCount / guidePts.length;
+
+        // Combined score: accuracy weighted 40%, coverage 60%
+        const score = Math.min(1, accuracy * 0.4 + coverage * 0.6);
+        const ok = score >= 0.55;
 
         this._taskResults.motor.push({
             id: this._traceTask.id,
-            result: ok ? 'correct' : (score >= 0.4 ? 'partial' : 'incorrect'),
+            result: ok ? 'correct' : (score >= 0.35 ? 'partial' : 'incorrect'),
             score: Math.round(score * 100) / 100,
             time_sec: Math.round(time * 10) / 10,
-            details: { points_total: total, in_bounds: inBounds }
+            details: { accuracy: Math.round(accuracy * 100), coverage: Math.round(coverage * 100) }
         });
         this._showFeedback(ok, () => this._next());
     },
@@ -2014,10 +2202,10 @@ const Testing = {
         this._rhythmCurGroup = 0;
         this._rhythmGroupCount = 0;
 
-        // Build slot display: beats shown as 🥁, pauses as gap
+        // Build slot display with stable data-group attributes
         const slotsHTML = groups.map((g, gi) =>
-            `<div class="rhy-group">
-                ${g.map(() => `<div class="rhy-slot" id="rhy-slot-${gi}-${Math.random().toString(36).slice(2)}"></div>`).join('')}
+            `<div class="rhy-group" data-group="${gi}">
+                ${g.map((_, si) => `<div class="rhy-slot" data-group="${gi}" data-slot="${si}"></div>`).join('')}
             </div>`
         ).join('<div class="rhy-pause-gap"></div>');
 
@@ -2097,38 +2285,51 @@ const Testing = {
 
     _onRhythmTap() {
         if (this._rhythmPhase !== 'repeat') return;
-        this._playTick();
 
-        const now = Date.now();
         const gi = this._rhythmCurGroup;
+        if (gi >= this._rhythmGroups.length) return; // guard
+
+        const groupSize = this._rhythmGroups[gi].length;
+
+        // Ignore extra taps beyond group size (don't overflow into next group)
+        if (this._rhythmGroupCount >= groupSize) return;
+
+        this._playTick();
+        const si = this._rhythmGroupCount;
         this._rhythmGroupCount++;
-        this._rhythmInput.push({ time: now - this._rhythmT0, group: gi });
+        this._rhythmInput.push({ time: Date.now() - this._rhythmT0, group: gi });
 
-        // Fill next empty slot in current group
-        const slots = document.querySelectorAll(`.rhy-group:nth-child(${gi * 2 + 1}) .rhy-slot`);
-        const emptySlot = [...slots].find(s => !s.classList.contains('filled'));
-        if (emptySlot) {
-            emptySlot.classList.add('filled');
-            emptySlot.textContent = '👏';
-        }
-
-        const groupSize = this._rhythmGroups[gi]?.length || 1;
-
-        // Clear gap timer if exists
-        if (this._rhythmGapTimer) { clearTimeout(this._rhythmGapTimer); this._rhythmGapTimer = null; }
+        // Fill slot using data attributes — no nth-child fragility
+        const slot = document.querySelector(`.rhy-slot[data-group="${gi}"][data-slot="${si}"]`);
+        if (slot) { slot.classList.add('filled'); slot.textContent = '👏'; }
 
         if (this._rhythmGroupCount >= groupSize) {
-            // Group done — wait for pause then move to next
+            // Group complete — lock this group and wait for pause before next
             this._rhythmGroupCount = 0;
-            this._rhythmCurGroup++;
-            document.getElementById('rhy-hint').textContent =
-                this._rhythmCurGroup < this._rhythmGroups.length ? 'Пауза... потом ещё!' : '';
+            const nextGi = gi + 1;
 
-            if (this._rhythmCurGroup >= this._rhythmGroups.length) {
-                // All done
+            if (nextGi >= this._rhythmGroups.length) {
+                // All groups done
                 this._rhythmPhase = 'done';
                 document.getElementById('rhy-tap-btn').style.display = 'none';
-                setTimeout(() => Testing._onRhythmCheck(), 300);
+                const hint = document.getElementById('rhy-hint');
+                if (hint) hint.textContent = '✅ Готово!';
+                setTimeout(() => Testing._onRhythmCheck(), 500);
+            } else {
+                // Pause between groups — button disabled briefly, then re-enable for next group
+                const btn = document.getElementById('rhy-tap-btn');
+                const hint = document.getElementById('rhy-hint');
+                if (btn) btn.disabled = true;
+                if (hint) hint.textContent = '⏸ Пауза...';
+                setTimeout(() => {
+                    if (Testing._rhythmPhase !== 'repeat') return;
+                    Testing._rhythmCurGroup = nextGi;
+                    Testing._rhythmGroupCount = 0;
+                    if (btn) btn.disabled = false;
+                    if (hint) hint.textContent = nextGi < Testing._rhythmGroups.length - 1
+                        ? 'Следующая группа!'
+                        : 'Последняя группа!';
+                }, 700);
             }
         }
     },
@@ -2178,34 +2379,46 @@ const Testing = {
         this._mazePassed = false;
         this._mazeHits = 0;
 
-        el.innerHTML = `
+        const finishCY = task.age === '6-7' ? 100 : 150;
+
+        const renderMaze = () => {
+            el.innerHTML = `
             <div class="tst-task">
                 <div class="tst-instruction">Проведи шарик через лабиринт!</div>
                 <div style="position:relative;display:flex;justify-content:center;">
                     <svg id="tst-maze-svg" width="300" height="300" viewBox="0 0 300 300" style="touch-action:none;background:var(--card);border-radius:16px;">
-                        <!-- Walls -->
                         <path d="${maze.wall1}" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4"/>
                         <path d="${maze.wall2}" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4"/>
-                        <!-- Path corridor -->
                         <path d="${maze.path}" fill="none" stroke="#a78bfa22" stroke-width="24"/>
-                        <!-- Center guide -->
-                        <path d="${maze.path}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
-                        <!-- Start / End markers -->
+                        <path id="tst-maze-guide" d="${maze.path}" fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,4"/>
                         <circle cx="20" cy="150" r="10" fill="#22c55e"/>
                         <text x="20" y="185" text-anchor="middle" font-size="11" fill="#22c55e">СТАРТ</text>
-                        <circle cx="280" cy="${task.age === '6-7' ? 100 : 150}" r="10" fill="#f97316"/>
-                        <text x="280" y="${task.age === '6-7' ? 135 : 185}" text-anchor="middle" font-size="11" fill="#f97316">ФИНИШ</text>
-                        <!-- Ball -->
+                        <circle cx="280" cy="${finishCY}" r="10" fill="#f97316"/>
+                        <text x="280" y="${finishCY + 18}" text-anchor="middle" font-size="11" fill="#f97316">ФИНИШ</text>
                         <circle id="tst-maze-ball" cx="20" cy="150" r="12" fill="#60a5fa" style="filter:drop-shadow(0 2px 4px #0004)"/>
                     </svg>
                 </div>
                 <div id="tst-maze-msg" style="text-align:center;color:#94a3b8;font-size:13px;margin-top:6px;">Тяни шарик к финишу!</div>
+                <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+                    <button id="tst-maze-hint" class="tst-check-btn" style="display:none;background:var(--card);color:var(--text2);border:1.5px solid var(--border);"
+                        onclick="Testing._onMazeHint()">💡 Подсказка</button>
+                    <button id="tst-maze-retry" class="tst-check-btn" style="display:none;"
+                        onclick="Testing._onMazeRetry()">🔄 Попробовать снова</button>
+                </div>
             </div>`;
+            Testing._attachMazeListeners(finishCY);
+        };
+        renderMaze();
+        Testing._renderMaze = renderMaze;
 
+    },
+
+    _attachMazeListeners(finishCY) {
         const svg = document.getElementById('tst-maze-svg');
         const ball = document.getElementById('tst-maze-ball');
+        if (!svg || !ball) return;
         let dragging = false;
-        const finishX = 280, finishY = task.age === '6-7' ? 100 : 150;
+        const finishX = 280;
 
         const getXY = (e) => {
             const rect = svg.getBoundingClientRect();
@@ -2222,10 +2435,11 @@ const Testing = {
             const {x, y} = getXY(e);
             ball.setAttribute('cx', x);
             ball.setAttribute('cy', y);
-            // Check if near finish
-            const dx = x - finishX, dy = y - finishY;
-            if (Math.sqrt(dx*dx + dy*dy) < 20 && !Testing._mazePassed) {
+            const dx = x - finishX, dy = y - finishCY;
+            if (Math.sqrt(dx*dx + dy*dy) < 22 && !Testing._mazePassed) {
                 Testing._mazePassed = true;
+                clearTimeout(Testing._mazeTimeout);
+                clearTimeout(Testing._mazeHintTimer);
                 Testing._playTick();
                 ball.setAttribute('fill', '#22c55e');
                 document.getElementById('tst-maze-msg').textContent = '🎉 Добрался!';
@@ -2234,12 +2448,13 @@ const Testing = {
                 const time = (Date.now() - Testing._mazeT0) / 1000;
                 const timeLimits = { '3-4': 30, '4-5': 25, '5-6': 20, '6-7': 18 };
                 const limit = timeLimits[Testing._mazeTask.age] || 25;
-                const score = Math.max(0.3, Math.min(1, 1 - (time - limit*0.5) / (limit*2)));
+                const hintPenalty = Testing._mazeHintUsed ? 0.2 : 0;
+                const score = Math.max(0.3, Math.min(1, 1 - (time - limit*0.5) / (limit*2)) - hintPenalty);
                 Testing._taskResults.motor.push({
                     id: Testing._mazeTask.id, result: 'correct',
                     score: Math.round(score*100)/100,
                     time_sec: Math.round(time*10)/10,
-                    details: { wall_hits: Testing._mazeHits }
+                    details: { wall_hits: Testing._mazeHits, hint_used: Testing._mazeHintUsed }
                 });
                 setTimeout(() => Testing._showFeedback(true, () => Testing._next()), 600);
             }
@@ -2252,17 +2467,57 @@ const Testing = {
         svg.addEventListener('mouseup', () => { dragging = false; });
         svg.addEventListener('touchend', () => { dragging = false; });
 
-        // Timeout fallback — if not solved in 45s, record partial
+        // Show hint button after 8 seconds
+        this._mazeHintUsed = false;
+        this._mazeHintTimer = setTimeout(() => {
+            const hintBtn = document.getElementById('tst-maze-hint');
+            if (hintBtn && !Testing._mazePassed) hintBtn.style.display = '';
+        }, 8000);
+
+        // Timeout after 25s — show retry instead of auto-advancing
         this._mazeTimeout = setTimeout(() => {
             if (!Testing._mazePassed) {
-                Testing._mazePassed = true;
-                Testing._taskResults.motor.push({
-                    id: Testing._mazeTask.id, result: 'partial', score: 0.4,
-                    time_sec: 45, details: { wall_hits: Testing._mazeHits, timeout: true }
-                });
-                Testing._showFeedback(false, () => Testing._next());
+                const msg = document.getElementById('tst-maze-msg');
+                const retryBtn = document.getElementById('tst-maze-retry');
+                const hintBtn = document.getElementById('tst-maze-hint');
+                if (msg) msg.textContent = 'Время вышло! Попробуй ещё раз или пропусти.';
+                if (retryBtn) retryBtn.style.display = '';
+                if (hintBtn) hintBtn.style.display = 'none';
+                svg.style.pointerEvents = 'none';
             }
-        }, 45000);
+        }, 25000);
+    },
+
+    _onMazeHint() {
+        this._mazeHintUsed = true;
+        // Flash the guide path bright for 2 seconds
+        const guide = document.getElementById('tst-maze-guide');
+        if (guide) {
+            guide.setAttribute('stroke', '#f97316');
+            guide.setAttribute('stroke-width', '5');
+            guide.removeAttribute('stroke-dasharray');
+            setTimeout(() => {
+                if (guide) {
+                    guide.setAttribute('stroke', '#a78bfa');
+                    guide.setAttribute('stroke-width', '2');
+                    guide.setAttribute('stroke-dasharray', '6,4');
+                }
+            }, 2000);
+        }
+        const hintBtn = document.getElementById('tst-maze-hint');
+        if (hintBtn) hintBtn.style.display = 'none';
+    },
+
+    _onMazeRetry() {
+        // Clear timers and reset state
+        clearTimeout(this._mazeTimeout);
+        clearTimeout(this._mazeHintTimer);
+        this._mazePassed = false;
+        this._mazeHits = 0;
+        this._mazeHintUsed = false;
+        this._mazeT0 = Date.now();
+        // Re-render maze
+        if (this._renderMaze) this._renderMaze();
     },
 
     // =============================================

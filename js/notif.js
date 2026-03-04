@@ -166,20 +166,91 @@ const Notif = {
     }
 };
 
-// -------- TELEGRAM VISIT NOTIFICATION --------
-function notifyTelegramVisit() {
-    try {
+// ────────────────────────────────────────────────────────────
+// TELEGRAM REMINDERS
+// ────────────────────────────────────────────────────────────
+const TgReminder = {
+    WORKER_URL: 'https://gosha-notify.saturngroup2025.workers.dev',
+    APP_URL:    'https://t.me/GoshaMiniSchoolBot/gosha',  // ссылка на Mini App
+
+    _userId() {
         const tg = window.Telegram?.WebApp;
-        const userId = tg?.initDataUnsafe?.user?.id || 'unknown';
-        // WORKER_URL — замени на свой URL после деплоя воркера
-        const WORKER_URL = 'https://gosha-notify.saturngroup2025.workers.dev';
-        fetch(WORKER_URL, {
+        return tg?.initDataUnsafe?.user?.id || null;
+    },
+
+    // Вызывается при каждом запуске приложения
+    onVisit() {
+        const userId = this._userId();
+        if (!userId) return;
+        // Обновляем last_visit на воркере
+        fetch(this.WORKER_URL + '/visit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId })
         }).catch(() => {});
-    } catch (e) { /* silent */ }
-}
+    },
+
+    // Подписаться / обновить настройки напоминаний
+    register(enabled, hour) {
+        const userId = this._userId();
+        if (!userId) return;
+        const childName = localStorage.getItem('child_name') || '';
+        const tzOffset  = -Math.round(new Date().getTimezoneOffset() / 60);
+        fetch(this.WORKER_URL + '/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id:           userId,
+                reminders_enabled: enabled,
+                remind_hour:       hour,
+                child_name:        childName,
+                app_url:           this.APP_URL,
+                tz_offset:         tzOffset,
+            })
+        }).catch(() => {});
+    },
+
+    // Отписаться
+    unsubscribe() {
+        const userId = this._userId();
+        if (!userId) return;
+        fetch(this.WORKER_URL + '/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId })
+        }).catch(() => {});
+    },
+
+    // Читаем сохранённые настройки
+    getSettings() {
+        try {
+            return JSON.parse(localStorage.getItem('tg_reminder_settings') || '{}');
+        } catch { return {}; }
+    },
+    saveSettings(s) {
+        localStorage.setItem('tg_reminder_settings', JSON.stringify(s));
+    },
+
+    // Инициализация: регистрируем визит + синхронизируем настройки
+    init() {
+        const userId = this._userId();
+        if (!userId) return; // не в Telegram — ничего не делаем
+        this.onVisit();
+        const s = this.getSettings();
+        if (s.registered) {
+            // Уже зарегистрирован — просто визит уже отправили
+            return;
+        }
+        // Первый раз — регистрируем с настройками по умолчанию
+        const enabled = s.enabled !== undefined ? s.enabled : true;
+        const hour    = s.hour    !== undefined ? s.hour    : 10;
+        this.register(enabled, hour);
+        this.saveSettings({ ...s, enabled, hour, registered: true });
+    },
+};
+
+// Обратная совместимость
+function notifyTelegramVisit() { TgReminder.onVisit(); }
 
 // ── Telegram Mini App viewport fix ──
 function initTelegramWebApp() {

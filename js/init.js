@@ -3,6 +3,7 @@
 // =============================================
 document.addEventListener('DOMContentLoaded', async () => {
     initTelegramWebApp();
+    TgReminder.init();
     // notifyTelegramVisit(); // отключено — уведомления о входе через Telegram
     // Читаем хэш ДО любых операций
     const deepLinkHash = window.location.hash;
@@ -55,10 +56,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         await App.init();
         App.navigate('main');
         // Загружаем имя ребёнка
+        Profiles.init();
         regUpdateCard();
         updateHomeGreeting();
         Notif.updateBadge();
         CardBadges.updateAll();
+        // Онбординг при первом запуске
+        setTimeout(() => Onboarding.start(), 600);
         // Enter в поле имени = сохранить
         document.getElementById('child-name-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') regSaveName(); });
         // Гоша приветствует при запуске

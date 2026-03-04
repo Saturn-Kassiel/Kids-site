@@ -4,7 +4,7 @@
 //  runtime), Data (Network First), Range Request support
 // ═══════════════════════════════════════════════════════
 
-const CACHE_VERSION = 25;
+const CACHE_VERSION = 26;
 const CACHE_SHELL = `gosha-shell-v${CACHE_VERSION}`;
 const CACHE_MEDIA = `gosha-media-v${CACHE_VERSION}`;
 const CACHE_DATA  = `gosha-data-v${CACHE_VERSION}`;
@@ -134,9 +134,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // ── App Shell — Cache First (предкэшировано) ──
+    // ── App Shell — Stale While Revalidate ──
+    // Отдаём из кэша мгновенно, в фоне обновляем — на след. визит свежая версия
     if (isShell(url)) {
-        event.respondWith(cacheFirstRuntime(event.request, CACHE_SHELL));
+        event.respondWith(staleWhileRevalidate(event.request, CACHE_SHELL));
         return;
     }
 
@@ -201,6 +202,31 @@ async function networkWithFallback(request) {
         if (cached) return cached;
         return new Response('', { status: 503, statusText: 'Offline' });
     }
+}
+
+/**
+ * Stale While Revalidate — мгновенно из кэша + обновление в фоне
+ * Идеально для JS/CSS/HTML: нет задержки загрузки, всегда свежая версия
+ * на следующий визит.
+ */
+async function staleWhileRevalidate(request, cacheName) {
+    const cache = await caches.open(cacheName);
+    const cached = await cache.match(request);
+
+    // Всегда запускаем фоновое обновление
+    const fetchPromise = fetch(request).then(response => {
+        if (response.ok) {
+            cache.put(request, response.clone());
+        }
+        return response;
+    }).catch(() => null);
+
+    // Если есть в кэше — отдаём немедленно, фоновый fetch продолжается
+    if (cached) return cached;
+
+    // Нет в кэше — ждём сеть
+    const fresh = await fetchPromise;
+    return fresh || new Response('', { status: 503, statusText: 'Offline' });
 }
 
 /**
@@ -284,4 +310,14 @@ self.addEventListener('message', (event) => {
     if (event.data === 'trimCache') {
         trimMediaCache();
     }
+    if (event.data === 'getVersion') {
+        event.source?.postMessage({ type: 'version', version: CACHE_VERSION });
+    }
+});
+
+// Уведомляем все вкладки когда новый SW взял управление
+self.addEventListener('activate', () => {
+    self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => client.postMessage({ type: 'sw-updated', version: CACHE_VERSION }));
+    });
 });
