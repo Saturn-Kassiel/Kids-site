@@ -129,7 +129,7 @@ const ShareHelper = {
 
         // Songs section: use promo image instead of generated canvas
         if (sectionId === 'songs') {
-            const promoText = 'Слушай детские песенки в мини-школе Гоша\n' + url;
+            const promoText = 'Слушай 🎧 детские песенки в мини-школе Гоша\n' + url;
             try {
                 const resp = await fetch('assets/images/links_pictures_opt/pesenki_promo.webp');
                 if (resp.ok) {
@@ -137,7 +137,7 @@ const ShareHelper = {
                     const file = new File([blob], 'pesenki_promo.webp', { type: 'image/webp' });
                     if (navigator.share) {
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: promoText });
+                            await navigator.share({ files: [file], title: promoText, text: promoText });
                         } else {
                             await navigator.share({ text: promoText, url });
                         }
