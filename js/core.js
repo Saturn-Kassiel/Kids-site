@@ -30,11 +30,6 @@ const App = {
             titleBar.classList.add('hidden');
         }
 
-        if (!isMain) this._history.push(id);
-        else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
-        if (isMain) CardBadges.updateAll();
-        window.scrollTo(0, 0);
-
         // Реестр хуков навигации: onEnter / onLeave.
         // Добавляя новый раздел — регистрируй хук здесь, не расширяй if-цепочку.
         const NAV_HOOKS = {
@@ -47,11 +42,19 @@ const App = {
                 onEnter: () => Riddles._renderTopBar(),
                 onLeave: () => document.getElementById('riddle-level-dots')?.remove(),
             },
-            info:    { onEnter: () => Info.render() },
+            info:        { onEnter: () => Info.render() },
+            'parent-dash': { onEnter: () => ParentDash._render() },
         };
 
-        // Вызываем onLeave для предыдущего раздела
+        // Читаем предыдущий раздел ДО push — иначе при isMain (push не вызывается)
+        // history может быть пустой и prev окажется undefined.
         const prev = this._history[this._history.length - 1];
+        if (!isMain) this._history.push(id);
+        else if (this._history.length > 1 && typeof Gosha !== 'undefined') Gosha.bounce();
+        if (isMain) CardBadges.updateAll();
+        window.scrollTo(0, 0);
+
+        // Вызываем onLeave для предыдущего раздела
         if (prev && prev !== id && NAV_HOOKS[prev]?.onLeave) NAV_HOOKS[prev].onLeave();
         // Вызываем onEnter для нового раздела
         if (NAV_HOOKS[id]?.onEnter) NAV_HOOKS[id].onEnter();
