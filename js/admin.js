@@ -794,5 +794,98 @@ const Admin = {
         } finally {
             if (btn) { btn.innerHTML = origText; btn.disabled = false; }
         }
+    },
+
+    // ── Отчёт о посетителях — вызывает /report-now на воркере → отчёт приходит в Telegram ──
+    requestReport() {
+        const savedSecret = localStorage.getItem('report_secret') || '';
+        const WORKER_URL  = TgReminder.WORKER_URL;
+
+        document.getElementById('rep-overlay')?.remove();
+
+        const html = `
+        <div class="rep-overlay" id="rep-overlay" onclick="if(event.target===this)this.remove()">
+          <div class="rep-modal">
+            <div class="rep-header">
+              <div class="rep-title">📊 Отчёт о посетителях</div>
+              <div class="rep-subtitle">Отчёт придёт в Telegram-бот</div>
+              <button class="rep-close" onclick="document.getElementById('rep-overlay').remove()">✕</button>
+            </div>
+            <div class="rep-section-title">Секретный ключ (REPORT_SECRET)</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+              <input id="rep-secret-inp" type="password"
+                value="${savedSecret}"
+                placeholder="Введите секрет из Cloudflare..."
+                style="flex:1;padding:10px 14px;background:var(--card2);border:1.5px solid var(--border);
+                       border-radius:12px;font-size:14px;color:var(--text);outline:none;">
+              <button onclick="
+                const i=document.getElementById('rep-secret-inp');
+                i.type=i.type==='password'?'text':'password'
+              " style="background:var(--card2);border:1.5px solid var(--border);border-radius:10px;
+                       padding:8px 12px;font-size:14px;cursor:pointer;color:var(--text2);">👁</button>
+            </div>
+            <button id="rep-send-btn" onclick="Admin._sendReport()" style="
+              width:100%;padding:14px;border:none;border-radius:14px;
+              background:var(--accent);color:#fff;font-size:15px;font-weight:700;
+              cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              📨 Отправить отчёт в Telegram
+            </button>
+            <div id="rep-status" style="margin-top:12px;text-align:center;font-size:14px;min-height:20px;color:var(--text2);"></div>
+          </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    async _sendReport() {
+        const inp    = document.getElementById('rep-secret-inp');
+        const btn    = document.getElementById('rep-send-btn');
+        const status = document.getElementById('rep-status');
+        const secret = (inp?.value || '').trim();
+        if (!secret) { status.textContent = '⚠️ Введите секретный ключ'; status.style.color = '#f97316'; return; }
+
+        // Сохраняем секрет для удобства
+        localStorage.setItem('report_secret', secret);
+
+        // user_id — берём из Telegram если доступен, иначе используем заглушку
+        const userId = TgReminder._userId() || localStorage.getItem('report_admin_uid') || 'admin';
+
+        btn.textContent = '⏳ Отправляю...';
+        btn.disabled = true;
+        status.textContent = '';
+        status.style.color = 'var(--text2)';
+
+        try {
+            const resp = await fetch(TgReminder.WORKER_URL + '/report-now', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ user_id: userId, secret }),
+            });
+            const data = await resp.json();
+            if (resp.ok && data.ok) {
+                status.textContent = '✅ Отчёт отправлен! Проверьте Telegram.';
+                status.style.color = '#22c55e';
+                btn.textContent = '📨 Отправить отчёт в Telegram';
+                btn.disabled = false;
+                setTimeout(() => document.getElementById('rep-overlay')?.remove(), 2500);
+            } else {
+                const msg = data.error || ('HTTP ' + resp.status);
+                if (resp.status === 403) {
+                    status.textContent = '❌ Неверный секретный ключ';
+                } else if (resp.status === 500 && msg.includes('CHAT_ID')) {
+                    status.textContent = '❌ CHAT_ID не настроен в Cloudflare';
+                } else {
+                    status.textContent = '❌ Ошибка: ' + msg;
+                }
+                status.style.color = '#ef4444';
+                btn.textContent = '📨 Отправить отчёт в Telegram';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            status.textContent = '❌ Нет соединения с воркером';
+            status.style.color = '#ef4444';
+            btn.textContent = '📨 Отправить отчёт в Telegram';
+            btn.disabled = false;
+        }
     }
 };
