@@ -804,6 +804,13 @@
       "answer": "",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_gs4zargs4zargs4z.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772626468000,
+      "text": "По утрам и вечерам\nЧистит зубы нам и вам.\nС мятной пастой крепко дружит,\nБелизне усердно служит.",
+      "answer": "Зубная щетка",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_l914r6l914r6l914.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -819,5 +826,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:12:57.254Z"
+  "exportedAt": "2026-03-04T12:14:28.044Z"
 }
