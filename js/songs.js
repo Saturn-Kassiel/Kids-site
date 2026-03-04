@@ -11,7 +11,8 @@ const Songs = {
     _activeTag: 'all',
     _searchQ: '',
     _favorites: new Set(),
-    _videoLoadId: 0, // guard against race conditions (fix #7)
+    _videoLoadId: 0,
+    DEFAULT_IDS: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], // guard against race conditions (fix #7)
 
     // ── SVG icons for play/pause button (fix #5) ──
     SVG_PLAY:  '<svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>',
@@ -19,14 +20,14 @@ const Songs = {
 
     // ── Tag definitions ──
     TAG_DEFS: [
-        { id: 'all',      emoji: '🎵', label: 'Все' },
-        { id: 'fav',      emoji: '❤️', label: 'Избранное' },
-        { id: 'animals',  emoji: '🐾', label: 'Животные' },
-        { id: 'months',   emoji: '📅', label: 'Месяцы' },
-        { id: 'holiday',  emoji: '🎄', label: 'Праздники' },
-        { id: 'family',   emoji: '👨‍👩‍👧', label: 'Семья' },
-        { id: 'learning', emoji: '📚', label: 'Обучающие' },
-        { id: 'sleep',    emoji: '🌙', label: 'Колыбельные' },
+        { id: 'all',      svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>', label: 'Все' },
+        { id: 'fav',      svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>', label: 'Избранное' },
+        { id: 'animals',  svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>', label: 'Животные' },
+        { id: 'months',   svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', label: 'Месяцы' },
+        { id: 'holiday',  svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 10 9 10"/><polygon points="12 7 17 16 7 16"/><polygon points="12 12 19 22 5 22"/><rect x="10" y="22" width="4" height="2"/></svg>', label: 'Праздники' },
+        { id: 'family',   svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', label: 'Семья' },
+        { id: 'learning', svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', label: 'Обучающие' },
+        { id: 'sleep',    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>', label: 'Колыбельные' },
     ],
 
     // Tags by filename (works regardless of song ID)
@@ -145,6 +146,9 @@ const Songs = {
             '#song-poster.poster-loading{animation:poster-shimmer 1.8s ease-in-out infinite}' +
             '@keyframes poster-shimmer{0%,100%{opacity:1}50%{opacity:.7}}' +
             '#song-video{animation:fade-in-video .4s ease}' +
+            '.chip-svg{display:inline-flex;vertical-align:-3px;margin-right:2px}' +
+            '.chip-svg svg{width:16px;height:16px}' +
+            '.song-fav-btn svg,.deeplink-btn svg{vertical-align:middle}' +
             '@keyframes fade-in-video{from{opacity:0}to{opacity:1}}';
         document.head.appendChild(style);
     },
@@ -324,7 +328,7 @@ const Songs = {
             else count = this._allSongs.filter(s => (s.tags || []).includes(t.id)).length;
             if (count === 0 && t.id !== 'all' && t.id !== 'fav') return '';
             const badge = t.id === 'fav' && favCount > 0 ? ` <span class="chip-badge">${favCount}</span>` : '';
-            return `<button class="song-chip${active}" onclick="Songs.setTag('${t.id}')">${t.emoji} ${t.label}${badge}</button>`;
+            return `<button class="song-chip${active}" onclick="Songs.setTag('${t.id}')"><span class="chip-svg">${t.svg}</span> ${t.label}${badge}</button>`;
         }).join('');
     },
 
@@ -367,26 +371,26 @@ const Songs = {
         if (this._filtered.length === 0) {
             list.innerHTML = `<div class="song-empty">${
                 this._activeTag === 'fav'
-                    ? 'Нажми ❤️ рядом с песенкой,<br>чтобы добавить в избранное'
+                    ? 'Нажми <svg viewBox="0 0 24 24" width="14" height="14" fill="#ef4444" stroke="none" style="vertical-align:-2px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg> рядом с песенкой,<br>чтобы добавить в избранное'
                     : 'Ничего не найдено'
             }</div>`;
             return;
         }
 
-        this._filtered.forEach((song) => {
+        this._filtered.forEach((song, filteredIdx) => {
             const realIdx = this._allSongs.indexOf(song);
             const isPlaying = realIdx === this.index;
             const isFav = this._favorites.has(song.id);
             const div = document.createElement('div');
             div.className = 'song-item' + (isPlaying ? ' playing' : '');
             div.innerHTML = `
-                <div class="song-num ${isPlaying ? 'pi-icon' : ''}">${isPlaying ? '▶' : realIdx + 1}</div>
+                <div class="song-num ${isPlaying ? 'pi-icon' : ''}">${isPlaying ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>' : filteredIdx + 1}</div>
                 <div class="song-name">${song.name}</div>
                 <div class="song-dur">${song.duration || ''}</div>
                 <button class="song-fav-btn ${isFav ? 'fav-active' : ''}" title="${isFav ? 'Убрать из избранного' : 'В избранное'}" data-id="${song.id}">
-                    ${isFav ? '❤️' : '🤍'}
+                    ${isFav ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="#ef4444" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>'}
                 </button>
-                <button class="deeplink-btn" title="Скопировать ссылку" data-type="song" data-id="${song.id}" data-name="${song.name.replace(/"/g,'&quot;')}">🔗</button>
+                <button class="deeplink-btn" title="Скопировать ссылку" data-type="song" data-id="${song.id}" data-name="${song.name.replace(/"/g,'&quot;')}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
             `;
             div.addEventListener('click', (e) => {
                 if (e.target.closest('.deeplink-btn') || e.target.closest('.song-fav-btn')) return;
@@ -515,13 +519,13 @@ const Songs = {
     toggleShuffle() {
         this.isShuffle = !this.isShuffle;
         document.getElementById('song-shuffle-btn').classList.toggle('active', this.isShuffle);
-        showToast(this.isShuffle ? '🔀 Перемешать вкл.' : '🔀 Выкл.');
+        showToast(this.isShuffle ? 'Перемешать вкл.' : 'Перемешать выкл.');
     },
 
     toggleRepeat() {
         this.isRepeat = !this.isRepeat;
         document.getElementById('song-repeat-btn').classList.toggle('active', this.isRepeat);
-        showToast(this.isRepeat ? '🔁 Повтор вкл.' : '🔁 Выкл.');
+        showToast(this.isRepeat ? 'Повтор вкл.' : 'Повтор выкл.');
     },
 
     // ── Utilities ──

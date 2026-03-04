@@ -126,6 +126,31 @@ const ShareHelper = {
         if (!cfg) return;
 
         const url = this.BASE_URL + '#' + sectionId;
+
+        // Songs section: use promo image instead of generated canvas
+        if (sectionId === 'songs') {
+            const promoText = 'Слушай детские песенки в мини-школе Гоша\n' + url;
+            try {
+                const resp = await fetch('assets/images/links_pictures_opt/pesenki_promo.webp');
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const file = new File([blob], 'pesenki_promo.webp', { type: 'image/webp' });
+                    if (navigator.share) {
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: promoText });
+                        } else {
+                            await navigator.share({ text: promoText, url });
+                        }
+                        return;
+                    }
+                }
+            } catch(e) { console.warn('Songs promo share failed:', e); }
+            if (navigator.share) {
+                try { await navigator.share({ text: promoText, url }); return; } catch(e) {}
+            }
+            try { await navigator.clipboard.writeText(promoText); if (typeof showToast === 'function') showToast('Ссылка скопирована!'); } catch(e) {}
+            return;
+        }
         const text = `${cfg.cta} мини школе Гоша! 🎓\nПрисоединяйся: ${url}`;
 
         try {
