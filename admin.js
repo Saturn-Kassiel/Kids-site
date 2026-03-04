@@ -534,6 +534,50 @@ const Admin = {
 
 
     // ── Обновить счётчик pending картинок на кнопке публикации ──
+    // Запрашивает немедленную отправку отчёта через воркер
+    async requestReport() {
+        const btn = document.getElementById('admin-report-btn');
+        if (!btn) return;
+
+        const WORKER_URL = TgReminder.WORKER_URL;
+        let secret = localStorage.getItem('report_secret') || '';
+        if (!secret) {
+            const s = prompt('Введите REPORT_SECRET (из настроек воркера):');
+            if (!s) return;
+            secret = s.trim();
+            localStorage.setItem('report_secret', secret);
+        }
+
+        const orig = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '⏳';
+
+        try {
+            const resp = await fetch(WORKER_URL + '/report-now', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secret }),
+            });
+            const data = await resp.json();
+            if (data.ok) {
+                btn.textContent = '✅';
+                showToast('📊 Отчёт отправлен в Telegram');
+            } else {
+                throw new Error(data.error || 'Ошибка');
+            }
+        } catch(e) {
+            btn.textContent = '❌';
+            if (e.message === 'Forbidden') {
+                localStorage.removeItem('report_secret');
+                showToast('❌ Неверный секрет — нажмите ещё раз');
+            } else {
+                showToast('❌ ' + e.message);
+            }
+        } finally {
+            setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3000);
+        }
+    },
+
     _updatePendingBadge() {
         const pendingPics = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
         const pendingAudio = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');

@@ -812,6 +812,7 @@
 
     <!-- ========== ADMIN ========== -->
     <section id="admin" class="hidden">
+        <div class="admin-tabs-wrap">
         <div class="admin-tabs">
             <button class="admin-tab active" onclick="Admin.setTab('songs',this)">Песенки</button>
             <button class="admin-tab" onclick="Admin.setTab('podcasts',this)">Подкасты</button>
@@ -819,6 +820,8 @@
             <button class="admin-tab" onclick="Admin.setTab('riddles',this)">Загадки</button>
             <button class="admin-tab" onclick="Admin.setTab('info',this)">Информация</button>
             <button class="admin-tab" onclick="Admin.setTab('notif',this)">Рассылка</button>
+        </div>
+        <button class="report-corner-btn" id="admin-report-btn" onclick="Admin.requestReport()" title="Отчёт о заходах">📊</button>
         </div>
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">

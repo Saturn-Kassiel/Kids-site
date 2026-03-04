@@ -1460,6 +1460,31 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
 .confirm-ok:hover { background: rgba(239,68,68,0.2); border-color: #ef4444; }
 
 /* ===== ADMIN ===== */
+.admin-tabs-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.report-corner-btn {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background: rgba(99,102,241,0.12);
+  border: none;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background .2s;
+}
+.report-corner-btn:hover { background: rgba(99,102,241,0.22); }
+.report-corner-btn:active { transform: translateY(-50%) scale(.92); }
+
 .admin-tabs {
     display: flex; gap: 8px; flex-wrap: wrap;
     margin-bottom: 14px;
@@ -1549,6 +1574,7 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
     transition: all var(--tr);
 }
 .batch-item-remove:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+
 
 .publish-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
