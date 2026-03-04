@@ -797,6 +797,13 @@
       "answer": "Мяч",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_6az0e6az0e6az0e6.png",
       "level": "easy"
+    },
+    {
+      "id": 1772626377216,
+      "text": "В ясный день в углу скучает,\nВ ливень — «шляпкой» расцветает.\nСам промокнет до костей,\nНо спасёт своих друзей.",
+      "answer": "",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_gs4zargs4zargs4z.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -812,5 +819,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T12:10:55.786Z"
+  "exportedAt": "2026-03-04T12:12:57.254Z"
 }
