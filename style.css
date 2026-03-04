@@ -1460,30 +1460,33 @@ input.wrong   { border-color: #ef4444; background: #ef444408; box-shadow: 0 0 0 
 .confirm-ok:hover { background: rgba(239,68,68,0.2); border-color: #ef4444; }
 
 /* ===== ADMIN ===== */
-.admin-tabs-wrap {
+
+.admin-tabs-outer {
   position: relative;
-  flex-shrink: 0;
+  margin-bottom: 14px;
 }
-.report-corner-btn {
+.admin-tabs-outer .admin-tabs {
+  margin-bottom: 0;
+  padding-right: 44px; /* место для кнопки */
+}
+.admin-report-btn {
   position: absolute;
-  top: 50%;
+  top: 0;
   right: 0;
-  transform: translateY(-50%);
   background: rgba(99,102,241,0.12);
   border: none;
   border-radius: 10px;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  font-size: 17px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
-  transition: background .2s;
+  transition: background .15s;
 }
-.report-corner-btn:hover { background: rgba(99,102,241,0.22); }
-.report-corner-btn:active { transform: translateY(-50%) scale(.92); }
+.admin-report-btn:hover  { background: rgba(99,102,241,0.22); }
+.admin-report-btn:active { transform: scale(.92); }
 
 .admin-tabs {
     display: flex; gap: 8px; flex-wrap: wrap;

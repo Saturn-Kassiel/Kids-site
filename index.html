@@ -812,17 +812,17 @@
 
     <!-- ========== ADMIN ========== -->
     <section id="admin" class="hidden">
-        <div class="admin-tabs-wrap">
-        <div class="admin-tabs">
+        <div class="admin-tabs-outer">
+            <div class="admin-tabs">
             <button class="admin-tab active" onclick="Admin.setTab('songs',this)">Песенки</button>
             <button class="admin-tab" onclick="Admin.setTab('podcasts',this)">Подкасты</button>
             <button class="admin-tab" onclick="Admin.setTab('puzzles',this)">Ребусы</button>
             <button class="admin-tab" onclick="Admin.setTab('riddles',this)">Загадки</button>
             <button class="admin-tab" onclick="Admin.setTab('info',this)">Информация</button>
             <button class="admin-tab" onclick="Admin.setTab('notif',this)">Рассылка</button>
-        </div>
-        <button class="report-corner-btn" id="admin-report-btn" onclick="Admin.requestReport()" title="Отчёт о заходах">📊</button>
-        </div>
+            </div><!-- /.admin-tabs -->
+            <button id="admin-report-btn" onclick="Admin.requestReport()" title="Отчёт о заходах" class="admin-report-btn">📊</button>
+        </div><!-- /.admin-tabs-outer -->
         <div class="admin-list" id="admin-list"></div>
         <div class="admin-footer">
             <button class="admin-add-btn" onclick="Admin.openModal(null)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить</button>

@@ -43,6 +43,7 @@ const App = {
                 onLeave: () => document.getElementById('riddle-level-dots')?.remove(),
             },
             info:        { onEnter: () => Info.render() },
+
             'parent-dash': { onEnter: () => ParentDash._render() },
         };
 
