@@ -20,6 +20,12 @@ const Words = {
             { word:'МЯЧ', emoji:'⚽' }, { word:'ЛЕВ', emoji:'🦁' }, { word:'КИТ', emoji:'🐳' },
             { word:'ЖУК', emoji:'🪲' }, { word:'ДЫМ', emoji:'💨' }, { word:'ЛУЧ', emoji:'☀️' },
             { word:'МЁД', emoji:'🍯' }, { word:'СЫР', emoji:'🧀' }, { word:'ПЁС', emoji:'🐕' },
+            { word:'РАК', emoji:'🦞' }, { word:'ВОЛ', emoji:'🐂' }, { word:'БЫК', emoji:'🐃' },
+            { word:'ЁЖ',  emoji:'🦔' }, { word:'УЖ',  emoji:{ word:'ЁРШ', emoji:'🐟' },
+            { word:'ГУСЬ', emoji:'🪿' }, { word:'ДУБ', emoji:'🌳' }, { word:'ЛЁД', emoji:'🧊' },
+            { word:'РОТ', emoji:'👄' }, { word:'ЗУБ', emoji:'🦷' }, { word:'ВЕС', emoji:'⚖️' },
+            { word:'ЧАЙ', emoji:'🍵' }, { word:'ЛИС', emoji:'🦊' }, { word:'НОЖ', emoji:'🔪' },
+            { word:'САД', emoji:'🌿' }, { word:'ДОЧЬ', emoji:'👧' }, { word:'МУЖ', emoji:'👨' },
         ],
         medium: [
             { word:'РЫБА', emoji:'🐟' }, { word:'ЛУНА', emoji:'🌙' }, { word:'ЗИМА', emoji:'❄️' },
@@ -27,12 +33,23 @@ const Words = {
             { word:'УТКА', emoji:'🦆' }, { word:'ТОРТ', emoji:'🎂' }, { word:'ГРИБ', emoji:'🍄' },
             { word:'МОСТ', emoji:'🌉' }, { word:'АРБУЗ', emoji:'🍉' }, { word:'ЛИСТ', emoji:'🍃' },
             { word:'ПАУК', emoji:'🕷️' }, { word:'ВОЛК', emoji:'🐺' }, { word:'СЛОН', emoji:'🐘' },
+            { word:'КОНЬ', emoji:'🐴' }, { word:'КРАБ', emoji:'🦀' }, { word:'ТИГР', emoji:'🐯' },
+            { word:'КОЗA', emoji:'🐐' }, { word:'СОВА', emoji:'🦉' }, { word:'ПЧЕЛA', emoji:'🐝' },
+            { word:'ХЛЕБ', emoji:'🍞' }, { word:'СУП',  emoji:'🍲' }, { word:'МОЛОКО', emoji:'🥛' },
+            { word:'ПОЕЗД', emoji:'🚂' }, { word:'ЛОДКА', emoji:'⛵' }, { word:'САМОЛЁТ', emoji:'✈️' },
+            { word:'КУКЛА', emoji:'🪆' }, { word:'КУБИК', emoji:'🧊' }, { word:'МЯЧ', emoji:'⚽' },
+            { word:'ДОЖДЬ', emoji:'🌧️' }, { word:'СНЕГ', emoji:'❄️' }, { word:'ГРОЗА', emoji:'⛈️' },
         ],
         hard: [
             { word:'КНИГА', emoji:'📖' }, { word:'ШКОЛА', emoji:'🏫' }, { word:'КОШКА', emoji:'🐈' },
             { word:'МЫШКА', emoji:'🐭' }, { word:'ОБЛАКО', emoji:'☁️' }, { word:'ДЕРЕВО', emoji:'🌳' },
             { word:'СОЛНЦЕ', emoji:'☀️' }, { word:'РАКЕТА', emoji:'🚀' }, { word:'ЯБЛОКО', emoji:'🍎' },
             { word:'ЗВЕЗДА', emoji:'⭐' }, { word:'БАБОЧКА', emoji:'🦋' }, { word:'РАДУГА', emoji:'🌈' },
+            { word:'КОРАБЛЬ', emoji:'🚢' }, { word:'ЧЕРЕПАХА', emoji:'🐢' }, { word:'КРОКОДИЛ', emoji:'🐊' },
+            { word:'ПИНГВИН', emoji:'🐧' }, { word:'ЖИРАФ', emoji:'🦒' }, { word:'СЛОНЁНОК', emoji:'🐘' },
+            { word:'АПЕЛЬСИН', emoji:'🍊' }, { word:'КЛУБНИКА', emoji:'🍓' }, { word:'ВИНОГРАД', emoji:'🍇' },
+            { word:'ПИРОЖНОЕ', emoji:'🍰' }, { word:'МОРОЖЕНОЕ', emoji:'🍦' }, { word:'ШОКОЛАД', emoji:'🍫' },
+            { word:'ВЕЛОСИПЕД', emoji:'🚲' }, { word:'АВТОБУС', emoji:'🚌' }, { word:'ВЕРТОЛЁТ', emoji:'🚁' },
         ],
     },
 
@@ -170,6 +187,7 @@ const Words = {
         if (!isHintEnabled('words')) { showToast('💡 Подсказки отключены в настройках'); return; }
         this._sessionHints++;
         this._updateHintBtn();
+        StatTracker.incHints('words');
         const result = this._engine.hint();
         if (result) showToast('💡 Подсказка: ' + result);
         else showToast('🤔 Попробуй убрать неправильные буквы');

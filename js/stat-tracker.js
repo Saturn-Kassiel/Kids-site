@@ -241,6 +241,13 @@ const StatTracker = {
     get(key) { return parseInt(localStorage.getItem(`stat_${key}`) || 0); },
     getTime(key) { return parseInt(localStorage.getItem(`stat_time_${key}`) || 0); },
 
+    // Подсказки
+    incHints(key) {
+        const cur = parseInt(localStorage.getItem(`stat_hints_${key}`) || 0);
+        localStorage.setItem(`stat_hints_${key}`, cur + 1);
+    },
+    getHints(key) { return parseInt(localStorage.getItem(`stat_hints_${key}`) || 0); },
+
     // Форматирование времени
     fmtDuration(secs) {
         secs = Math.floor(secs);
@@ -276,6 +283,7 @@ const StatTracker = {
             'badges_unlocked',
             'viewed_letters','viewed_numbers','viewed_colors',
             'stat_interstitials','inter_best_streak',
+            'stat_hints_words','stat_hints_math',
             'stat_daily_log','stat_daily_migrated',
             'tried_songs','tried_podcasts','tried_puzzles','tried_riddles'
         ];

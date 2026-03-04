@@ -656,11 +656,15 @@ const Stats = {
         const words = StatTracker.get('words');
         set('st-words', words);
         bar('sf-words', words / 45 * 100);
+        const hintsWords = StatTracker.getHints('words');
+        set('st-hints-words', hintsWords > 0 ? '💡 ' + hintsWords + (hintsWords === 1 ? ' подсказка' : hintsWords < 5 ? ' подсказки' : ' подсказок') : '');
 
         // ── Арифметика ──
         const math = StatTracker.get('math');
         set('st-math', math);
         bar('sf-math', math / 50 * 100);
+        const hintsMath = StatTracker.getHints('math');
+        set('st-hints-math', hintsMath > 0 ? '💡 ' + hintsMath + (hintsMath === 1 ? ' подсказка' : hintsMath < 5 ? ' подсказки' : ' подсказок') : '');
 
         // ── Перебивки ──
         const interstitials = StatTracker.get('interstitials');

@@ -3472,3 +3472,12 @@ input[type=file] { display: none; }
 .words-streak.visible {
     opacity: 1;
 }
+
+/* ── Hints label in stat card ── */
+.stat-hints-lbl {
+    font-size: 12px;
+    color: var(--text-secondary, #94a3b8);
+    margin-top: 4px;
+    min-height: 16px;
+    transition: opacity 0.3s ease;
+}

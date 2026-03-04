@@ -164,6 +164,7 @@ const Arithmetic = {
         if (!isHintEnabled('math')) { showToast('💡 Подсказки отключены в настройках'); return; }
         this._sessionHints++;
         this._updateHintBtn();
+        StatTracker.incHints('math');
         const result = this._engine.hint();
         if (result) showToast('💡 Подсказка: ' + result);
         else showToast('🤔 Попробуй убрать неправильные цифры');
