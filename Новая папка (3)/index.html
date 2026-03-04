@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Гоша</title>
+    <link rel="icon" href="assets/favicon/favicon.webp" type="image/webp">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Гоша">
+    <link rel="apple-touch-icon" href="assets/favicon/icon-192.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="testing.css">
+    <!-- Apply saved theme instantly to prevent flash -->
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+    <script>
+        (function(){
+            var t; try { t = localStorage.getItem('theme'); } catch(e) {}
+            if (t) document.documentElement.setAttribute('data-theme', t);
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.content = t === 'dark' ? '#0a1628' : '#f0f9ff';
+
+            // ── Standalone PWA detection (synchronous) ──
+            if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+                document.documentElement.classList.add('pwa');
+            }
+
+            // Detect Telegram Mini App
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                document.documentElement.classList.add('tg-webapp');
+                try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch(e) {}
+            }
+            // Detect section deep links (before app.js reads hash)
+            var h = location.hash.replace('#', '');
+            var sections = ['puzzles','riddles','testing','songs','podcasts','alphabet','numbers','colors','words','arithmetic','finger','articul','breath'];
+            if (sections.indexOf(h) !== -1) {
+                window.__sectionDeepLink = h;
+                history.replaceState(null, '', location.pathname);
+            }
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" async></script>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div></div>
+<div id="toast"></div>
+<div class="stars-host" id="stars-host"></div>
+
+<div id="app">
+
+    <!-- TOP BAR -->
+    <div id="top-bar">
+        <button id="back-btn" class="hidden" onclick="App.back()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span id="back-text">Назад</span>
+        </button>
+        <span id="page-title-bar" class="hidden"></span>
+        <span style="flex:1"></span>
+        <button id="notif-bell-btn" onclick="Notif.toggle()" title="Уведомления" style="display:none;position:relative;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+        </button>
+        <button id="settings-icon-btn" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();CloudSync.init();},50)" title="Настройки" style="display:none;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+
+    <!-- ========== MAIN ========== -->
+    <section id="main">
+        <div class="home-hero">
+            <div class="home-mascot-wrap">
+                <img class="home-mascot" id="home-mascot" src="assets/favicon/favicon.webp" alt="Гоша" width="72" height="72">
+            </div>
+            <div class="home-hero-text">
+                <div class="home-logo">Гоша</div>
+                <div class="home-greeting" id="home-greeting">Давай учиться играя!</div>
+            </div>
+        </div>
+        <div class="menu-grid">
+            <button class="menu-card mc-alphabet" onclick="Media.initSection('alphabet')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h3l8-14h-3L4 20z"/><path d="M12.5 6L17 20"/><path d="M9 14h7"/></svg></span>
+                <span class="mc-label">Алфавит</span>
+            </button>
+            <button class="menu-card mc-numbers" onclick="Media.initSection('numbers')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16"/><path d="M6 4h4"/><path d="M14 8a2 2 0 1 1 4 0c0 1.5-4 3-4 5h4"/><path d="M6 20h4"/></svg></span>
+                <span class="mc-label">Цифры</span>
+            </button>
+            <button class="menu-card mc-colors" onclick="Media.initSection('colors')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 2.4.846 4.604 2.256 6.328.396.484.463 1.17.088 1.67-.512.682-.072 1.68.8 1.549A10.1 10.1 0 0 0 7 21.5c.658 0 1.293.207 1.824.582.39.276.888.418 1.39.418H12z"/></svg></span>
+                <span class="mc-label">Цвета</span>
+            </button>
+            <button class="menu-card mc-words" onclick="Words.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                <span class="mc-label">Слова</span>
+            </button>
+            <button class="menu-card mc-math" onclick="Arithmetic.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+                <span class="mc-label">Арифметика</span>
+            </button>
+            <button class="menu-card mc-songs" onclick="Songs.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+                <span class="mc-label">Песенки</span>
+                <span class="mc-count mc-count-total" id="mc-songs-total"></span>
+                <span class="mc-count mc-count-new" id="mc-songs-new"></span>
+            </button>
+            <button class="menu-card mc-podcasts" onclick="Podcasts.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>
+                <span class="mc-label">Подкасты</span>
+                <span class="mc-count mc-count-total" id="mc-podcasts-total"></span>
+                <span class="mc-count mc-count-new" id="mc-podcasts-new"></span>
+            </button>
+            <button class="menu-card mc-puzzles" onclick="Puzzles.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></span>
+                <span class="mc-label">Ребусы</span>
+                <span class="mc-count mc-count-total" id="mc-puzzles-total"></span>
+                <span class="mc-count mc-count-new" id="mc-puzzles-new"></span>
+            </button>
+            <button class="menu-card mc-riddles" onclick="Riddles.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <span class="mc-label">Загадки</span>
+                <span class="mc-count mc-count-new" id="mc-riddles-new"></span>
+            </button>
+            <button class="menu-card mc-finger" onclick="App.navigate('finger')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v1"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></span>
+                <span class="mc-label">Пальчиковые игры</span>
+            </button>
+            <button class="menu-card mc-articul" onclick="App.navigate('articul')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18c-4 0-6-2-6-4h12c0 2-2 4-6 4z"/><path d="M7 9.5a1.5 1.5 0 1 1 3 0"/><path d="M14 9.5a1.5 1.5 0 1 1 3 0"/><circle cx="12" cy="12" r="10"/></svg></span>
+                <span class="mc-label">Артикуляционная гимнастика</span>
+            </button>
+            <button class="menu-card mc-breath" onclick="App.navigate('breath')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a7.5 7.5 0 1 0 0 8.6"/><path d="M21 12h-6"/><path d="M18 9l3 3-3 3"/></svg></span>
+                <span class="mc-label">Дыхательная гимнастика</span>
+            </button>
+            <button class="menu-card mc-info" onclick="App.navigate('info', 'Информация')">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+                <span class="mc-label">Информация</span>
+            </button>
+            <button class="menu-card mc-testing" onclick="Testing.init()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <span class="mc-label">Тестирование</span>
+            </button>
+            <button class="menu-card mc-badges" onclick="Badges.show()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <span class="mc-label">Достижения</span>
+                <span class="mc-badge-count" id="mc-badge-count"></span>
+            </button>
+            <button class="menu-card mc-stats" onclick="Stats.show()">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
+                <span class="mc-label">Статистика</span>
+            </button>
+            <button class="menu-card mc-settings" onclick="App.navigate('settings');setTimeout(()=>{Profiles.renderCard();tgReminderInitUI();CloudSync.init();},50)">
+                <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="mc-label">Настройки</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ========== MEDIA PAGE (Alphabet / Numbers / Colors) ========== -->
+    <section id="media-page" class="hidden">
+        <div id="video-wrap">
+            <video id="global-video" loop muted playsinline></video>
+            <div class="video-placeholder-inner" id="video-placeholder">
+                <div class="pi"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg></div>
+                <span id="video-label">—</span>
+            </div>
+        </div>
+        <div class="sp12"></div>
+
+<div class="audio-player">
+            <div class="player-track-row">
+                <div>
+                    <div class="track-name" id="track-name">—</div>
+                    <div class="track-sub"  id="track-sub"></div>
+                </div>
+            </div>
+            <div class="player-main-row">
+                <span class="player-time player-time-cur" id="time-cur">0:00</span>
+                <div class="progress-bar-wrap" id="prog-wrap">
+                    <div id="progress-bar"></div>
+                </div>
+                <span class="player-time player-time-dur" id="time-dur">0:00</span>
+            </div>
+            <div class="player-btns">
+                <button class="ctrl-btn" id="shuffle-btn" onclick="Media.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Media.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="play-btn" onclick="Media.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Media.next()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="repeat-btn" onclick="Media.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            </div>
+        </div>
+        <div class="sp8"></div>
+        <div id="media-grid"></div>
+    </section>
+
+    <!-- ========== WORDS ========== -->
+    <section id="words" class="hidden">
+        <div class="words-emoji" id="words-emoji">🐱</div>
+        <div class="words-slots" id="words-slots"></div>
+        <div class="words-msg" id="words-msg"></div>
+        <button id="words-next-btn" class="words-next-btn" onclick="Words.next()">Дальше →</button>
+        <div class="words-tiles" id="words-tiles"></div>
+        <div class="words-level-row">
+            <button class="words-lvl-btn active" data-lvl="easy"   onclick="Words.setLevel('easy',this)">Простой</button>
+            <button class="words-lvl-btn"        data-lvl="medium" onclick="Words.setLevel('medium',this)">Средний</button>
+            <button class="words-lvl-btn"        data-lvl="hard"   onclick="Words.setLevel('hard',this)">Сложный</button>
+        </div>
+        <div class="words-score-row">
+            <span id="words-score">0</span> собрано &nbsp;<span class="words-streak" id="words-streak"></span>
+        </div>
+        <div class="riddle-btns-row" style="margin-top:8px;">
+            <button class="words-hint-btn" id="words-hint-btn" onclick="Words.hint()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</button>
+            <button class="next-btn" onclick="Words.next()">Следующее →</button>
+        </div>
+    </section>
+
+    <!-- ========== ARITHMETIC ========== -->
+    <section id="arithmetic" class="hidden">
+        <div class="math-problem" id="math-problem">2 + 3 = ?</div>
+        <div class="words-slots" id="math-slots"></div>
+        <div class="words-msg" id="math-msg"></div>
+        <button id="math-next-btn" class="words-next-btn" onclick="Arithmetic.next()">Дальше →</button>
+        <div class="words-tiles" id="math-tiles"></div>
+        <div class="words-level-row">
+            <button class="words-lvl-btn active" data-lvl="easy"   onclick="Arithmetic.setLevel('easy',this)">Простой</button>
+            <button class="words-lvl-btn"        data-lvl="medium" onclick="Arithmetic.setLevel('medium',this)">Средний</button>
+            <button class="words-lvl-btn"        data-lvl="hard"   onclick="Arithmetic.setLevel('hard',this)">Сложный</button>
+        </div>
+        <div class="words-score-row">
+            <span id="math-score">0</span> решено &nbsp;<span class="words-streak" id="math-streak"></span>
+        </div>
+        <div class="riddle-btns-row" style="margin-top:8px;">
+            <button class="words-hint-btn" id="math-hint-btn" onclick="Arithmetic.hint()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</button>
+            <button class="next-btn" onclick="Arithmetic.next()">Следующий →</button>
+        </div>
+    </section>
+
+    <!-- ========== SONGS ========== -->
+    <section id="songs" class="hidden">
+        <div id="song-visual-wrap" style="width:100%;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:transparent;margin-bottom:12px;position:relative">
+            <video id="song-video" loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+            <img id="song-poster" src="assets/images/links_pictures_opt/slushaet.webp" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </div>
+<div class="audio-player">
+            <div class="player-track-row">
+                <div>
+                    <div class="track-name" id="song-name">Выберите песенку</div>
+                    <div class="track-sub"  id="song-sub"></div>
+                </div>
+            </div>
+            <div class="player-main-row">
+                <span class="player-time player-time-cur" id="song-time-cur">0:00</span>
+                <div class="progress-bar-wrap" id="song-prog-wrap">
+                    <div id="song-progress-bar"></div>
+                </div>
+                <span class="player-time player-time-dur" id="song-time-dur">0:00</span>
+            </div>
+            <div class="player-btns">
+                <button class="ctrl-btn" id="song-shuffle-btn" onclick="Songs.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Songs.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="song-play-btn" onclick="Songs.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Songs.nextSong()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="song-repeat-btn" onclick="Songs.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            </div>
+        </div>
+        <div class="sp8"></div>
+        <div class="search-bar">
+            <span><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" id="song-search" placeholder="Найти песенку..." oninput="Songs.filter(this.value)">
+        </div>
+        <div class="songs-list" id="songs-list"></div>
+    </section>
+
+    <!-- ========== PODCASTS ========== -->
+    <section id="podcasts" class="hidden">
+<div class="audio-player">
+            <div class="player-track-row">
+                <div>
+                    <div class="track-name" id="podcast-name">Выберите подкаст</div>
+                    <div class="track-sub"  id="podcast-sub"></div>
+                    <div class="podcast-desc" id="podcast-desc"></div>
+                </div>
+            </div>
+            <div class="player-main-row">
+                <span class="player-time player-time-cur" id="podcast-time-cur">0:00</span>
+                <div class="progress-bar-wrap" id="podcast-prog-wrap">
+                    <div id="podcast-progress-bar"></div>
+                </div>
+                <span class="player-time player-time-dur" id="podcast-time-dur">0:00</span>
+            </div>
+            <div class="player-btns">
+                <button class="ctrl-btn" id="podcast-shuffle-btn" onclick="Podcasts.toggleShuffle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+                <button class="ctrl-btn" onclick="Podcasts.prev()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M19 4L9 12l10 8V4z"/><line x1="5" y1="4" x2="5" y2="20"/></svg></button>
+                <button id="podcast-play-btn" onclick="Podcasts.toggle()"><svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polygon points="5,3 19,12 5,21"/></svg></button>
+                <button class="ctrl-btn" onclick="Podcasts.nextPodcast()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="4" x2="19" y2="20"/></svg></button>
+                <button class="ctrl-btn" id="podcast-repeat-btn" onclick="Podcasts.toggleRepeat()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            </div>
+        </div>
+        <div class="sp8"></div>
+        <div class="search-bar">
+            <span><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" id="podcast-search" placeholder="Найти подкаст..." oninput="Podcasts.filter(this.value)">
+        </div>
+        <div class="songs-list" id="podcasts-list"></div>
+    </section>
+
+    <!-- ========== PUZZLES ========== -->
+    <section id="puzzles" class="hidden">
+        <div class="puzzle-card">
+            <div class="puzzle-img-area" id="puzzle-img"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;opacity:0.2"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></div>
+            <div class="puzzle-answer-area">
+                <div class="hint-box" id="puzzle-hint"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" class="icon-svg hint-svg"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg> Подсказка</div>
+                <input type="text" id="puzzle-input" placeholder="Введи ответ ребуса...">
+                <div id="puzzle-msg"></div>
+                <div class="riddle-btns-row">
+                    <button class="submit-btn" onclick="Puzzles.check()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="20,6 9,17 4,12"/></svg> Проверить</button>
+                    <button class="next-btn" onclick="Puzzles.next()">Следующий →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== RIDDLES ========== -->
+    <section id="riddles" class="hidden">
+        <div class="riddle-card">
+            <div class="riddle-text-area" id="riddle-text">Загрузка...</div>
+            <div class="riddle-answer-area">
+                <input type="text" id="riddle-input" placeholder="Введи ответ...">
+                <div id="riddle-msg"></div>
+                <div class="riddle-btns-row">
+                    <button class="submit-btn" onclick="Riddles.check()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><polyline points="20,6 9,17 4,12"/></svg> Проверить</button>
+                    <button class="next-btn" onclick="Riddles.next()">Следующая →</button>
+                </div>
+            </div>
+        </div>
+        <div class="answer-img" id="riddle-img"></div>
+    </section>
+
+    <!-- ========== FINGER GAMES ========== -->
+    <section id="finger" class="hidden">
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8M6 14v2a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6v-3a2 2 0 0 0-4 0v-1a2 2 0 0 0-4 0"/></svg></div>
+        <div class="riddle-box">Пальчиковые игры</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== ARTICULATION ========== -->
+    <section id="articul" class="hidden">
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M12 19c-4.42 0-8-1.79-8-4v-1a8 8 0 0 1 16 0v1c0 2.21-3.58 4-8 4z"/><path d="M8 14s1 1 4 1 4-1 4-1"/></svg></div>
+        <div class="riddle-box">Артикуляционная гимнастика</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== BREATHING ========== -->
+    <section id="breath" class="hidden">
+        <div style="text-align:center;padding:40px 0;display:flex;align-items:center;justify-content:center;height:100px;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.7"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg></div>
+        <div class="riddle-box">Дыхательная гимнастика</div>
+        <div class="info-block" style="margin-top:12px;">
+            <p>Раздел находится в разработке. Добавляйте упражнения через Админку!</p>
+        </div>
+    </section>
+
+    <!-- ========== INFO ========== -->
+    <section id="info" class="hidden">
+        <div id="info-blocks-container"></div>
+    </section>
+
+    <!-- ========== STATS ========== -->
+    <section id="stats" class="hidden stats-layout">
+        <!-- ══ ЗАКРЕП: только график активности ══ -->
+        <div class="stats-fixed">
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Активность по периодам</span>
+                <button class="chart-info-btn" onclick="Stats.toggleInfo()" title="Подробнее">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </button>
+                <div class="chart-tabs" id="chart-metric-tabs">
+                    <button class="chart-tab active" data-metric="answers" onclick="Stats.toggleMetric('answers')">Ответы</button>
+                    <button class="chart-tab active" data-metric="time"    onclick="Stats.toggleMetric('time')">Время</button>
+                </div>
+            </div>
+            <div class="chart-info-box hidden" id="chart-info-box">
+                <div class="chart-info-text">
+                    <b>Ответы</b> — сумма ответов в загадках, ребусах, словах, арифметике и перебивках<br>
+                    <b>Время</b> — сумма времени прослушивания песенок и подкастов
+                </div>
+            </div>
+            <div class="chart-period-tabs" id="chart-period-tabs">
+                <button class="chart-period" data-period="day" onclick="Stats.setChartPeriod('day')">День</button>
+                <button class="chart-period active" data-period="week" onclick="Stats.setChartPeriod('week')">Неделя</button>
+                <button class="chart-period" data-period="month" onclick="Stats.setChartPeriod('month')">Месяц</button>
+                <button class="chart-period" data-period="all" onclick="Stats.setChartPeriod('all')">Всё время</button>
+            </div>
+            <div class="chart-area">
+                <div class="chart-bars" id="chart-bars"></div>
+                <div class="chart-labels" id="chart-labels"></div>
+            </div>
+        </div>
+        </div>
+        <!-- ══ СКРОЛЛ: детальная статистика ══ -->
+        <div class="stats-scroll">
+            <!-- Почасовая активность -->
+            <div class="chart-card" id="hourly-chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Активность по суткам</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.35"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <div class="chart-tabs" id="hourly-metric-tabs">
+                        <button class="chart-tab active" data-metric="answers" onclick="Stats.toggleHourlyMetric('answers')">Ответы</button>
+                        <button class="chart-tab active" data-metric="time" onclick="Stats.toggleHourlyMetric('time')">Время</button>
+                    </div>
+                </div>
+                <div class="chart-period-tabs" id="hourly-period-tabs">
+                    <span class="chart-period hourly-period" data-range="night">Ночь</span>
+                    <span class="chart-period hourly-period" data-range="morning">Утро</span>
+                    <span class="chart-period hourly-period" data-range="day">День</span>
+                    <span class="chart-period hourly-period" data-range="evening">Вечер</span>
+                </div>
+                <div class="chart-area">
+                    <div class="chart-bars hourly-bars" id="hourly-bars"></div>
+                    <div class="chart-labels hourly-labels" id="hourly-labels"></div>
+                </div>
+            </div>
+
+            <div class="stat-section-hdr">Правильные ответы</div>
+        <div class="stat-card">
+            <div class="stat-icon si-puzzles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.5 2.5 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-puzzles">0</div>
+                <div class="stat-lbl">Ребусов решено</div>
+                
+                <div class="stat-track"><div class="stat-fill sf-puzzles" id="sf-puzzles"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-riddles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-riddles">0</div>
+                <div class="stat-lbl">Загадок угадано</div>
+                
+                <div class="stat-track"><div class="stat-fill sf-riddles" id="sf-riddles"></div></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-words"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-words">0</div>
+                <div class="stat-lbl">Слов собрано</div>
+                <div class="stat-track"><div class="stat-fill sf-words" id="sf-words"></div></div>
+                <div class="stat-hints-lbl" id="st-hints-words"></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-math">0</div>
+                <div class="stat-lbl">Примеров решено</div>
+                <div class="stat-track"><div class="stat-fill sf-math" id="sf-math"></div></div>
+                <div class="stat-hints-lbl" id="st-hints-math"></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-inter"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-interstitials">0</div>
+                <div class="stat-lbl">Перебивок пройдено</div>
+                <div class="stat-track"><div class="stat-fill sf-inter" id="sf-interstitials"></div></div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Музыка и подкасты</div>
+        <div class="stat-card">
+            <div class="stat-icon si-songs"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val" id="st-songs">0</div>
+                <div class="stat-lbl">Песенок прослушано</div>
+                <div class="stat-sub" id="st-songs-time"></div>
+                <div class="stat-track"><div class="stat-fill sf-songs" id="sf-songs"></div></div>
+                <div class="stat-hint">Песенка считается прослушанной, если прослушана полностью без перерывов</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-time-songs"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val-time" id="st-songs-time-card">—</div>
+                <div class="stat-lbl">Общее время песенок</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-podcasts"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div class="stat-val-time" id="st-podcasts-time">—</div>
+                <div class="stat-lbl">Общее время подкастов</div>
+                <div class="stat-hint">Подкаст считается прослушанным, если прослушан полностью без перерывов</div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Обучение</div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('letters')">
+            <div class="stat-icon si-letters"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h3l8-14h-3L4 20z"/><path d="M12.5 6L17 20"/><path d="M9 14h7"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-letters">0</div>
+                        <div class="stat-lbl">Просмотров букв</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-letters"></div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('numbers')">
+            <div class="stat-icon si-numbers"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16"/><path d="M6 4h4"/><path d="M14 8a2 2 0 1 1 4 0c0 1.5-4 3-4 5h4"/><path d="M6 20h4"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-numbers">0</div>
+                        <div class="stat-lbl">Просмотров цифр</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-numbers"></div>
+        <div class="stat-card stat-learn-card" onclick="Stats.toggleLearn('colors')">
+            <div class="stat-icon si-colors"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 2.4.846 4.604 2.256 6.328.396.484.463 1.17.088 1.67-.512.682-.072 1.68.8 1.549A10.1 10.1 0 0 0 7 21.5c.658 0 1.293.207 1.824.582.39.276.888.418 1.39.418H12z"/></svg></div>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <div class="stat-val" id="st-colors">0</div>
+                        <div class="stat-lbl">Просмотров цветов</div>
+                    </div>
+                    <svg class="icon-svg" style="color:var(--text2)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="learn-accordion" id="acc-colors"></div>
+
+        <div class="stat-section-hdr">Достижения · Загадки</div>
+        <div class="stat-card stat-ach-card">
+            <div class="stat-icon si-ach-riddles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div style="flex:1;min-width:0" id="ach-riddles">
+                <div class="ach-stat-none">Пока нет достижений</div>
+            </div>
+        </div>
+
+                <div class="stat-section-hdr">Достижения · Ребусы</div>
+        <div class="stat-card stat-ach-card">
+            <div class="stat-icon si-ach-puzzles"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div style="flex:1;min-width:0" id="ach-puzzles">
+                <div class="ach-stat-none">Пока нет достижений</div>
+            </div>
+        </div>
+
+        <!-- ── Итоги месяца ── -->
+        <button class="month-summary-btn" onclick="Stats.shareMonth()">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Итоги месяца
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+
+        <div class="stat-footer">Продолжай учиться — ты молодец! <svg class="icon-svg" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div>
+        </div>
+    </section>
+
+    <!-- ========== BADGES ========== -->
+    <section id="badges" class="hidden">
+        <div class="badges-header">
+            <div class="badges-mascot-wrap" id="badges-mascot-wrap">
+                <img class="badges-mascot" src="assets/favicon/favicon.webp" alt="Гоша" width="64" height="64">
+            </div>
+            <div class="badges-summary">
+                <div class="badges-count"><span id="badges-unlocked">0</span> / <span id="badges-total">0</span></div>
+                <div class="badges-label">значков получено</div>
+                <div class="badges-bar"><div class="badges-bar-fill" id="badges-bar-fill"></div></div>
+            </div>
+        </div>
+        <div class="badges-grid" id="badges-grid"></div>
+    </section>
+
+    <!-- ========== NOTIFICATIONS ========== -->
+    <section id="notifications" class="hidden">
+        <div id="notif-list"></div>
+        <div id="notif-empty" class="notif-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.2;margin-bottom:8px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <div>Пока нет уведомлений</div>
+        </div>
+    </section>
+
+    <!-- ========== SETTINGS ========== -->
+    <section id="settings" class="hidden">
+        <!-- Profiles card -->
+        <div class="profiles-card" id="profiles-card">
+            <div class="profiles-title">Дети</div>
+            <div class="profiles-row" id="profiles-row"></div>
+            <div class="profiles-add-wrap" id="profiles-add-wrap" style="display:none">
+                <input type="text" id="profiles-add-input" placeholder="Имя ребёнка" maxlength="20" autocomplete="off" spellcheck="false">
+                <div class="profiles-add-btns">
+                    <button class="profiles-cancel-btn" onclick="Profiles.cancelAdd()">Отмена</button>
+                    <button class="profiles-save-btn" onclick="Profiles.saveNew()">Добавить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-theme" id="theme-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+                <div><div class="s-label" id="theme-label">Тёмная тема</div><div class="s-sub">Переключить оформление</div></div>
+                <div class="toggle" id="tog-theme" onclick="App.toggleTheme(this)"></div>
+            </div>
+        </div>
+
+        <div class="settings-group-title">Звуки</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-snd-riddle"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="12" r="10"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div><div class="s-label">Загадки · правильный ответ</div><div class="s-sub">Звук при верном ответе</div></div>
+                <div class="toggle on" id="tog-snd-riddle-correct" onclick="this.classList.toggle('on');saveSetting('snd-riddle-correct',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-achieve"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <div><div class="s-label">Загадки · поощрение</div><div class="s-sub">Фанфара за серию ответов</div></div>
+                <div class="toggle on" id="tog-snd-riddle-achieve" onclick="this.classList.toggle('on');saveSetting('snd-riddle-achieve',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-puzzle"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704z"/></svg></span>
+                <div><div class="s-label">Ребусы · правильный ответ</div><div class="s-sub">Звук при верном ответе</div></div>
+                <div class="toggle on" id="tog-snd-puzzle-correct" onclick="this.classList.toggle('on');saveSetting('snd-puzzle-correct',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-achieve"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+                <div><div class="s-label">Ребусы · поощрение</div><div class="s-sub">Фанфара за серию ответов</div></div>
+                <div class="toggle on" id="tog-snd-puzzle-achieve" onclick="this.classList.toggle('on');saveSetting('snd-puzzle-achieve',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-words"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                <div><div class="s-label">Слова · звуки</div><div class="s-sub">Звуки при ответах</div></div>
+                <div class="toggle on" id="tog-snd-words-correct" onclick="this.classList.toggle('on');saveSetting('snd-words-correct',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+                <div><div class="s-label">Арифметика · звуки</div><div class="s-sub">Звуки при ответах</div></div>
+                <div class="toggle on" id="tog-snd-math-correct" onclick="this.classList.toggle('on');saveSetting('snd-math-correct',this.classList.contains('on'))"></div>
+            </div>
+        </div>
+
+        <div class="settings-group-title">Перебивки</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-snd-inter"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div><div class="s-label">Мини-задания</div><div class="s-sub">Перебивки между изучением контента</div></div>
+                <div class="toggle on" id="tog-interstitials" onclick="this.classList.toggle('on');saveSetting('interstitials',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-inter2"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
+                <div><div class="s-label">Перебивки · звуки</div><div class="s-sub">Звуки при ответах на перебивки</div></div>
+                <div class="toggle on" id="tog-snd-inter-correct" onclick="this.classList.toggle('on');saveSetting('snd-inter-correct',this.classList.contains('on'))"></div>
+            </div>
+        </div>
+
+        <div class="settings-group-title">Подсказки</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <span class="s-icon si-snd-words"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+                <div><div class="s-label">Слова</div><div class="s-sub">Кнопка подсказки в разделе Слова</div></div>
+                <div class="toggle on" id="tog-hint-words" onclick="this.classList.toggle('on');saveSetting('hint-words',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-math"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+                <div><div class="s-label">Арифметика</div><div class="s-sub">Кнопка подсказки в разделе Арифметика</div></div>
+                <div class="toggle on" id="tog-hint-math" onclick="this.classList.toggle('on');saveSetting('hint-math',this.classList.contains('on'))"></div>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-snd-puzzle"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.5 2.5 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704z"/></svg></span>
+                <div><div class="s-label">Ребусы</div><div class="s-sub">Текст подсказки под картинкой ребуса</div></div>
+                <div class="toggle on" id="tog-hint-puzzles" onclick="this.classList.toggle('on');saveSetting('hint-puzzles',this.classList.contains('on'))"></div>
+            </div>
+        </div>
+
+        <div class="settings-group-title" id="tg-reminder-section" style="display:none">Напоминания</div>
+        <div class="settings-group" id="tg-reminder-group" style="display:none">
+            <div class="settings-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </span>
+                <div><div class="s-label">Напоминать заниматься</div><div class="s-sub">Уведомление в Telegram если не заходили</div></div>
+                <div class="toggle" id="tog-reminder" onclick="tgReminderToggle(this)"></div>
+            </div>
+            <div class="settings-row" id="remind-hour-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                </span>
+                <div><div class="s-label">Время напоминания</div><div class="s-sub">В какое время слать уведомление</div></div>
+                <select id="remind-hour-select" onchange="tgReminderSetHour(this.value)"
+                    style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;">
+                    <option value="8">8:00</option>
+                    <option value="9">9:00</option>
+                    <option value="10" selected>10:00</option>
+                    <option value="11">11:00</option>
+                    <option value="12">12:00</option>
+                    <option value="15">15:00</option>
+                    <option value="17">17:00</option>
+                    <option value="18">18:00</option>
+                    <option value="19">19:00</option>
+                    <option value="20">20:00</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-group-title">Синхронизация</div>
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.push()" id="sync-push-row">
+                <span class="s-icon" style="background:rgba(34,197,94,0.12);color:#22c55e">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                </span>
+                <div>
+                    <div class="s-label">Сохранить в облако</div>
+                    <div class="s-sub" id="sync-push-sub">Загрузить прогресс на другое устройство</div>
+                </div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.pull()" id="sync-pull-row">
+                <span class="s-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,17 12,21 16,17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                </span>
+                <div>
+                    <div class="s-label">Загрузить из облака</div>
+                    <div class="s-sub" id="sync-pull-sub">Восстановить прогресс с другого устройства</div>
+                </div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+            <div class="settings-row" style="cursor:pointer" onclick="CloudSync.clearCache()">
+                <span class="s-icon" style="background:rgba(249,115,22,0.12);color:#f97316">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.57"/></svg>
+                </span>
+                <div><div class="s-label">Сбросить кеш</div><div class="s-sub">Загрузить свежие данные с сервера</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div class="settings-group" id="sync-noauth-group" style="display:none">
+            <div class="settings-row">
+                <span class="s-icon">☁️</span>
+                <div><div class="s-label" style="color:var(--text2)">Синхронизация недоступна</div><div class="s-sub">Откройте приложение через Telegram</div></div>
+            </div>
+        </div>
+        <div class="settings-group" style="display:none" id="sync-old-placeholder">
+            <div class="settings-row">
+                <span class="s-icon si-sync"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Облачная синхронизация</div>
+                    <div class="s-sub" id="sync-status">Не настроена</div>
+                </div>
+                <button class="sync-btn" id="sync-cloud-btn" onclick="Sync.cloudSync()">
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                    Синхр.
+                </button>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-export"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Экспорт в файл</div>
+                    <div class="s-sub">Скачать прогресс на устройство</div>
+                </div>
+                <button class="sync-btn" onclick="Sync.exportFile()">Скачать</button>
+            </div>
+            <div class="settings-row">
+                <span class="s-icon si-import"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span>
+                <div style="flex:1">
+                    <div class="s-label">Импорт из файла</div>
+                    <div class="s-sub">Восстановить прогресс с другого устройства</div>
+                </div>
+                <label class="sync-btn" style="cursor:pointer;">
+                    Загрузить
+                    <input type="file" accept=".json" onchange="Sync.importFile(this)" style="display:none;">
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="localStorage.removeItem('onboarding_done');Onboarding.start();App.back();">
+                <span class="s-icon" style="background:rgba(99,102,241,0.12);color:#6366f1"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                <div><div class="s-label">Экскурсия по приложению</div><div class="s-sub">Показать тур заново</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="ParentDash.show()">
+                <span class="s-icon" style="background:rgba(99,102,241,0.12);color:#6366f1"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <div><div class="s-label">Для родителей</div><div class="s-sub">Сводка прогресса ребёнка</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-row" style="cursor:pointer" onclick="App.resetStats()">
+                <span class="s-icon si-reset"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
+                <div><div class="s-label" style="color:#ef4444">Сбросить прогресс</div><div class="s-sub">Очистить все данные</div></div>
+                <span style="color:var(--text2);font-size:18px">›</span>
+            </div>
+        </div>
+        <div style="text-align:center;color:var(--text2);font-size:13px;margin-top:20px;">Гоша v1.2 · Сделано с <svg class="icon-svg" viewBox="0 0 24 24" fill="#f87171" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    </section>
+
+    <!-- ========== PARENT DASHBOARD ========== -->
+    <section id="parent-dash" class="hidden">
+        <div id="parent-dash-content"></div>
+    </section>
+
+    <!-- ========== ADMIN ========== -->
+    <section id="admin" class="hidden">
+        <div class="admin-tabs-outer">
+            <div class="admin-tabs">
+            <button class="admin-tab active" onclick="Admin.setTab('songs',this)">Песенки</button>
+            <button class="admin-tab" onclick="Admin.setTab('podcasts',this)">Подкасты</button>
+            <button class="admin-tab" onclick="Admin.setTab('puzzles',this)">Ребусы</button>
+            <button class="admin-tab" onclick="Admin.setTab('riddles',this)">Загадки</button>
+            <button class="admin-tab" onclick="Admin.setTab('info',this)">Информация</button>
+            <button class="admin-tab" onclick="Admin.setTab('notif',this)">Рассылка</button>
+            </div><!-- /.admin-tabs -->
+            <button id="admin-report-btn" onclick="Admin.requestReport()" title="Отчёт о заходах" class="admin-report-btn">📊</button>
+        </div><!-- /.admin-tabs-outer -->
+        <div class="admin-list" id="admin-list"></div>
+        <div class="admin-footer">
+            <button class="admin-add-btn" onclick="Admin.openModal(null)"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить</button>
+            <button class="admin-batch-btn hidden" id="admin-batch-btn" onclick="Admin.openBatch()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Загрузить пачкой</button>
+            <div class="github-token-row">
+                <div class="github-token-label">GitHub Token</div>
+                <div class="github-token-input-wrap">
+                    <input type="password" id="github-token-input"
+                        placeholder="ghp_xxxxxxxxxxxx"
+                        autocomplete="off" spellcheck="false"
+                        oninput="Admin.saveToken(this.value)">
+                    <button class="github-token-eye" onclick="Admin.toggleTokenEye(this)" title="Показать/скрыть"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <div class="github-token-hint">Хранится только в браузере · <a href="https://github.com/settings/tokens/new?scopes=repo&description=RazvivaykaApp" target="_blank" style="color:var(--text2)">Создать новый →</a></div>
+            </div>
+            <button class="publish-btn" onclick="Admin.publish()" id="publish-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать на GitHub</button>
+        </div>
+    </section>
+
+    <!-- ========== TESTING ========== -->
+    <section id="testing" class="hidden">
+        <div class="tst-progress" id="tst-progress-wrap" style="display:none"><div class="tst-progress-bar" id="tst-progress-bar"></div></div>
+        <div id="testing-content"></div>
+    </section>
+
+</div><!-- #app -->
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal" onclick="Admin.closeModal(event)">
+    <div class="modal-box">
+        <div class="modal-title" id="modal-title">Добавить</div>
+        <input   type="text" id="m-name-input" placeholder="Название" style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
+        <textarea id="m-name-area" rows="4" placeholder="Текст загадки..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;"></textarea>
+        <textarea id="m-desc" rows="4" placeholder="Описание подкаста..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:8px;resize:none;line-height:1.5;display:none;"></textarea>
+        <textarea id="m-body" rows="6" placeholder="Текст информационного блока..." style="width:100%;padding:13px 15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none;margin-bottom:4px;resize:none;line-height:1.5;display:none;"></textarea>
+        <div id="m-body-hint" style="display:none;margin-bottom:8px;">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Красивая ссылка: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;color:#60a5fa;">[Колыбельная](https://url)</code><br>Или просто вставьте URL — он станет ссылкой автоматически.</div>
+            <button type="button" onclick="Admin._insertLinkTemplate()" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Вставить ссылку</button>
+        </div>
+        <input type="text"     id="m-answer"  placeholder="Ответ (для ребусов/загадок)">
+        <input type="text"     id="m-hint"    placeholder="Подсказка / Картинка-ребус (эмодзи)">
+        <select id="m-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;">
+            <option value="">Уровень (только для ребусов)</option>
+            <option value="easy">Простой</option>
+            <option value="medium">Средний</option>
+            <option value="hard">Сложный</option>
+        </select>
+        <select id="m-tag" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:8px;display:none;">
+            <option value="">Подборка (необязательно)</option>
+            <option value="animals">🐾 Животные</option>
+            <option value="months">📅 Месяцы и времена года</option>
+            <option value="holiday">🎄 Праздники</option>
+            <option value="family">👨‍👩‍👧 Семья</option>
+            <option value="learning">📚 Обучающие</option>
+            <option value="sleep">🌙 Колыбельные</option>
+        </select>
+        <div id="m-video-wrap" style="display:none;margin-bottom:8px;">
+            <input type="text" id="m-video" placeholder="Видео/фото (путь к файлу)" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-size:14px;color:var(--text);outline:none;">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;padding:0 4px;">Пример: assets/video/songs_video/name.mp4 · Пусто = видео по умолчанию</div>
+        </div>
+        <div class="m-current-file" id="m-current-file"></div>
+        <img id="m-pic-preview" src="" alt="Превью картинки">
+        <label class="file-label">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> Прикрепить файл
+            <input type="file" id="m-file" accept="audio/*,image/*" onchange="Admin._onFileChange(this)">
+        </label>
+        <div class="file-chosen" id="m-file-name">Файл не выбран</div>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="Admin.closeModal()">Отмена</button>
+            <button class="modal-save"   onclick="Admin.save()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Core & Utilities ── -->
+<script defer src="js/core.js"></script>
+<script defer src="js/answer-checker.js"></script>
+<script defer src="js/sounds.js"></script>
+<script defer src="js/gosha.js"></script>
+<script defer src="js/audio-mgr.js"></script>
+
+<!-- ── Data & Progress ── -->
+<script defer src="js/stat-tracker.js"></script>
+<script defer src="js/achievements.js"></script>
+<script defer src="js/badges.js"></script>
+
+<!-- ── Sections ── -->
+<script defer src="js/media.js"></script>
+<script defer src="js/words.js"></script>
+<script defer src="js/arithmetic.js"></script>
+<script defer src="js/songs.js"></script>
+<script defer src="js/podcasts.js"></script>
+<script defer src="js/puzzles.js"></script>
+<script defer src="js/riddles.js"></script>
+<script defer src="js/info.js"></script>
+<script defer src="js/stats.js"></script>
+
+<!-- ── Admin & Infrastructure ── -->
+<script defer src="js/admin.js"></script>
+<script defer src="js/interstitials.js"></script>
+<script defer src="js/notif.js"></script>
+<script defer src="js/init.js"></script>
+<script>
+// ── Service Worker ──────────────────────────────
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Определяем путь к sw.js относительно текущего location
+        // Работает и на GitHub Pages (/Kids-site/) и локально (/)
+        const swPath = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
+        navigator.serviceWorker.register(swPath)
+            .then(reg => {
+                // Проверяем обновления при каждом визите
+                reg.update();
+
+                // Новый SW установлен и ждёт — активируем сразу
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (!newWorker) return;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Есть новая версия — активируем без ожидания
+                            newWorker.postMessage('skipWaiting');
+                        }
+                    });
+                });
+            })
+            .catch(err => console.warn('[SW] Registration failed:', err));
+
+        // SW взял управление — показываем тост и перезагружаем стили/скрипты
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            if (typeof showToast === 'function') {
+                showToast('✨ Приложение обновлено!');
+            }
+        });
+
+        // Слушаем сообщение sw-updated
+        navigator.serviceWorker.addEventListener('message', e => {
+            if (e.data?.type === 'sw-updated' && typeof showToast === 'function') {
+                showToast('✨ Приложение обновлено до v' + e.data.version);
+            }
+        });
+    });
+}
+</script>
+
+<!-- ── Extra modules ── -->
+<script defer src="testing.js"></script>
+<script>
+// =============================================
+// PARENT DASHBOARD — сводка прогресса ребёнка
+// =============================================
+const ParentDash = {
+
+    show() {
+        App.navigate('parent-dash', 'Для родителей');
+        this._render();
+    },
+
+    _render() {
+        const el = document.getElementById('parent-dash-content');
+        if (!el) return;
+
+        const name = localStorage.getItem('child_name') || 'Ребёнок';
+        const streak      = StatTracker.getDayStreak();
+        const dailyData   = StatTracker.getDailyData('week');
+        const lastActive  = this._lastActiveDaysAgo();
+        const testResults = this._getTestResults();
+        const sections    = this._getSectionActivity();
+        const totalAns    = this._totalAnswers();
+        const recommendation = this._getRecommendation(testResults, sections);
+
+        // Совсем пустой профиль — ещё ничего не делали
+        if (totalAns === 0 && !testResults.length && streak === 0) {
+            el.innerHTML = `
+                <div class="pd-wrap">
+                    <div class="pd-header">
+                        <div class="pd-avatar">👦</div>
+                        <div>
+                            <div class="pd-child-name">${name}</div>
+                            <div class="pd-last-seen">Ещё не занимался</div>
+                        </div>
+                    </div>
+                    <div class="pd-card" style="text-align:center;padding:32px 20px;">
+                        <div style="font-size:48px;margin-bottom:14px;">📊</div>
+                        <div style="font-size:16px;font-weight:var(--fw-semi);color:var(--text);margin-bottom:10px;">Здесь будет прогресс ${name}</div>
+                        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px;">
+                            Как только ребёнок начнёт заниматься — загадки, слова, песенки, тестирование — здесь появится статистика, серия дней и рекомендации.
+                        </div>
+                        <button class="pd-test-btn" onclick="App.back()">Начать заниматься →</button>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        el.innerHTML = `
+            <div class="pd-wrap">
+
+                <!-- ── Шапка ── -->
+                <div class="pd-header">
+                    <div class="pd-avatar">👦</div>
+                    <div>
+                        <div class="pd-child-name">${name}</div>
+                        <div class="pd-last-seen">${this._lastSeenText(lastActive)}</div>
+                    </div>
+                </div>
+
+                <!-- ── Серия и активность ── -->
+                <div class="pd-row-2">
+                    <div class="pd-stat-card pd-streak">
+                        <div class="pd-stat-num">${streak}</div>
+                        <div class="pd-stat-label">🔥 дней подряд</div>
+                    </div>
+                    <div class="pd-stat-card pd-total">
+                        <div class="pd-stat-num">${this._totalAnswers()}</div>
+                        <div class="pd-stat-label">✅ ответов всего</div>
+                    </div>
+                    <div class="pd-stat-card pd-time">
+                        <div class="pd-stat-num">${this._totalTimeFormatted()}</div>
+                        <div class="pd-stat-label">🎵 прослушано</div>
+                    </div>
+                </div>
+
+                <!-- ── Активность за неделю ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Активность за 7 дней</div>
+                    <div class="pd-week-chart" id="pd-week-bars">
+                        ${this._weekBarsHTML(dailyData)}
+                    </div>
+                </div>
+
+                <!-- ── Топ разделов ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Самые активные разделы</div>
+                    ${this._topSectionsHTML(sections)}
+                </div>
+
+                <!-- ── Результаты тестирования ── -->
+                <div class="pd-card">
+                    <div class="pd-card-title">Тестирование</div>
+                    ${this._testingHTML(testResults)}
+                </div>
+
+                <!-- ── Рекомендация ── -->
+                ${recommendation ? `
+                <div class="pd-card pd-rec-card">
+                    <div class="pd-card-title">💡 Рекомендация</div>
+                    <div class="pd-rec-text">${recommendation}</div>
+                </div>` : ''}
+
+            </div>`;
+    },
+
+    // ── Данные ────────────────────────────────────────────
+
+    _lastActiveDaysAgo() {
+        const log = StatTracker._getDailyLog();
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(today); d.setDate(d.getDate() - i);
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const e = log[k];
+            if (e && ((e.answers || 0) > 0 || (e.time || 0) > 0)) return i;
+        }
+        return null;
+    },
+
+    _lastSeenText(daysAgo) {
+        if (daysAgo === null) return 'Ещё не занимался';
+        if (daysAgo === 0) return 'Занимался сегодня 🟢';
+        if (daysAgo === 1) return 'Занимался вчера 🟡';
+        return `Последний раз ${daysAgo} дн. назад 🔴`;
+    },
+
+    _totalAnswers() {
+        return StatTracker.get('puzzles') + StatTracker.get('riddles')
+             + StatTracker.get('words')   + StatTracker.get('math')
+             + StatTracker.get('letters') + StatTracker.get('numbers')
+             + StatTracker.get('colors')  + StatTracker.get('songs')
+             + StatTracker.get('interstitials');
+    },
+
+    _totalTimeFormatted() {
+        const secs = StatTracker.getTime('songs') + StatTracker.getTime('podcasts');
+        if (secs < 60) return secs + 'с';
+        const m = Math.floor(secs / 60);
+        if (m < 60) return m + ' мин';
+        return Math.floor(m / 60) + 'ч ' + (m % 60) + 'м';
+    },
+
+    _getTestResults() {
+        try { return JSON.parse(localStorage.getItem('testing_results') || '[]'); } catch { return []; }
+    },
+
+    _getSectionActivity() {
+        const sections = [
+            { key: 'riddles',   label: 'Загадки',     emoji: '❓', stat: 'riddles' },
+            { key: 'puzzles',   label: 'Ребусы',      emoji: '🧩', stat: 'puzzles' },
+            { key: 'words',     label: 'Слова',       emoji: '📝', stat: 'words' },
+            { key: 'math',      label: 'Арифметика',  emoji: '➕', stat: 'math' },
+            { key: 'songs',     label: 'Песенки',     emoji: '🎵', stat: 'songs' },
+            { key: 'podcasts',  label: 'Подкасты',    emoji: '🎧', statTime: 'podcasts' },
+            { key: 'letters',   label: 'Алфавит',     emoji: '🔤', stat: 'letters' },
+            { key: 'numbers',   label: 'Цифры',       emoji: '🔢', stat: 'numbers' },
+            { key: 'colors',    label: 'Цвета',       emoji: '🎨', stat: 'colors' },
+        ];
+        return sections.map(s => ({
+            ...s,
+            count: s.stat ? StatTracker.get(s.stat) : Math.round(StatTracker.getTime(s.statTime || '') / 60)
+        })).filter(s => s.count > 0).sort((a, b) => b.count - a.count);
+    },
+
+    _getRecommendation(testResults, sections) {
+        // Find weakest test block
+        if (testResults.length) {
+            const last = testResults[testResults.length - 1];
+            const blocks = last.blocks || {};
+            let weakest = null, weakScore = 1;
+            for (const [k, v] of Object.entries(blocks)) {
+                if (v.score != null && v.score >= 0 && v.score < weakScore) {
+                    weakScore = v.score; weakest = k;
+                }
+            }
+            const tips = {
+                cognitive: 'Тренируйте логику: пазлы, сортировка, «что лишнее?», счёт предметов',
+                speech:    'Читайте вслух каждый день, задавайте вопросы по прочитанному',
+                motor:     'Лепка, рисование, застёгивание пуговиц — отличные упражнения',
+                social:    'Играйте в ролевые игры, обсуждайте чувства героев мультфильмов',
+            };
+            if (weakest && weakScore < 0.65 && tips[weakest]) {
+                const blockNames = { cognitive: 'Когниция', speech: 'Речь', motor: 'Моторика', social: 'Социум' };
+                return `<strong>${blockNames[weakest]}</strong> — ${Math.round(weakScore*100)}%. ${tips[weakest]}.`;
+            }
+        }
+        // Suggest least used section
+        const allSections = ['riddles','puzzles','words','math','songs','letters','numbers','colors'];
+        const usedKeys = new Set(sections.map(s => s.key));
+        const unused = allSections.filter(k => !usedKeys.has(k));
+        if (unused.length) {
+            const labels = { riddles:'Загадки', puzzles:'Ребусы', words:'Слова', math:'Арифметика',
+                             songs:'Песенки', letters:'Алфавит', numbers:'Цифры', colors:'Цвета' };
+            return `Ещё не пробовали раздел <strong>${labels[unused[0]] || unused[0]}</strong> — попробуйте сегодня!`;
+        }
+        return '';
+    },
+
+    // ── HTML-фрагменты ────────────────────────────────────
+
+    _weekBarsHTML(data) {
+        if (!data || !data.length) return '<div style="color:var(--text2);font-size:13px">Нет данных</div>';
+        const max = Math.max(...data.map(d => d.activity), 1);
+        const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+        return '<div class="pd-bars">' + data.map(d => {
+            const pct = Math.round((d.activity / max) * 100);
+            const dayName = days[d.date.getDay()];
+            const isToday = d.isToday;
+            return `<div class="pd-bar-col">
+                <div class="pd-bar-outer">
+                    <div class="pd-bar-fill ${isToday ? 'today' : ''}" style="height:${pct}%"></div>
+                </div>
+                <div class="pd-bar-label ${isToday ? 'today' : ''}">${dayName}</div>
+            </div>`;
+        }).join('') + '</div>';
+    },
+
+    _topSectionsHTML(sections) {
+        if (!sections.length) return '<div style="color:var(--text2);font-size:13px">Нет активности</div>';
+        const top = sections.slice(0, 5);
+        const max = top[0].count;
+        return top.map(s => {
+            const pct = Math.round((s.count / max) * 100);
+            const unit = s.statTime ? 'мин' : 'раз';
+            return `<div class="pd-section-row">
+                <span class="pd-section-emoji">${s.emoji}</span>
+                <div class="pd-section-info">
+                    <div class="pd-section-name">${s.label}</div>
+                    <div class="pd-section-bar-wrap">
+                        <div class="pd-section-bar" style="width:${pct}%"></div>
+                    </div>
+                </div>
+                <span class="pd-section-count">${s.count} ${unit}</span>
+            </div>`;
+        }).join('');
+    },
+
+    _testingHTML(results) {
+        if (!results.length) {
+            return '<div class="pd-no-test">Тестирование ещё не пройдено.<br><button class="pd-test-btn" onclick="Testing.init()">Начать тест →</button></div>';
+        }
+        const last = results[results.length - 1];
+        const d = new Date(last.date);
+        const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+        const blockNames = { cognitive:'🧠 Когниция', speech:'💬 Речь', motor:'✋ Моторика', social:'❤️ Социум' };
+        const colors = { cognitive:'#a855f7', speech:'#3b82f6', motor:'#22c55e', social:'#f59e0b' };
+
+        // Trend arrow vs previous
+        let trendHtml = '';
+        if (results.length > 1) {
+            const avg = r => {
+                const bs = Object.values(r.blocks).filter(b => b.score != null && b.score >= 0);
+                return bs.length ? bs.reduce((s, b) => s + b.score, 0) / bs.length : 0;
+            };
+            const diff = Math.round((avg(last) - avg(results[results.length - 2])) * 100);
+            if (diff > 0) trendHtml = `<span class="pd-trend up">↑${diff}%</span>`;
+            else if (diff < 0) trendHtml = `<span class="pd-trend down">↓${Math.abs(diff)}%</span>`;
+            else trendHtml = `<span class="pd-trend flat">→ без изм.</span>`;
+        }
+
+        const blocksHtml = Object.entries(last.blocks).map(([k, v]) => {
+            if (v.voiceOnly || v.score == null || v.score < 0) return '';
+            const pct = Math.round(v.score * 100);
+            const color = colors[k] || '#94a3b8';
+            return `<div class="pd-test-block">
+                <div class="pd-test-block-top">
+                    <span class="pd-test-block-name">${blockNames[k] || k}</span>
+                    <span class="pd-test-block-pct" style="color:${color}">${pct}%</span>
+                </div>
+                <div class="pd-test-bar-wrap"><div class="pd-test-bar" style="width:${pct}%;background:${color}"></div></div>
+            </div>`;
+        }).join('');
+
+        return `<div class="pd-test-date">${dateStr} ${trendHtml}</div>
+                ${blocksHtml}
+                ${results.length > 1 ? `<div class="pd-test-count">${results.length} тестов пройдено</div>` : ''}
+                <button class="pd-test-btn" onclick="Testing.init()">Пройти тест →</button>`;
+    },
+};
+
+</script>
+<script defer src="share.js"></script>
+
+<!-- BATCH UPLOAD MODAL -->
+<div class="modal-overlay hidden" id="batch-modal" onclick="Admin.closeBatch(event)">
+    <div class="modal-box" style="max-height:82vh;overflow-y:auto;">
+        <div class="modal-title" id="batch-modal-title">Пакетная загрузка</div>
+
+        <!-- Ребусы: загрузка картинок -->
+        <div id="batch-pics-section">
+            <label class="file-label" style="justify-content:center;padding:18px;border-style:dashed;">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                Выбрать картинки
+                <input type="file" id="batch-files" accept="image/*" multiple onchange="Admin._onBatchFiles(this)">
+            </label>
+            <div id="batch-preview-list"></div>
+            <div id="batch-summary" style="display:none;font-size:13px;color:var(--text2);text-align:center;margin:6px 0;"></div>
+        </div>
+
+        <!-- Загадки: текстовый ввод -->
+        <div id="batch-text-section" style="display:none;">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6;">
+                Построчно: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;">Текст загадки|Ответ|easy</code><br>
+                Или вставьте JSON-массив: <code style="background:var(--card2);padding:2px 6px;border-radius:6px;">[{"text":"...","answer":"...","level":"easy"}]</code>
+            </div>
+            <textarea id="batch-riddle-text" rows="8" placeholder="Белым снегом всё одето...|Зима|easy&#10;Охраняет дом, виляет хвостом...|Собака|easy" style="width:100%;padding:12px 14px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-size:13px;color:var(--text);outline:none;resize:none;line-height:1.6;font-family:monospace;"></textarea>
+        </div>
+
+        <select id="batch-level" style="width:100%;padding:12px 13px;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-top:8px;">
+            <option value="easy">Уровень: Простой</option>
+            <option value="medium">Уровень: Средний</option>
+            <option value="hard">Уровень: Сложный</option>
+        </select>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="Admin.closeBatch()">Отмена</button>
+            <button class="modal-save" id="batch-save-btn" onclick="Admin.saveBatch()">Сохранить все</button>
+        </div>
+    </div>
+</div>
+
+    <!-- ========== ONBOARDING ========== -->
+    <div id="onb-overlay" class="hidden">
+        <div id="onb-backdrop"></div>
+        <div id="onb-card">
+            <button id="onb-skip" onclick="Onboarding.skip()">Пропустить</button>
+            <div id="onb-emoji"></div>
+            <div id="onb-title"></div>
+            <div id="onb-text"></div>
+            <div id="onb-dots"></div>
+            <button id="onb-next" onclick="Onboarding.next()">Далее →</button>
+        </div>
+        <div id="onb-spotlight"></div>
+    </div>
+
+<script>
+// ── ONBOARDING ────────────────────────────────────────────────────────────
+const Onboarding = {
+    _step: 0,
+    _steps: [
+        {
+            emoji: '👋',
+            title: 'Привет! Я Гоша!',
+            text:  'Твой помощник для учёбы и игры. Покажу что здесь есть!',
+            highlight: null
+        },
+        {
+            emoji: '❓',
+            title: 'Загадки и Ребусы',
+            text:  'Отгадывай загадки и решай ребусы — тренируй логику и смекалку!',
+            highlight: '.mc-riddles'
+        },
+        {
+            emoji: '📝',
+            title: 'Слова и Арифметика',
+            text:  'Собирай слова из букв и считай примеры. Каждый день новые задания!',
+            highlight: '.mc-words'
+        },
+        {
+            emoji: '🎵',
+            title: 'Песенки и Подкасты',
+            text:  'Слушай детские песенки и познавательные подкасты в любое время!',
+            highlight: '.mc-songs'
+        },
+        {
+            emoji: '✅',
+            title: 'Тестирование',
+            text:  'Проверь что уже умеешь! Тест покажет сильные стороны и чему ещё учиться.',
+            highlight: '.mc-testing'
+        },
+    ],
+
+    shouldShow() {
+        return !localStorage.getItem('onboarding_done');
+    },
+
+    start() {
+        if (!this.shouldShow()) return;
+        this._step = 0;
+        document.getElementById('onb-overlay').classList.remove('hidden');
+        this._render();
+    },
+
+    _render() {
+        const step = this._steps[this._step];
+        const total = this._steps.length;
+        const isLast = this._step === total - 1;
+
+        document.getElementById('onb-emoji').textContent  = step.emoji;
+        document.getElementById('onb-title').textContent  = step.title;
+        document.getElementById('onb-text').textContent   = step.text;
+        document.getElementById('onb-next').textContent   = isLast ? '🚀 Поехали!' : 'Далее →';
+
+        // Dots
+        const dots = document.getElementById('onb-dots');
+        dots.innerHTML = this._steps.map((_, i) =>
+            `<span class="onb-dot ${i === this._step ? 'active' : ''}"></span>`
+        ).join('');
+
+        // Spotlight
+        this._clearHighlight();
+        if (step.highlight) {
+            const el = document.querySelector(step.highlight);
+            if (el) this._spotlight(el);
+        }
+    },
+
+    _spotlight(el) {
+        const rect = el.getBoundingClientRect();
+        const sp = document.getElementById('onb-spotlight');
+        const PAD = 8;
+        sp.style.top    = (rect.top    - PAD + window.scrollY) + 'px';
+        sp.style.left   = (rect.left   - PAD) + 'px';
+        sp.style.width  = (rect.width  + PAD * 2) + 'px';
+        sp.style.height = (rect.height + PAD * 2) + 'px';
+        sp.style.opacity = '1';
+        el.classList.add('onb-highlighted');
+        this._hlEl = el;
+
+        // Card stays fixed — no repositioning
+    },
+
+    _clearHighlight() {
+        const sp = document.getElementById('onb-spotlight');
+        sp.style.opacity = '0';
+        if (this._hlEl) {
+            this._hlEl.classList.remove('onb-highlighted');
+            this._hlEl = null;
+        }
+        // card position is fixed, no reset needed
+    },
+
+    next() {
+        this._step++;
+        if (this._step >= this._steps.length) {
+            this.finish();
+        } else {
+            this._render();
+        }
+    },
+
+    skip() {
+        this.finish();
+    },
+
+    finish() {
+        this._clearHighlight();
+        const overlay = document.getElementById('onb-overlay');
+        overlay.classList.add('onb-fade-out');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('onb-fade-out');
+        }, 350);
+        localStorage.setItem('onboarding_done', '1');
+    },
+};
+</script>
+
+<script>
+// ── PROFILES — несколько детей ─────────────────────────────────────────────
+const Profiles = {
+    MAX: 4,
+
+    // Все ключи данных привязанных к профилю
+    KEYS: [
+        'child_name',
+        'testing_profile','testing_results',
+        'stat_songs','stat_letters','stat_numbers','stat_colors',
+        'stat_puzzles','stat_riddles','stat_words','stat_math',
+        'stat_time_songs','stat_time_podcasts',
+        'stat_ach_puzzles','stat_ach_riddles',
+        'achievements_best','badges_unlocked',
+        'viewed_letters','viewed_numbers','viewed_colors',
+        'stat_interstitials','inter_best_streak',
+        'stat_hints_words','stat_hints_math',
+        'stat_daily_log','stat_daily_migrated',
+        'tried_songs','tried_podcasts','tried_puzzles','tried_riddles'
+    ],
+
+    EMOJIS: ['👦','👧','🧒','👼'],
+
+    _list() {
+        try { return JSON.parse(localStorage.getItem('profiles_list') || '[]'); } catch { return []; }
+    },
+    _save(list) { localStorage.setItem('profiles_list', JSON.stringify(list)); },
+    activeId() { return localStorage.getItem('active_profile_id') || null; },
+
+    // ── Init: если профилей нет, создаём из существующего child_name ────────
+    init() {
+        let list = this._list();
+        if (!list.length) {
+            // Первый запуск — создаём профиль из существующих данных
+            const name = localStorage.getItem('child_name') || '';
+            const id = 'p' + Date.now();
+            list = [{ id, name: name || '', emoji: this.EMOJIS[0] }];
+            this._save(list);
+            localStorage.setItem('active_profile_id', id);
+            // Сохраняем уже существующие stat_* данные в профиль
+            this._saveCurrentData();
+        }
+        this.renderCard();
+    },
+
+    // ── Сохранить данные текущего профиля ────────────────────────────────────
+    _saveCurrentData() {
+        const id = this.activeId();
+        if (!id) return;
+        const data = {};
+        this.KEYS.forEach(k => {
+            const v = localStorage.getItem(k);
+            if (v !== null) data[k] = v;
+        });
+        localStorage.setItem('profile_data_' + id, JSON.stringify(data));
+    },
+
+    // ── Загрузить данные профиля в localStorage ───────────────────────────────
+    _loadProfileData(id) {
+        // Сначала очищаем текущие ключи профиля
+        this.KEYS.forEach(k => localStorage.removeItem(k));
+        // Восстанавливаем сохранённые
+        try {
+            const raw = localStorage.getItem('profile_data_' + id);
+            if (raw) {
+                const data = JSON.parse(raw);
+                Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
+            }
+        } catch(e) { console.warn('Profiles: ошибка загрузки данных', e); }
+    },
+
+    // ── Переключить профиль ───────────────────────────────────────────────────
+    switchTo(id) {
+        const cur = this.activeId();
+        if (id === cur) return;
+        this._saveCurrentData();
+        this._loadProfileData(id);
+        localStorage.setItem('active_profile_id', id);
+        // Обновляем UI
+        updateHomeGreeting();
+        if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+        if (typeof regUpdateCard === 'function') regUpdateCard();
+        this.renderCard();
+        const list = this._list();
+        const profile = list.find(p => p.id === id);
+        if (profile?.name) showToast('👋 ' + profile.name);
+    },
+
+    // ── Рендер карточки профилей в настройках ────────────────────────────────
+    renderCard() {
+        const row = document.getElementById('profiles-row');
+        if (!row) return;
+        const list = this._list();
+        const activeId = this.activeId();
+
+        row.innerHTML = list.map(p => {
+            const initial = p.name ? p.name.charAt(0).toUpperCase() : p.emoji;
+            const isActive = p.id === activeId;
+            return `<div class="profile-bubble-wrap">
+                <button class="profile-bubble ${isActive ? 'active' : ''}"
+                    onclick="Profiles.switchTo('${p.id}')"
+                    title="${p.name || 'Профиль'}">
+                    ${initial}
+                </button>
+                <div class="profile-bubble-name">${p.name || '—'}</div>
+                ${list.length > 1 ? `<button class="profile-del-btn" onclick="Profiles.remove('${p.id}')" title="Удалить">×</button>` : ''}
+            </div>`;
+        }).join('');
+
+        // Кнопка добавить (если не достигнут лимит)
+        if (list.length < this.MAX) {
+            row.innerHTML += `<div class="profile-bubble-wrap">
+                <button class="profile-bubble profile-add-btn" onclick="Profiles.showAdd()" title="Добавить ребёнка">+</button>
+                <div class="profile-bubble-name">Добавить</div>
+            </div>`;
+        }
+    },
+
+    showAdd() {
+        const wrap = document.getElementById('profiles-add-wrap');
+        const inp  = document.getElementById('profiles-add-input');
+        if (wrap) { wrap.style.display = ''; inp?.focus(); }
+    },
+
+    cancelAdd() {
+        const wrap = document.getElementById('profiles-add-wrap');
+        const inp  = document.getElementById('profiles-add-input');
+        if (wrap) wrap.style.display = 'none';
+        if (inp) inp.value = '';
+    },
+
+    saveNew() {
+        const inp = document.getElementById('profiles-add-input');
+        const name = (inp?.value || '').trim();
+        if (!name) { showToast('✏️ Введи имя'); inp?.focus(); return; }
+
+        const list = this._list();
+        if (list.length >= this.MAX) { showToast('Максимум ' + this.MAX + ' профиля'); return; }
+
+        // Сохраняем данные текущего профиля
+        this._saveCurrentData();
+
+        const id = 'p' + Date.now();
+        const emoji = this.EMOJIS[list.length % this.EMOJIS.length];
+        list.push({ id, name, emoji });
+        this._save(list);
+
+        // Переключаемся на новый (пустой) профиль
+        this.KEYS.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('child_name', name);
+        localStorage.setItem('active_profile_id', id);
+
+        this.cancelAdd();
+        this.renderCard();
+        updateHomeGreeting();
+        if (typeof regUpdateCard === 'function') regUpdateCard();
+        showToast('👋 Привет, ' + name + '!');
+    },
+
+    remove(id) {
+        const list = this._list();
+        if (list.length <= 1) { showToast('Нельзя удалить последний профиль'); return; }
+
+        const profile = list.find(p => p.id === id);
+        const name = profile?.name || 'профиль';
+        if (!confirm('Удалить профиль «' + name + '»? Все данные будут потеряны.')) return;
+
+        // Если удаляем активный — переключаемся на другой
+        if (id === this.activeId()) {
+            const other = list.find(p => p.id !== id);
+            this._loadProfileData(other.id);
+            localStorage.setItem('active_profile_id', other.id);
+        }
+
+        // Удаляем данные и из списка
+        localStorage.removeItem('profile_data_' + id);
+        const newList = list.filter(p => p.id !== id);
+        this._save(newList);
+
+        this.renderCard();
+        updateHomeGreeting();
+        if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+        showToast('🗑 Профиль удалён');
+    },
+};
+</script>
+
+
+<script>
+// ── Reminder settings UI ──────────────────────────────
+function tgReminderInitUI() {
+    // Показываем только в Telegram WebApp
+    if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) return;
+    const section = document.getElementById('tg-reminder-section');
+    const group   = document.getElementById('tg-reminder-group');
+    if (section) section.style.display = '';
+    if (group)   group.style.display = '';
+
+    const s = TgReminder.getSettings();
+    const enabled = s.enabled !== false;
+    const hour    = s.hour ?? 10;
+
+    const tog = document.getElementById('tog-reminder');
+    if (tog) tog.classList.toggle('on', enabled);
+
+    const sel = document.getElementById('remind-hour-select');
+    if (sel) sel.value = String(hour);
+
+    const hourRow = document.getElementById('remind-hour-row');
+    if (hourRow) hourRow.style.opacity = enabled ? '1' : '0.4';
+}
+
+function tgReminderToggle(el) {
+    el.classList.toggle('on');
+    const enabled = el.classList.contains('on');
+    const s = TgReminder.getSettings();
+    s.enabled = enabled;
+    TgReminder.saveSettings(s);
+    TgReminder.register(enabled, s.hour ?? 10);
+    const hourRow = document.getElementById('remind-hour-row');
+    if (hourRow) hourRow.style.opacity = enabled ? '1' : '0.4';
+    showToast(enabled ? '🔔 Напоминания включены' : '🔕 Напоминания выключены');
+}
+
+function tgReminderSetHour(val) {
+    const hour = parseInt(val);
+    const s = TgReminder.getSettings();
+    s.hour = hour;
+    TgReminder.saveSettings(s);
+    if (s.enabled !== false) TgReminder.register(true, hour);
+    showToast('⏰ Время напоминания: ' + val + ':00');
+}
+</script>
+
+
+<script>
+// ── CLOUD SYNC ────────────────────────────────────────────────────────────────
+const CloudSync = {
+    WORKER_URL: 'https://gosha-notify.saturngroup2025.workers.dev',
+
+    _userId() {
+        return window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
+    },
+
+    // Все ключи для синхронизации (из Profiles.KEYS + profiles_list)
+    _collectData() {
+        const keys = [
+            ...Profiles.KEYS,
+            'profiles_list', 'active_profile_id',
+            'onboarding_done', 'tg_reminder_settings',
+        ];
+        // Также сохраняем данные всех профилей
+        const profileList = Profiles._list();
+        profileList.forEach(p => keys.push('profile_data_' + p.id));
+
+        const data = {};
+        keys.forEach(k => {
+            const v = localStorage.getItem(k);
+            if (v !== null) data[k] = v;
+        });
+        return data;
+    },
+
+    _applyData(data) {
+        if (!data || typeof data !== 'object') return;
+        Object.entries(data).forEach(([k, v]) => {
+            try { localStorage.setItem(k, v); } catch(e) {}
+        });
+    },
+
+    _fmtDate(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) +
+               ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    },
+
+    // ── Сохранить в облако ──
+    async push() {
+        const userId = this._userId();
+        if (!userId) { showToast('⚠️ Доступно только в Telegram'); return; }
+
+        const sub = document.getElementById('sync-push-sub');
+        if (sub) sub.textContent = 'Сохраняем...';
+
+        try {
+            const data = this._collectData();
+            const resp = await fetch(this.WORKER_URL + '/sync/push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, data, profile_id: 'main' })
+            });
+            const json = await resp.json();
+            if (json.ok) {
+                const ts = this._fmtDate(json.saved_at);
+                localStorage.setItem('sync_last_push', json.saved_at);
+                if (sub) sub.textContent = 'Сохранено ' + ts;
+                showToast('☁️ Прогресс сохранён в облако');
+            } else {
+                if (sub) sub.textContent = 'Загрузить прогресс на другое устройство';
+                showToast('❌ Ошибка сохранения');
+            }
+        } catch(e) {
+            if (sub) sub.textContent = 'Загрузить прогресс на другое устройство';
+            showToast('❌ Нет соединения');
+        }
+    },
+
+    // ── Загрузить из облака ──
+    async pull() {
+        const userId = this._userId();
+        if (!userId) { showToast('⚠️ Доступно только в Telegram'); return; }
+
+        const sub = document.getElementById('sync-pull-sub');
+        if (sub) sub.textContent = 'Загружаем...';
+
+        try {
+            const resp = await fetch(this.WORKER_URL + '/sync/pull', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, profile_id: 'main' })
+            });
+            const json = await resp.json();
+
+            if (json.ok && json.data) {
+                const ts = this._fmtDate(json.saved_at);
+                // Подтверждение перед перезаписью
+                const ok = confirm(`Загрузить данные из облака?
+Сохранено: ${ts}
+
+Текущие данные на этом устройстве будут заменены.`);
+                if (!ok) {
+                    if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                    return;
+                }
+                this._applyData(json.data);
+                if (sub) sub.textContent = 'Загружено ' + ts;
+                showToast('✅ Прогресс восстановлен!');
+
+                // Перезагружаем UI
+                setTimeout(() => {
+                    Profiles.init();
+                    regUpdateCard();
+                    updateHomeGreeting();
+                    if (typeof CardBadges !== 'undefined') CardBadges.updateAll();
+                    Profiles.renderCard();
+                }, 200);
+            } else if (json.error === 'no_data') {
+                if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                showToast('☁️ Нет данных в облаке — сначала сохрани');
+            } else {
+                if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+                showToast('❌ Ошибка загрузки');
+            }
+        } catch(e) {
+            if (sub) sub.textContent = 'Восстановить прогресс с другого устройства';
+            showToast('❌ Нет соединения');
+        }
+    },
+
+    // ── Сбросить SW кеш ──
+    async clearCache() {
+        if (!confirm('Сбросить кеш? Приложение перезагрузится и загрузит свежие данные.')) return;
+        try {
+            // Удаляем все SW кеши
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+            // Отписываем SW чтобы он переустановился
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
+            }
+            showToast('🔄 Кеш сброшен, перезагружаем...');
+            setTimeout(() => location.reload(true), 800);
+        } catch(e) {
+            showToast('❌ Ошибка сброса кеша');
+        }
+    },
+
+    // Инициализация: показать дату последнего сохранения
+    init() {
+        const userId = this._userId();
+        if (!userId) {
+            // Не в Telegram — скрываем кнопки, показываем заглушку
+            const pushRow = document.getElementById('sync-push-row')?.closest('.settings-row');
+            const pullRow = document.getElementById('sync-pull-row')?.closest('.settings-row');
+            const noAuth  = document.getElementById('sync-noauth-group');
+            // оставляем как есть — просто не инициализируем
+            return;
+        }
+        const lastPush = localStorage.getItem('sync_last_push');
+        if (lastPush) {
+            const sub = document.getElementById('sync-push-sub');
+            if (sub) sub.textContent = 'Последнее сохранение: ' + this._fmtDate(Number(lastPush));
+        }
+    },
+};
+</script>
+
+</body>
+</html>

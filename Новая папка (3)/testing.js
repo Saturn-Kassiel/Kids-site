@@ -1062,8 +1062,6 @@ const Testing = {
     _exitTest() {
         if (this._paused) return;
         this._paused = true;
-        // Snapshot result count so _resumeTest can tell if the current task was already answered
-        this._resultsCountSnapshot = Object.values(this._taskResults).flat().length;
         const el = document.getElementById('testing-content');
         const done = Object.values(this._taskResults).flat().length;
         el.innerHTML = `
@@ -1080,17 +1078,8 @@ const Testing = {
 
     _resumeTest() {
         this._paused = false;
-        // Only replay the current task if it hasn't been answered yet.
-        // _taskIdx is already pointing at the NEXT task (incremented in _next() before render).
-        // If the current task was answered, _taskResults will have grown since _taskIdx was set —
-        // in that case we proceed forward rather than replaying and double-counting results.
-        const resultsBefore = this._resultsCountSnapshot || 0;
-        const resultsNow = Object.values(this._taskResults).flat().length;
-        if (resultsNow === resultsBefore) {
-            // No new result recorded → task was not yet answered → replay it
-            this._taskIdx = Math.max(0, this._taskIdx - 1);
-        }
-        // else: result already recorded → continue from current _taskIdx (show next task)
+        // Replay current task (go back one step)
+        this._taskIdx = Math.max(0, this._taskIdx - 1);
         this._next();
     },
 
@@ -1287,14 +1276,8 @@ const Testing = {
         const items = Array(task.count).fill(task.emoji);
         // Генерируем варианты ответов
         const options = new Set([task.count]);
-        // Fallback to 0..cfg.max if local neighbourhood is too narrow (< 4 unique values)
-        const lo = Math.max(1, task.count - 3);
-        const hi = Math.min(task.max, task.count + 3);
-        const useWideRange = (hi - lo + 1) < 4;
         while (options.size < 4) {
-            const n = useWideRange
-                ? this._rand(Math.max(0, task.count - 5), Math.min(task.max + 2, task.count + 5))
-                : this._rand(lo, hi);
+            let n = this._rand(Math.max(1, task.count - 3), Math.min(task.max, task.count + 3));
             if (n !== task.count || options.size >= 3) options.add(n);
         }
         const sorted = [...options].sort((a, b) => a - b);
@@ -2812,12 +2795,10 @@ const Testing = {
         // Определяем сильные/слабые стороны
         const blockEntries = Object.entries(blocks);
         let strongest = '', weakest = '';
-        // Exclude voiceOnly/null-score blocks — they have no numeric score to compare
-        const scoredEntries = blockEntries.filter(([, d]) => d.score != null && d.score >= 0);
-        if (scoredEntries.length) {
-            scoredEntries.sort((a, b) => b[1].score - a[1].score);
-            strongest = scoredEntries[0][0];
-            weakest = scoredEntries[scoredEntries.length - 1][0];
+        if (blockEntries.length) {
+            blockEntries.sort((a, b) => b[1].score - a[1].score);
+            strongest = blockEntries[0][0];
+            weakest = blockEntries[blockEntries.length - 1][0];
         }
 
         // Сохраняем результат

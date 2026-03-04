@@ -4063,32 +4063,3 @@ input[type=file] { display: none; }
   color: var(--text2);
   outline: none;
 }
-
-/* ── Admin Report Modal ── */
-.rep-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-  display: flex; align-items: flex-end; justify-content: center;
-  animation: repFadeIn .18s ease;
-}
-@keyframes repFadeIn { from { opacity: 0 } to { opacity: 1 } }
-.rep-modal {
-  width: 100%; max-width: 480px;
-  background: var(--card); border-radius: 20px 20px 0 0;
-  padding: 20px 18px 36px; box-shadow: 0 -8px 40px rgba(0,0,0,0.3);
-  animation: repSlideUp .22s ease;
-}
-@keyframes repSlideUp { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
-.rep-header { display: flex; flex-direction: column; gap: 2px; margin-bottom: 18px; position: relative; }
-.rep-title { font-size: 17px; font-weight: 700; font-family: var(--font-display); color: var(--text); }
-.rep-subtitle { font-size: 13px; color: var(--text2); }
-.rep-close {
-  position: absolute; top: 0; right: 0;
-  background: var(--card2); border: none; border-radius: 50%;
-  width: 30px; height: 30px; font-size: 14px; cursor: pointer;
-  color: var(--text2); display: flex; align-items: center; justify-content: center;
-}
-.rep-section-title {
-  font-size: 12px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .6px; color: var(--text2); margin-bottom: 8px;
-}
