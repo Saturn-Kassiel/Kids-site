@@ -905,15 +905,15 @@
     },
     {
       "id": 1772693792856,
-      "text": "Птица яркая, ручная,\nРечь людскую повторяет.\nВ клетке или на ветвях,\nСловно радуга в перьях.|Попугай|easy",
-      "answer": "Gemini Generated Image Pgmdq5pgmdq5pgmd",
+      "text": "Птица яркая, ручная,\nРечь людскую повторяет.\nВ клетке или на ветвях,\nСловно радуга в перьях.",
+      "answer": "Попугай",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_pgmdq5pgmdq5pgmd.webp",
       "level": "easy"
     },
     {
       "id": 1772693796589,
-      "text": "Шея выгнута дугой,\nОн красивый и большой.\nПо воде плывёт, как диво,\nГрациозно и красиво.|Лебедь|easy",
-      "answer": "Gemini Generated Image Szocuiszocuiszoc",
+      "text": "Шея выгнута дугой,\nОн красивый и большой.\nПо воде плывёт, как диво,\nГрациозно и красиво.",
+      "answer": "Лебедь",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_szocuiszocuiszoc.webp",
       "level": "easy"
     },
@@ -945,5 +945,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-05T07:01:43.229Z"
+  "exportedAt": "2026-03-05T07:03:19.161Z"
 }
