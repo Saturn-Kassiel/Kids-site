@@ -29,7 +29,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('loader').style.display = 'none';
 
             if (type === 'song') {
-                Songs.init();
+                // При deep link — инициализируем Songs без AudioMgr.stop()
+                // чтобы видео не сбрасывалось до того как загрузится
+                Songs._loadSongs();
+                App.navigate('songs', 'Песенки');
+                Songs._loadFavorites();
+                Songs._buildList();
+                Songs._applyFilter();
+                Songs._renderChips();
+                Songs.render();
+                setupProgress(Songs.audio, 'song-progress-bar', 'song-time-cur', 'song-time-dur', 'song-prog-wrap');
+                if (!Songs._timeTracked) { StatTracker.trackAudioTime(Songs.audio, 'songs'); Songs._timeTracked = true; }
+                Songs.audio.onended = () => {
+                    if (!Songs._wasPaused) StatTracker.inc('songs');
+                    const song = Songs._allSongs[Songs.index];
+                    if (song) CardBadges.markTried('songs', song.id);
+                    if (Songs.isRepeat) { Songs.play(Songs.index); return; }
+                    Songs._setPlayBtn(false);
+                    setTimeout(() => Songs.nextSong(), 1000);
+                };
+                Songs._loadDurations();
                 const idx = Songs._allSongs.findIndex(s => s.id === id);
                 if (idx !== -1) Songs.play(idx);
             } else if (type === 'podcast') {
