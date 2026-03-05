@@ -926,8 +926,8 @@
     },
     {
       "id": 1772693794990,
-      "text": "Крупный клюв и хитрый взор,\nНа заборе — дирижёр.\nГромко «Кар!» она кричит,\nЗа порядком здесь следит.|Ворона|easy",
-      "answer": "Gemini Generated Image Y0lxmdy0lxmdy0lx",
+      "text": "Крупный клюв и хитрый взор,\nНа заборе — дирижёр.\nГромко «Кар!» она кричит,\nЗа порядком здесь следит.",
+      "answer": "Ворона",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_y0lxmdy0lxmdy0lx.webp",
       "level": "easy"
     }
@@ -945,5 +945,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-05T06:56:31.960Z"
+  "exportedAt": "2026-03-05T07:00:43.149Z"
 }
