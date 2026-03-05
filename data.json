@@ -884,22 +884,22 @@
     },
     {
       "id": 1772693800933,
-      "text": "В ярко-красной шапке он,\nСлышен в роще дробный звон.|Дятел|easy\nПо дереву весь день стучит,\nЛес от вредителей лечит.",
-      "answer": "Gemini Generated Image 2kxpdx2kxpdx2kxp",
+      "text": "В ярко-красной шапке он,\nСлышен в роще дробный звон.\nПо дереву весь день стучит,\nЛес от вредителей лечит.",
+      "answer": "Дятел",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_2kxpdx2kxpdx2kxp.webp",
       "level": "easy"
     },
     {
       "id": 1772693799959,
-      "text": "В черном фраке среди льдин,\nХодит важный господин.\nХоть он птица — не летает,\nВ море ледяном ныряет.|Пингвин|easy",
-      "answer": "Gemini Generated Image 7nsos87nsos87nso",
+      "text": "В черном фраке среди льдин,\nХодит важный господин.\nХоть он птица — не летает,\nВ море ледяном ныряет.",
+      "answer": "Пингвин",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_7nsos87nsos87nso.webp",
       "level": "easy"
     },
     {
       "id": 1772693795046,
-      "text": "Всю ночь в лесу она не спит,\nЗа каждой мышкой уследит.\nГлаза большие, клюв крючком,\nА спит в дупле она лишь днём.|Сова|easy",
-      "answer": "Gemini Generated Image Au020bau020bau02",
+      "text": "Всю ночь в лесу она не спит,\nЗа каждой мышкой уследит.\nГлаза большие, клюв крючком,\nА спит в дупле она лишь днём.",
+      "answer": "Сова",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_au020bau020bau02.webp",
       "level": "easy"
     },
@@ -945,5 +945,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-05T07:03:19.161Z"
+  "exportedAt": "2026-03-05T07:04:46.340Z"
 }
