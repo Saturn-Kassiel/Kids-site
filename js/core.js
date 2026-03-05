@@ -59,6 +59,18 @@ const App = {
         if (prev && prev !== id && NAV_HOOKS[prev]?.onLeave) NAV_HOOKS[prev].onLeave();
         // Вызываем onEnter для нового раздела
         if (NAV_HOOKS[id]?.onEnter) NAV_HOOKS[id].onEnter();
+
+        // Трекинг раздела на воркере (только в Telegram, не main, не admin)
+        if (!isMain && id !== 'admin' && id !== 'notifications') {
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            if (userId && typeof TgReminder !== 'undefined') {
+                fetch(TgReminder.WORKER_URL + '/section', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, section: id }),
+                }).catch(() => {});
+            }
+        }
     },
 
     // Обрабатываем deep link хэш (#song-5, #podcast-3)

@@ -1,5 +1,5 @@
 // =============================================
-//  Gosha — Cloudflare Worker (fixed)
+//  Gosha — Cloudflare Worker
 // =============================================
 
 const CORS = {
@@ -16,6 +16,25 @@ const REMINDERS = [
   'В Гоше появились новые песенки — послушаем?',
   'До нового значка совсем немного! Зайди в Гошу.',
 ];
+
+const SECTION_LABELS = {
+  songs:     '🎵 Песенки',
+  podcasts:  '🎧 Подкасты',
+  riddles:   '❓ Загадки',
+  puzzles:   '🧩 Ребусы',
+  alphabet:  '🔠 Алфавит',
+  numbers:   '🔢 Цифры',
+  colors:    '🎨 Цвета',
+  words:     '📝 Слова',
+  math:      '➕ Арифметика',
+  finger:    '✋ Пальчиковые',
+  articul:   '👄 Артикуляция',
+  breath:    '💨 Дыхание',
+  testing:   '🧪 Тестирование',
+  stats:     '📊 Статистика',
+  settings:  '⚙️ Настройки',
+  info:      'ℹ️ Информация',
+};
 
 function randomReminder() {
   return REMINDERS[Math.floor(Math.random() * REMINDERS.length)];
@@ -68,17 +87,12 @@ async function handleFetch(request, env) {
   const { user_id } = body;
   if (!user_id) return jsonResponse({ ok: false, error: 'user_id required' }, 400);
 
-  // DEV_IDS — заходы этих пользователей не считаются в статистику
   const DEV_IDS = new Set(['319941252', '8134419471',
     ...(env.DEV_USER_ID ? [String(env.DEV_USER_ID)] : [])]);
 
-  // ИСПРАВЛЕНО: удалена `const devId = null` — локальная переменная handleFetch,
-  // которую использовали как аргумент в handleCron → sendVisitReport.
-  // В handleCron она не определена → ReferenceError → cron молча падал всегда.
-  // Отчёты и напоминания никогда не отправлялись именно по этой причине.
-
   const key = 'user:' + user_id;
 
+  // ── POST /register ──
   if (path === '/register') {
     const { reminders_enabled = true, remind_hour = 10, child_name = '', app_url = '' } = body;
     const existing = await env.USERS.get(key, { type: 'json' }) || {};
@@ -99,6 +113,7 @@ async function handleFetch(request, env) {
     return jsonResponse({ ok: true });
   }
 
+  // ── POST /visit ──
   if (path === '/visit') {
     const existing = await env.USERS.get(key, { type: 'json' });
     if (existing) {
@@ -109,6 +124,16 @@ async function handleFetch(request, env) {
     return jsonResponse({ ok: true });
   }
 
+  // ── POST /section — трекинг раздела ──
+  if (path === '/section') {
+    if (!DEV_IDS.has(String(user_id))) {
+      const section = (body.section || 'unknown').slice(0, 32);
+      await recordSection(env, section);
+    }
+    return jsonResponse({ ok: true });
+  }
+
+  // ── POST /unsubscribe ──
   if (path === '/unsubscribe') {
     const existing = await env.USERS.get(key, { type: 'json' });
     if (existing) {
@@ -118,11 +143,9 @@ async function handleFetch(request, env) {
     return jsonResponse({ ok: true });
   }
 
-  // ── POST /report-now — немедленный отчёт (только для администратора) ──
+  // ── POST /report-now ──
   if (path === '/report-now') {
     if (!env.CHAT_ID) return jsonResponse({ ok: false, error: 'CHAT_ID not configured' }, 500);
-    // Простая защита: принимаем только от самого бота/администратора.
-    // Воркер открыт публично, поэтому проверяем секрет.
     const { secret } = body;
     if (!secret || secret !== env.REPORT_SECRET) {
       return jsonResponse({ ok: false, error: 'Forbidden' }, 403);
@@ -136,7 +159,7 @@ async function handleFetch(request, env) {
   return jsonResponse({ ok: false, error: 'Unknown endpoint' }, 404);
 }
 
-// Отчёты: 9, 12, 15, 18, 21 МСК = 6, 9, 12, 15, 18 UTC
+// ── Cron ──
 const REPORT_HOURS_UTC = [6, 9, 12, 15, 18];
 
 async function handleCron(env) {
@@ -145,8 +168,6 @@ async function handleCron(env) {
   const nowMs      = Date.now();
   const nowHourUTC = new Date(nowMs).getUTCHours();
 
-  // ИСПРАВЛЕНО: убран аргумент devId — не определён в этой области видимости.
-  // Именно это вызывало ReferenceError и роняло весь cron без каких-либо логов.
   if (REPORT_HOURS_UTC.includes(nowHourUTC) && env.CHAT_ID) {
     await sendVisitReport(env, nowMs, nowHourUTC);
   }
@@ -178,7 +199,7 @@ async function handleCron(env) {
   console.log('[Cron] Напоминаний отправлено: ' + sent);
 }
 
-// ИСПРАВЛЕНО: убран параметр devId из сигнатуры — нигде внутри не использовался
+// ── Отправка отчёта ──
 async function sendVisitReport(env, nowMs, nowHourUTC) {
   const statsRaw = await env.USERS.get('stats:visits', { type: 'json' }) || {
     total: 0, new_users: 0, returning: 0,
@@ -195,18 +216,30 @@ async function sendVisitReport(env, nowMs, nowHourUTC) {
     timeZone: 'Europe/Moscow', day: 'numeric', month: 'long'
   });
 
+  // Топ разделов
+  const sectionsRaw = await env.USERS.get('stats:sections', { type: 'json' }) || {};
+  const topSections = Object.entries(sectionsRaw)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([k, v]) => '  ' + (SECTION_LABELS[k] || k) + ': <b>' + v + '</b>')
+    .join('\n');
+
   const lines = [
-    '<b>Гоша — заходы</b>  ' + dateStr + ', ' + mskHour + ':00',
+    '<b>Гоша — отчёт</b>  ' + dateStr + ', ' + mskHour + ':00',
     '',
     '<b>За период:</b>',
-    '  Всего заходов: <b>' + periodTotal + '</b>',
-    '  Новые: ' + periodNew,
-    '  Постоянные: ' + periodReturning,
+    '  Заходов: <b>' + periodTotal + '</b>',
+    '  Новых: ' + periodNew,
+    '  Постоянных: ' + periodReturning,
     '',
     '<b>Накопительно:</b>',
     '  Всего заходов: <b>' + statsRaw.total + '</b>',
     '  Уникальных пользователей: <b>' + (statsRaw.unique_users || 0) + '</b>',
   ];
+
+  if (topSections) {
+    lines.push('', '<b>Топ разделов:</b>', topSections);
+  }
 
   await sendTelegram(env.BOT_TOKEN, env.CHAT_ID, lines.join('\n'), null);
 
@@ -216,6 +249,7 @@ async function sendVisitReport(env, nowMs, nowHourUTC) {
   await env.USERS.put('stats:visits', JSON.stringify(statsRaw));
 }
 
+// ── Запись захода ──
 async function recordVisit(env, userId, isNew) {
   const statsRaw = await env.USERS.get('stats:visits', { type: 'json' }) || {
     total: 0, new_users: 0, returning: 0,
@@ -231,6 +265,13 @@ async function recordVisit(env, userId, isNew) {
     statsRaw.returning++;
   }
   await env.USERS.put('stats:visits', JSON.stringify(statsRaw));
+}
+
+// ── Запись раздела ──
+async function recordSection(env, section) {
+  const sectionsRaw = await env.USERS.get('stats:sections', { type: 'json' }) || {};
+  sectionsRaw[section] = (sectionsRaw[section] || 0) + 1;
+  await env.USERS.put('stats:sections', JSON.stringify(sectionsRaw));
 }
 
 export default {
