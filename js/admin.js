@@ -138,7 +138,7 @@ const Admin = {
         const addBtn = document.querySelector('.admin-add-btn');
         const batchBtn = document.getElementById('admin-batch-btn');
         if (addBtn) addBtn.style.display = isNotif ? 'none' : '';
-        if (batchBtn && !isNotif) batchBtn.classList.toggle('hidden', this._tab !== 'puzzles');
+        if (batchBtn && !isNotif) batchBtn.classList.toggle('hidden', this._tab !== 'puzzles' && this._tab !== 'riddles');
 
         if (isNotif) {
             this._renderNotifTab();
