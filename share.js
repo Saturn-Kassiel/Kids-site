@@ -3,7 +3,14 @@
 // =============================================
 
 const ShareHelper = {
-    BASE_URL: 'https://saturn-kassiel.github.io/Kids-site/',
+    BASE_URL:    'https://saturn-kassiel.github.io/Kids-site/',
+    BASE_TG_URL: 'https://t.me/GoshaMiniSchoolBot/gosha',
+
+    // Генерирует ссылку — query param, работает везде
+    _makeUrl(sectionId, type, id) {
+        const param = (type && id) ? (type + '-' + id) : sectionId;
+        return this.BASE_URL + '?s=' + param;
+    },
 
     // Polyfill roundRect for older browsers
     _ensureRoundRect() {
@@ -125,7 +132,7 @@ const ShareHelper = {
         const cfg = this.SECTIONS[sectionId];
         if (!cfg) return;
 
-        const url = this.BASE_URL + '#' + sectionId;
+        const url = this._makeUrl(sectionId);
 
         // Songs section: use promo image instead of generated canvas
         if (sectionId === 'songs') {

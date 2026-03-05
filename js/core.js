@@ -379,8 +379,7 @@ function isHintEnabled(section) {
 
 // -------- DEEP LINK COPY --------
 function copyDeepLink(type, id, name) {
-    const BASE = 'https://saturn-kassiel.github.io/Kids-site/';
-    const url  = BASE + '#' + type + '-' + id;
+    const url = 'https://saturn-kassiel.github.io/Kids-site/?s=' + type + '-' + id;
     navigator.clipboard.writeText(url).then(() => {
         showToast('🔗 Ссылка скопирована');
     }).catch(() => {
