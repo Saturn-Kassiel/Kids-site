@@ -919,8 +919,8 @@
     },
     {
       "id": 1772693799307,
-      "text": "Зимой на ветках, как цветы,\nЕго в лесу увидишь ты.|Снигирь|easy\nГрудка красная горит,\nНа рябине он сидит.",
-      "answer": "Gemini Generated Image Xaq2fixaq2fixaq2",
+      "text": "Зимой на ветках, как цветы,\nЕго в лесу увидишь ты.\nГрудка красная горит,\nНа рябине он сидит.",
+      "answer": "Снигирь",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_xaq2fixaq2fixaq2.webp",
       "level": "easy"
     },
@@ -945,5 +945,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-05T07:00:43.149Z"
+  "exportedAt": "2026-03-05T07:01:43.229Z"
 }
