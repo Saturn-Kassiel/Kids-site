@@ -162,6 +162,17 @@
       "src": "assets/audio/songs/volk.mp3",
       "tags": [],
       "video": "assets\\video\\songs_video\\volk.mp4"
+    },
+    {
+      "id": 1772703782718,
+      "name": "Песенка про Лису",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/lisa.mp3",
+      "tags": [
+        "animals"
+      ],
+      "video": "assets\\video\\songs_video\\lisa.mp4"
     }
   ],
   "podcasts": [
@@ -945,5 +956,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-05T07:14:17.676Z"
+  "exportedAt": "2026-03-05T09:43:02.735Z"
 }
