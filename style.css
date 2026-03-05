@@ -316,6 +316,7 @@ section.hidden { display: none !important; }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+    padding-bottom: calc(var(--tg-safe-bottom, 0px) + 16px);
 }
 /* Плашки — иконки + цветовые акценты */
 .menu-card {
