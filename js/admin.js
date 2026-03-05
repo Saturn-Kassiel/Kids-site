@@ -837,6 +837,199 @@ const Admin = {
         document.body.insertAdjacentHTML('beforeend', html);
     },
 
+    // ── Пакетная загрузка ──
+    _batchItems: [],
+
+    openBatch() {
+        this._batchItems = [];
+        const isPuzzles = this._tab === 'puzzles';
+        const isRiddles = this._tab === 'riddles';
+
+        document.getElementById('batch-modal-title').textContent =
+            isPuzzles ? 'Загрузить ребусы пачкой' : 'Загрузить загадки пачкой';
+
+        // Показываем секцию картинок для обоих, текстовую — только для загадок
+        document.getElementById('batch-pics-section').style.display = '';
+        document.getElementById('batch-text-section').style.display = isRiddles ? '' : 'none';
+        document.getElementById('batch-level').style.display = '';
+
+        // Обновляем подсказку в зависимости от вкладки
+        const hint = document.querySelector('#batch-pics-section .file-label');
+        if (hint) hint.childNodes[2] && (hint.childNodes[2].textContent = isPuzzles ? ' Выбрать картинки' : ' Выбрать картинки (необязательно)');
+
+        // Сброс
+        const fileInput = document.getElementById('batch-files');
+        if (fileInput) fileInput.value = '';
+        document.getElementById('batch-preview-list').innerHTML = '';
+        document.getElementById('batch-summary').style.display = 'none';
+        const ta = document.getElementById('batch-riddle-text');
+        if (ta) ta.value = '';
+
+        document.getElementById('batch-modal').classList.remove('hidden');
+    },
+
+    closeBatch(e) {
+        if (!e || e.target === document.getElementById('batch-modal')) {
+            document.getElementById('batch-modal').classList.add('hidden');
+            this._batchItems = [];
+        }
+    },
+
+    _onBatchFiles(input) {
+        const files = Array.from(input.files);
+        if (!files.length) return;
+        const isPuzzles = this._tab === 'puzzles';
+        const isRiddles = this._tab === 'riddles';
+
+        this._batchItems = files.map(f => ({
+            file:   f,
+            answer: f.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            text:   '', // для загадок — текст загадки
+            preview: URL.createObjectURL(f),
+        }));
+
+        const list = document.getElementById('batch-preview-list');
+        list.innerHTML = '';
+
+        this._batchItems.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;';
+
+            const fieldsHtml = isRiddles ? `
+                <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                    <textarea rows="2" placeholder="Текст загадки..."
+                        style="width:100%;padding:8px 12px;background:var(--card2);border:1.5px solid var(--border);
+                               border-radius:10px;font-size:13px;color:var(--text);outline:none;resize:none;line-height:1.4;"
+                        oninput="Admin._batchItems[${idx}].text=this.value">${item.text}</textarea>
+                    <input type="text" value="${item.answer}" placeholder="Ответ"
+                        style="width:100%;padding:8px 12px;background:var(--card2);border:1.5px solid var(--border);
+                               border-radius:10px;font-size:14px;color:var(--text);outline:none;"
+                        oninput="Admin._batchItems[${idx}].answer=this.value">
+                </div>` : `
+                <input type="text" value="${item.answer}" placeholder="Ответ (название)"
+                    style="flex:1;padding:8px 12px;background:var(--card2);border:1.5px solid var(--border);
+                           border-radius:10px;font-size:14px;color:var(--text);outline:none;align-self:center;"
+                    oninput="Admin._batchItems[${idx}].answer=this.value">`;
+
+            div.innerHTML = `
+                <img src="${item.preview}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+                ${fieldsHtml}`;
+            list.appendChild(div);
+        });
+
+        const summary = document.getElementById('batch-summary');
+        summary.textContent = `Выбрано: ${files.length} картинок`;
+        summary.style.display = '';
+    },
+
+    async saveBatch() {
+        const level     = document.getElementById('batch-level').value || 'easy';
+        const isPuzzles = this._tab === 'puzzles';
+        const isRiddles = this._tab === 'riddles';
+        const btn       = document.getElementById('batch-save-btn');
+
+        btn.textContent = '⏳ Сохраняю...';
+        btn.disabled = true;
+
+        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+
+        // Общий хелпер: читает файл → base64, сохраняет в pending, возвращает путь
+        const savePic = async (file, answer, folder) => {
+            const base64 = await new Promise((res, rej) => {
+                const fr = new FileReader();
+                fr.onload  = () => res(fr.result);
+                fr.onerror = rej;
+                fr.readAsDataURL(file);
+            });
+            const ext      = file.name.split('.').pop().toLowerCase();
+            const base     = (answer || file.name.replace(/\.[^.]+$/,'')).toLowerCase().replace(/[^a-zа-яё0-9]/gi, '_');
+            const filePath = `${folder}/${base}.${ext}`;
+            pending[filePath] = base64;
+            return filePath;
+        };
+
+        if (isPuzzles) {
+            if (!this._batchItems.length) { showToast('⚠️ Выберите картинки'); btn.textContent = 'Сохранить все'; btn.disabled = false; return; }
+
+            const items = this._getData('puzzles');
+            for (const item of this._batchItems) {
+                const answer = (item.answer || '').trim();
+                if (!answer) continue;
+                const filePath = await savePic(item.file, answer, 'assets/images/rebuses_pictures_opt');
+                items.push({
+                    id: Date.now() + Math.floor(Math.random() * 9999),
+                    name: answer, pic: filePath,
+                    hint: 'Присмотрись к картинке',
+                    answer, level,
+                });
+                await new Promise(r => setTimeout(r, 2));
+            }
+            this._setData('puzzles', items);
+            // Обновляем Puzzles._data
+            Puzzles._data = { easy: [], medium: [], hard: [] };
+            items.forEach(p => {
+                const lv = p.level || 'easy';
+                if (Puzzles._data[lv]) Puzzles._data[lv].push({ pic: p.pic||'', hint: p.hint||'', answer: p.answer||'' });
+            });
+            localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+            this._updatePendingBadge();
+            showToast(`✅ Добавлено ${this._batchItems.length} ребусов`);
+            this._autoSync();
+
+        } else if (isRiddles) {
+            const items = this._getData('riddles');
+            let added = 0;
+
+            // Если были загружены картинки — используем их
+            if (this._batchItems.length) {
+                for (const item of this._batchItems) {
+                    const answer = (item.answer || '').trim();
+                    const text   = (item.text   || '').trim();
+                    if (!answer) continue;
+                    const filePath = await savePic(item.file, answer, 'assets/images/riddles_pictures_opt');
+                    items.push({
+                        id: Date.now() + Math.floor(Math.random() * 9999),
+                        text: text || answer, answer, pic: filePath, level,
+                    });
+                    await new Promise(r => setTimeout(r, 2));
+                    added++;
+                }
+                localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                this._updatePendingBadge();
+            }
+
+            // Если заполнено текстовое поле — добавляем оттуда тоже
+            const rawText = (document.getElementById('batch-riddle-text')?.value || '').trim();
+            if (rawText) {
+                let parsed = [];
+                if (rawText.startsWith('[')) {
+                    try { parsed = JSON.parse(rawText); } catch { showToast('❌ Неверный JSON'); }
+                } else {
+                    parsed = rawText.split('\n').map(line => {
+                        const parts = line.split('|');
+                        return { text: (parts[0]||'').trim(), answer: (parts[1]||'').trim(), level: (parts[2]||level).trim() };
+                    }).filter(r => r.text && r.answer);
+                }
+                parsed.forEach(r => {
+                    items.push({ id: Date.now() + Math.floor(Math.random()*9999), text: r.text, answer: r.answer, pic: r.pic||'', level: r.level||level });
+                    added++;
+                });
+            }
+
+            if (!added) { showToast('⚠️ Нечего сохранять'); btn.textContent = 'Сохранить все'; btn.disabled = false; return; }
+
+            this._setData('riddles', items);
+            Riddles._loadFromAdmin();
+            showToast(`✅ Добавлено ${added} загадок`);
+            this._autoSync();
+        }
+
+        btn.textContent = 'Сохранить все';
+        btn.disabled = false;
+        this.closeBatch();
+        this.render();
+    },
+
     async _sendReport() {
         const inp    = document.getElementById('rep-secret-inp');
         const btn    = document.getElementById('rep-send-btn');
