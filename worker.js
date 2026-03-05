@@ -126,9 +126,19 @@ async function handleFetch(request, env) {
 
   // ── POST /section — трекинг раздела ──
   if (path === '/section') {
+    const section = (body.section || 'unknown').slice(0, 32);
+    const isAnon = String(user_id).startsWith('anon_');
     if (!DEV_IDS.has(String(user_id))) {
-      const section = (body.section || 'unknown').slice(0, 32);
       await recordSection(env, section);
+      // Для анонимных браузерных пользователей — считаем уникальных отдельно
+      if (isAnon) {
+        const anonKey = 'anon:' + user_id;
+        const seen = await env.USERS.get(anonKey);
+        if (!seen) {
+          await env.USERS.put(anonKey, '1', { expirationTtl: 86400 * 30 }); // 30 дней
+          await recordVisit(env, user_id, true);
+        }
+      }
     }
     return jsonResponse({ ok: true });
   }

@@ -60,10 +60,16 @@ const App = {
         // Вызываем onEnter для нового раздела
         if (NAV_HOOKS[id]?.onEnter) NAV_HOOKS[id].onEnter();
 
-        // Трекинг раздела на воркере (только в Telegram, не main, не admin)
+        // Трекинг раздела на воркере (не main, не admin)
         if (!isMain && id !== 'admin' && id !== 'notifications') {
-            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-            if (userId && typeof TgReminder !== 'undefined') {
+            const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+                || localStorage.getItem('anon_uid')
+                || (() => {
+                    const uid = 'anon_' + Math.random().toString(36).slice(2, 10);
+                    localStorage.setItem('anon_uid', uid);
+                    return uid;
+                })();
+            if (typeof TgReminder !== 'undefined') {
                 fetch(TgReminder.WORKER_URL + '/section', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
