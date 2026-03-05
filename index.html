@@ -155,9 +155,8 @@
                 <span class="mc-label">Настройки</span>
             </button>
         </div>
-    </section>
-
-    <!-- ========== MEDIA PAGE (Alphabet / Numbers / Colors) ========== -->
+        <div style="height: calc(var(--tg-safe-bottom, 34px) + 60px); flex-shrink:0;"></div>
+    </section> -->
     <section id="media-page" class="hidden">
         <div id="video-wrap">
             <video id="global-video" loop muted playsinline></video>
@@ -837,6 +836,17 @@
                     <button class="github-token-eye" onclick="Admin.toggleTokenEye(this)" title="Показать/скрыть"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
                 <div class="github-token-hint">Хранится только в браузере · <a href="https://github.com/settings/tokens/new?scopes=repo&description=RazvivaykaApp" target="_blank" style="color:var(--text2)">Создать новый →</a></div>
+            </div>
+            <div class="github-token-row">
+                <div class="github-token-label">Report Secret</div>
+                <div class="github-token-input-wrap">
+                    <input type="password" id="report-secret-input"
+                        placeholder="Секрет из Cloudflare Worker"
+                        autocomplete="off" spellcheck="false"
+                        oninput="Admin.saveReportSecret(this.value)">
+                    <button class="github-token-eye" onclick="Admin.toggleReportSecretEye(this)" title="Показать/скрыть"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <div class="github-token-hint">REPORT_SECRET из настроек воркера · используется кнопкой 📊</div>
             </div>
             <button class="publish-btn" onclick="Admin.publish()" id="publish-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" ><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Опубликовать на GitHub</button>
         </div>
