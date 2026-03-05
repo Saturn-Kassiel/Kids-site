@@ -764,25 +764,11 @@
       "level": "easy"
     },
     {
-      "id": 1772457824876,
-      "text": "На ветке висит он, обнявшись с листвой,\nЗамедленной жизнью доволен такой.\nДвижение каждое — будто во сне,\nОн самый спокойный в лесной тишине.",
-      "answer": "",
-      "pic": "assets/images/riddles_pictures_opt/lenivetc.webp",
-      "level": "easy"
-    },
-    {
       "id": 1772518978218,
       "text": "Рыжеватый, воет звонко,\nХитрость — главный инструмент.\nЗа обедом льва в сторонке\nЖдёт он правильный момент.",
       "answer": "Шакал",
       "pic": "assets/images/riddles_pictures_opt/shakal.webp",
       "level": "medium"
-    },
-    {
-      "id": 1772521854571,
-      "text": "В серой шубе, взгляд суров,\nСанитар густых лесов.\nНочью воет на луну,\nНарушая тишину.",
-      "answer": "",
-      "pic": "assets/images/riddles_pictures_opt/volk.webp",
-      "level": "easy"
     },
     {
       "id": 1772626183980,
@@ -796,13 +782,6 @@
       "text": "Его бьют, а он не плачет,\nТолько выше, выше скачет.\nКруглый бок и без углов,\nПоиграть всегда готов.",
       "answer": "Мяч",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_6az0e6az0e6az0e6.png",
-      "level": "easy"
-    },
-    {
-      "id": 1772626377216,
-      "text": "В ясный день в углу скучает,\nВ ливень — «шляпкой» расцветает.\nСам промокнет до костей,\nНо спасёт своих друзей.",
-      "answer": "",
-      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_gs4zargs4zargs4z.webp",
       "level": "easy"
     },
     {
@@ -845,13 +824,6 @@
       "text": "Зёрна в травке собирает,\nГромко крыльями хлопочет.\n«Ко-ко-ко» — она вещает,\nМамой быть цыплятам хочет.",
       "answer": "Курица",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_jytc3xjytc3xjytc.webp",
-      "level": "easy"
-    },
-    {
-      "id": 1772627662129,
-      "text": "К дому плотно прилегает,\nОтдохнуть нас приглашает.\nЗдесь в тени, под крышей ясной,\nВ летний вечер быть прекрасно.",
-      "answer": "",
-      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_fuowfpfuowfpfuow.webp",
       "level": "easy"
     },
     {
@@ -909,6 +881,55 @@
       "answer": "Страус",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_onb19onb19onb19o.webp",
       "level": "easy"
+    },
+    {
+      "id": 1772693800933,
+      "text": "В ярко-красной шапке он,\nСлышен в роще дробный звон.|Дятел|easy\nПо дереву весь день стучит,\nЛес от вредителей лечит.",
+      "answer": "Gemini Generated Image 2kxpdx2kxpdx2kxp",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_2kxpdx2kxpdx2kxp.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693799959,
+      "text": "В черном фраке среди льдин,\nХодит важный господин.\nХоть он птица — не летает,\nВ море ледяном ныряет.|Пингвин|easy",
+      "answer": "Gemini Generated Image 7nsos87nsos87nso",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_7nsos87nsos87nso.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693795046,
+      "text": "Всю ночь в лесу она не спит,\nЗа каждой мышкой уследит.\nГлаза большие, клюв крючком,\nА спит в дупле она лишь днём.|Сова|easy",
+      "answer": "Gemini Generated Image Au020bau020bau02",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_au020bau020bau02.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693792856,
+      "text": "Птица яркая, ручная,\nРечь людскую повторяет.\nВ клетке или на ветвях,\nСловно радуга в перьях.|Попугай|easy",
+      "answer": "Gemini Generated Image Pgmdq5pgmdq5pgmd",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_pgmdq5pgmdq5pgmd.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693796589,
+      "text": "Шея выгнута дугой,\nОн красивый и большой.\nПо воде плывёт, как диво,\nГрациозно и красиво.|Лебедь|easy",
+      "answer": "Gemini Generated Image Szocuiszocuiszoc",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_szocuiszocuiszoc.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693799307,
+      "text": "Зимой на ветках, как цветы,\nЕго в лесу увидишь ты.|Снигирь|easy\nГрудка красная горит,\nНа рябине он сидит.",
+      "answer": "Gemini Generated Image Xaq2fixaq2fixaq2",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_xaq2fixaq2fixaq2.webp",
+      "level": "easy"
+    },
+    {
+      "id": 1772693794990,
+      "text": "Крупный клюв и хитрый взор,\nНа заборе — дирижёр.\nГромко «Кар!» она кричит,\nЗа порядком здесь следит.|Ворона|easy",
+      "answer": "Gemini Generated Image Y0lxmdy0lxmdy0lx",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_y0lxmdy0lxmdy0lx.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -924,5 +945,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-04T13:54:34.774Z"
+  "exportedAt": "2026-03-05T06:56:31.960Z"
 }
