@@ -273,10 +273,10 @@ function initTelegramWebApp() {
             const totalBottom   = Math.max(bottom, contentBottom, 16);
             document.documentElement.style.setProperty('--tg-safe-bottom', totalBottom + 'px');
 
-            // Высота viewport
+            // Высота viewport — используем stableHeight для предотвращения прыжков
             const app = document.getElementById('app');
-            if (app && tg.viewportStableHeight) {
-                app.style.height = tg.viewportStableHeight + 'px';
+            if (tg.viewportStableHeight) {
+                document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportStableHeight + 'px');
             }
         }
 

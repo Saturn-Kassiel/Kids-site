@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(r => setTimeout(r, 100));
 
         if (type === 'song') {
+            Songs._loadSongs(); // явно загружаем песни после данных
             App.navigate('songs', 'Песенки');
             Songs._loadFavorites();
             Songs._buildList();
