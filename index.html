@@ -1326,31 +1326,36 @@ const Onboarding = {
             emoji: '👋',
             title: 'Привет! Я Гоша!',
             text:  'Твой помощник для учёбы и игры. Покажу что здесь есть!',
-            highlight: null
+            highlight: null,
+            img: 'assets/images/links_pictures_opt/ob_0.webp'
         },
         {
             emoji: '❓',
             title: 'Загадки и Ребусы',
             text:  'Отгадывай загадки и решай ребусы — тренируй логику и смекалку!',
-            highlight: '.mc-riddles'
+            highlight: null,
+            img: 'assets/images/links_pictures_opt/ob_1.webp'
         },
         {
             emoji: '📝',
             title: 'Слова и Арифметика',
             text:  'Собирай слова из букв и считай примеры. Каждый день новые задания!',
-            highlight: '.mc-words'
+            highlight: null,
+            img: 'assets/images/links_pictures_opt/ob_2.webp'
         },
         {
             emoji: '🎵',
             title: 'Песенки и Подкасты',
             text:  'Слушай детские песенки и познавательные подкасты в любое время!',
-            highlight: '.mc-songs'
+            highlight: null,
+            img: 'assets/images/links_pictures_opt/ob_3.webp'
         },
         {
             emoji: '✅',
             title: 'Тестирование',
             text:  'Проверь что уже умеешь! Тест покажет сильные стороны и чему ещё учиться.',
-            highlight: '.mc-testing'
+            highlight: null,
+            img: 'assets/images/links_pictures_opt/ob_4.webp'
         },
     ],
 
@@ -1370,7 +1375,25 @@ const Onboarding = {
         const total = this._steps.length;
         const isLast = this._step === total - 1;
 
-        document.getElementById('onb-emoji').textContent  = step.emoji;
+        document.getElementById('onb-emoji').textContent  = step.img ? '' : step.emoji;
+        document.getElementById('onb-emoji').style.display = step.img ? 'none' : '';
+
+        // Картинка
+        let imgEl = document.getElementById('onb-img');
+        if (step.img) {
+            if (!imgEl) {
+                imgEl = document.createElement('img');
+                imgEl.id = 'onb-img';
+                imgEl.style.cssText = 'width:calc(100% + 44px);margin:-24px -22px 14px;border-radius:24px 24px 0 0;display:block;object-fit:contain;background:#f0f4ff;';
+                const card = document.getElementById('onb-card');
+                card.insertBefore(imgEl, card.firstChild);
+            }
+            imgEl.src = step.img;
+            imgEl.style.display = 'block';
+        } else if (imgEl) {
+            imgEl.style.display = 'none';
+        }
+
         document.getElementById('onb-title').textContent  = step.title;
         document.getElementById('onb-text').textContent   = step.text;
         document.getElementById('onb-next').textContent   = isLast ? '🚀 Поехали!' : 'Далее →';
