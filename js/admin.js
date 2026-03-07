@@ -4,6 +4,8 @@
 const Admin = {
     _tab: 'songs',
     _editId: null,
+    _pendingAudio: {}, // base64 аудио файлы в памяти (не в localStorage — слишком большие)
+    _pendingPics:  {}, // base64 картинки в памяти
 
     init() {
         // Seed defaults with full data
@@ -430,10 +432,8 @@ const Admin = {
                     fr.onerror = rej;
                     fr.readAsDataURL(file);
                 });
-                // Сохраняем base64 в очередь на загрузку
-                const pending = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
-                pending[filePath] = base64;
-                localStorage.setItem('admin_pending_audio', JSON.stringify(pending));
+                // Сохраняем base64 в памяти (не localStorage — файлы слишком большие)
+                this._pendingAudio[filePath] = base64;
                 this._editSrc = filePath;
             }
         }
@@ -456,11 +456,9 @@ const Admin = {
                     fr.onerror = rej;
                     fr.readAsDataURL(file);
                 });
-                // Сохраняем base64 в очередь на загрузку
-                const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
-                pending[filePath] = base64;
-                localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
-                this._editPic = filePath; // путь уже финальный
+                // Сохраняем base64 в памяти
+                this._pendingPics[filePath] = base64;
+                this._editPic = filePath;
             }
         }
 
@@ -614,8 +612,8 @@ const Admin = {
 
     // ── Обновить счётчик pending картинок на кнопке публикации ──
     _updatePendingBadge() {
-        const pendingPics = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
-        const pendingAudio = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+        const pendingPics = this._pendingPics;
+        const pendingAudio = this._pendingAudio;
         const count = Object.keys(pendingPics).length + Object.keys(pendingAudio).length;
         const btn = document.getElementById('publish-btn');
         if (!btn) return;
@@ -667,7 +665,7 @@ const Admin = {
         };
 
         // ── Сначала загружаем все pending картинки ──
-        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+        const pending = this._pendingPics;
         const pendingPaths = Object.keys(pending);
         if (pendingPaths.length > 0) {
             const btn2 = document.getElementById('publish-btn');
@@ -675,9 +673,8 @@ const Admin = {
             let uploaded = 0;
             for (const filePath of pendingPaths) {
                 const dataUrl = pending[filePath];
-                const base64  = dataUrl.split(',')[1]; // убираем data:...;base64,
+                const base64  = dataUrl.split(',')[1];
                 const apiUrl  = `https://api.github.com/repos/${REPO}/contents/${filePath}`;
-                // Проверяем SHA если файл уже есть
                 let sha = null;
                 try {
                     const gr = await fetch(apiUrl + `?ref=${BRANCH}`, { headers });
@@ -687,8 +684,7 @@ const Admin = {
                 const pr = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(pb) });
                 if (pr.ok) {
                     uploaded++;
-                    delete pending[filePath];
-                    localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                    delete this._pendingPics[filePath];
                     if (btn2) btn2.textContent = `⏳ Картинки: ${uploaded}/${pendingPaths.length}...`;
                 } else {
                     const pe = await pr.json();
@@ -698,7 +694,7 @@ const Admin = {
         }
 
         // ── Загружаем pending аудио файлы ──
-        const pendingAudio = JSON.parse(localStorage.getItem('admin_pending_audio') || '{}');
+        const pendingAudio = this._pendingAudio;
         const audioPaths = Object.keys(pendingAudio);
         if (audioPaths.length > 0) {
             const btn2 = document.getElementById('publish-btn');
@@ -717,8 +713,7 @@ const Admin = {
                 const pr = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(pb) });
                 if (pr.ok) {
                     uploaded++;
-                    delete pendingAudio[filePath];
-                    localStorage.setItem('admin_pending_audio', JSON.stringify(pendingAudio));
+                    delete this._pendingAudio[filePath];
                     if (btn2) btn2.textContent = `⏳ Аудио: ${uploaded}/${audioPaths.length}...`;
                 } else {
                     const pe = await pr.json();
@@ -772,10 +767,10 @@ const Admin = {
 
             if (putResp.ok) {
                 const result = await putResp.json();
-                localStorage.setItem('gh_token', token); // сохраняем токен
-                localStorage.removeItem('admin_pending_pics');
-                localStorage.removeItem('admin_pending_audio');
-                const stillPending = Object.keys(JSON.parse(localStorage.getItem('admin_pending_pics') || '{}')).length;
+                localStorage.setItem('gh_token', token);
+                this._pendingPics = {};
+                this._pendingAudio = {};
+                const stillPending = 0;
                 showToast('✅ Данные опубликованы на GitHub!');
                 console.log('Published:', result.content?.html_url);
                 // Флаг: при следующем открытии сайта загрузить свежие данные
@@ -931,7 +926,7 @@ const Admin = {
         btn.textContent = '⏳ Сохраняю...';
         btn.disabled = true;
 
-        const pending = JSON.parse(localStorage.getItem('admin_pending_pics') || '{}');
+        const pending = this._pendingPics;
 
         // Общий хелпер: читает файл → base64, сохраняет в pending, возвращает путь
         const savePic = async (file, answer, folder) => {
@@ -944,7 +939,7 @@ const Admin = {
             const ext      = file.name.split('.').pop().toLowerCase();
             const base     = (answer || file.name.replace(/\.[^.]+$/,'')).toLowerCase().replace(/[^a-zа-яё0-9]/gi, '_');
             const filePath = `${folder}/${base}.${ext}`;
-            pending[filePath] = base64;
+            this._pendingPics[filePath] = base64;
             return filePath;
         };
 
@@ -971,7 +966,7 @@ const Admin = {
                 const lv = p.level || 'easy';
                 if (Puzzles._data[lv]) Puzzles._data[lv].push({ pic: p.pic||'', hint: p.hint||'', answer: p.answer||'' });
             });
-            localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+            
             this._updatePendingBadge();
             showToast(`✅ Добавлено ${this._batchItems.length} ребусов`);
             this._autoSync();
@@ -994,7 +989,7 @@ const Admin = {
                     await new Promise(r => setTimeout(r, 2));
                     added++;
                 }
-                localStorage.setItem('admin_pending_pics', JSON.stringify(pending));
+                
                 this._updatePendingBadge();
             }
 
