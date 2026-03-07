@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(r => setTimeout(r, 100));
 
         if (type === 'song') {
-            Songs._loadSongs(); // явно загружаем песни после данных
             App.navigate('songs', 'Песенки');
             Songs._loadFavorites();
             Songs._buildList();
@@ -54,11 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTimeout(() => Songs.nextSong(), 1000);
             };
             Songs._loadDurations();
-            const idx = Songs._allSongs.findIndex(s => s.id === id);
+            const idx = Songs._allSongs.findIndex(s => s.id == id); // == чтобы сравнивать и строку и число
             if (idx !== -1) Songs.play(idx);
         } else if (type === 'podcast') {
             Podcasts.init();
-            const idx = Podcasts._allPodcasts.findIndex(p => p.id === id);
+            const idx = Podcasts._allPodcasts.findIndex(p => p.id == id);
             if (idx !== -1) Podcasts.play(idx);
         } else if (type === 'info') {
             App.navigate('info', 'Информация');
