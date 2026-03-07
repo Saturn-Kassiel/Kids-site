@@ -180,8 +180,10 @@
       "desc": "",
       "duration": "",
       "src": "assets/audio/songs/8_марта.mp3",
-      "tags": [],
-      "video": ""
+      "tags": [
+        "holiday"
+      ],
+      "video": "assets\\video\\songs_video\\8mart.mp4"
     }
   ],
   "podcasts": [
@@ -965,5 +967,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-07T11:09:37.937Z"
+  "exportedAt": "2026-03-07T15:44:33.651Z"
 }
