@@ -173,6 +173,15 @@
         "animals"
       ],
       "video": "assets\\video\\songs_video\\lisa.mp4"
+    },
+    {
+      "id": 1772881777906,
+      "name": "Песнка 8 Марта",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/8_марта.mp3",
+      "tags": [],
+      "video": ""
     }
   ],
   "podcasts": [
@@ -956,5 +965,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-07T10:56:27.504Z"
+  "exportedAt": "2026-03-07T11:09:37.937Z"
 }
