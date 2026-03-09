@@ -184,6 +184,15 @@
         "holiday"
       ],
       "video": "assets\\video\\songs_video\\8mart.mp4"
+    },
+    {
+      "id": 1773039721501,
+      "name": "Песенка про Кролика",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/кролик.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\krolik.mp4"
     }
   ],
   "podcasts": [
@@ -974,5 +983,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-09T06:05:40.134Z"
+  "exportedAt": "2026-03-09T07:02:01.516Z"
 }
