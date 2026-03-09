@@ -952,6 +952,13 @@
       "answer": "Ворона",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_y0lxmdy0lxmdy0lx.webp",
       "level": "easy"
+    },
+    {
+      "id": 1773036340125,
+      "text": "Длинные ушки и хвостик-пушок,\nПрыгает ловко — прыг да подскок.\nЛюбит морковку и сочный листок,\nВ клетке живёт этот милый зверёк.",
+      "answer": "Кролик",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_nxcg8enxcg8enxcg.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -967,5 +974,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-07T15:44:33.651Z"
+  "exportedAt": "2026-03-09T06:05:40.134Z"
 }
