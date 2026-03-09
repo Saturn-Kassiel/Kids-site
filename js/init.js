@@ -11,10 +11,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const deepLinkHash = window.location.hash;
 
     const rawParam = queryParam || startParam || deepLinkHash.replace('#', '');
-    const deepLinkMatch = rawParam.match(/^(song|podcast|info)-(\d+)$/);
+    const deepLinkMatch   = rawParam.match(/^(song|podcast|info)-(\d+)$/);
+    const sectionMap = {
+        'songs': ['songs', 'Песенки'],
+        'podcasts': ['podcasts', 'Подкасты'],
+        'riddles': ['riddles', 'Загадки'],
+        'puzzles': ['puzzles', 'Ребусы'],
+        'alphabet': ['alphabet', 'Алфавит'],
+        'numbers': ['numbers', 'Цифры'],
+        'colors': ['colors', 'Цвета'],
+        'words': ['words', 'Слова'],
+        'math': ['math', 'Арифметика'],
+        'info': ['info', 'Информация'],
+        'testing': ['testing', 'Тестирование'],
+        'finger': ['finger', 'Пальчиковые игры'],
+        'artgym': ['artgym', 'Артикуляционная гимнастика'],
+        'breathgym': ['breathgym', 'Дыхательная гимнастика'],
+    };
+    const sectionDeepLink = !deepLinkMatch && sectionMap[rawParam] ? rawParam : null;
 
     // Убираем параметр из URL
-    if (deepLinkMatch) history.replaceState(null, '', location.pathname);
+    if (deepLinkMatch || sectionDeepLink) history.replaceState(null, '', location.pathname);
 
     if (deepLinkMatch) {
         // Deep link: показываем UI немедленно, но ждём загрузки данных
@@ -76,6 +93,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }, 100);
         }
+    } else if (sectionDeepLink) {
+        await App.init();
+        const [sectionId, sectionTitle] = sectionMap[sectionDeepLink];
+        App.navigate(sectionId, sectionTitle);
+        Profiles.init();
+        Notif.updateBadge();
+        CardBadges.updateAll();
     } else {
         // Обычный запуск — ждём данных
         await App.init();
