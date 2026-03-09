@@ -33,7 +33,10 @@ const App = {
         // Реестр хуков навигации: onEnter / onLeave.
         // Добавляя новый раздел — регистрируй хук здесь, не расширяй if-цепочку.
         const NAV_HOOKS = {
-            songs:   { onLeave: () => { if (typeof Songs !== 'undefined' && Songs.index !== -1) Songs.destroy(); } },
+            songs:   { 
+                onEnter: () => { document.getElementById('puzzle-level-dots')?.remove(); document.getElementById('riddle-level-dots')?.remove(); },
+                onLeave: () => { if (typeof Songs !== 'undefined' && Songs.index !== -1) Songs.destroy(); } 
+            },
             puzzles: {
                 onEnter: () => Puzzles._renderLevelDots(),
                 onLeave: () => document.getElementById('puzzle-level-dots')?.remove(),
