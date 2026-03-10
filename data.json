@@ -975,6 +975,13 @@
       "answer": "Кролик",
       "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_nxcg8enxcg8enxcg.webp",
       "level": "easy"
+    },
+    {
+      "id": 1773118201935,
+      "text": "Уши длинные, копыта,\nГолос громкий и сердитый.\nЕсли встанет — не сойдёт,\nЛишь «иа-иа» поёт?",
+      "answer": "Осёл",
+      "pic": "assets/images/riddles_pictures_opt/gemini_generated_image_4fij4u4fij4u4fij.webp",
+      "level": "easy"
     }
   ],
   "info": [
@@ -990,5 +997,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-09T11:00:30.745Z"
+  "exportedAt": "2026-03-10T04:50:01.958Z"
 }
