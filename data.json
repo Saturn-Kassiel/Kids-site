@@ -193,6 +193,15 @@
       "src": "assets/audio/songs/кролик.mp3",
       "tags": [],
       "video": "assets\\video\\songs_video\\krolik.mp4"
+    },
+    {
+      "id": 1773120753770,
+      "name": "Песенка про Осла",
+      "desc": "",
+      "duration": "",
+      "src": "assets/audio/songs/osel.mp3",
+      "tags": [],
+      "video": "assets\\video\\songs_video\\osel.mp4"
     }
   ],
   "podcasts": [
@@ -997,5 +1006,5 @@
     }
   ],
   "notifications": [],
-  "exportedAt": "2026-03-10T04:50:01.958Z"
+  "exportedAt": "2026-03-10T05:32:33.791Z"
 }
