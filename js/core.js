@@ -84,6 +84,8 @@ const App = {
 
     // Обрабатываем deep link хэш (#song-5, #podcast-3)
     back() {
+        document.getElementById('puzzle-level-dots')?.remove();
+        document.getElementById('riddle-level-dots')?.remove();
         this._history.pop();
         const prev = this._history[this._history.length - 1] || 'main';
         this._history.pop(); // will be re-pushed by navigate
